@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,7 +10,7 @@ use std::ops::Deref;
 /// across the bridge.
 ///
 /// This should not be used to convert user-provided data since the error messages are not very friendly. A failure to
-/// convert from `P` to `T` indicates a bug in libsignal or in application code.
+/// convert from `P` to `T` indicates a bug in libmochi or in application code.
 pub struct AsType<T, P>(T, PhantomData<P>);
 
 impl<T, P> AsType<T, P> {

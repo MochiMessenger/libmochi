@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -41,7 +41,7 @@ impl ProfileKeyStruct {
         combined_array[..PROFILE_KEY_LEN].copy_from_slice(&profile_key_bytes);
         combined_array[PROFILE_KEY_LEN..].copy_from_slice(&uid_bytes);
         Sho::new(
-            b"Signal_ZKGroup_20200424_ProfileKeyAndUid_ProfileKey_CalcM3",
+            b"Mochi_ZKGroup_20200424_ProfileKeyAndUid_ProfileKey_CalcM3",
             &combined_array,
         )
         .get_point_single_elligator()

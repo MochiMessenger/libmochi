@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     version = "0.52.1"
-    group   = "org.signal"
+    group   = "org.mochi"
 }
 
 subprojects {

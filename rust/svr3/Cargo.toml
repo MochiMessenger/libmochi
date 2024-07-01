@@ -1,12 +1,12 @@
 #
-# Copyright (C) 2023 Signal Messenger, LLC.
+# Copyright (C) 2023 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 [package]
-name = "libsignal-svr3"
+name = "libmochi-svr3"
 version = "0.1.0"
 edition = "2021"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 license = "AGPL-3.0-only"
 
 [dependencies]

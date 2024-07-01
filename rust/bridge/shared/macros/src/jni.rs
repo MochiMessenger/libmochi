@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -59,7 +59,7 @@ pub(crate) fn bridge_fn(
 
     Ok(quote! {
         #[cfg(feature = "jni")]
-        #[export_name = concat!(env!("LIBSIGNAL_BRIDGE_FN_PREFIX_JNI"), #name)]
+        #[export_name = concat!(env!("LIBMOCHI_BRIDGE_FN_PREFIX_JNI"), #name)]
         #[allow(non_snake_case)]
         pub unsafe extern "C" fn #wrapper_name<'local>(
             mut env: ::jni::JNIEnv<'local>,

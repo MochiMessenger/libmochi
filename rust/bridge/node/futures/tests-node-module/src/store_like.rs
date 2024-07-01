@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@ use neon::prelude::*;
 use std::panic::AssertUnwindSafe;
 use std::sync::Arc;
 
-use signal_neon_futures::*;
+use mochi_neon_futures::*;
 
 struct NameStore {
     js_channel: Channel,

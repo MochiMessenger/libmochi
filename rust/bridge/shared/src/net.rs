@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,14 +7,14 @@ use std::convert::TryInto as _;
 use std::num::{NonZeroU16, NonZeroU32};
 
 use base64::prelude::{Engine, BASE64_STANDARD};
-use libsignal_bridge_macros::{bridge_fn, bridge_io};
-use libsignal_bridge_types::net::svr3_connect;
-use libsignal_net::auth::Auth;
-use libsignal_net::env::Svr3Env;
-use libsignal_net::svr3::{self, OpaqueMaskedShareSet, PpssOps as _};
+use libmochi_bridge_macros::{bridge_fn, bridge_io};
+use libmochi_bridge_types::net::svr3_connect;
+use libmochi_net::auth::Auth;
+use libmochi_net::env::Svr3Env;
+use libmochi_net::svr3::{self, OpaqueMaskedShareSet, PpssOps as _};
 use rand::rngs::OsRng;
 
-pub use libsignal_bridge_types::net::{ConnectionManager, Environment, TokioAsyncContext};
+pub use libmochi_bridge_types::net::{ConnectionManager, Environment, TokioAsyncContext};
 
 use crate::support::*;
 use crate::*;

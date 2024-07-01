@@ -1,9 +1,9 @@
 //
-// Copyright (C) 2023 Signal Messenger, LLC.
+// Copyright (C) 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-//! Signal remote message backup utilities.
+//! Mochi remote message backup utilities.
 //!
 //! Contains code to read and validate message backup files.
 

@@ -2,7 +2,7 @@
 # shellcheck disable=SC1004
 
 #
-# Copyright 2022 Signal Messenger, LLC.
+# Copyright 2022 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -11,7 +11,7 @@ set -euo pipefail
 SCRIPT_DIR=$(dirname "$0")
 cd "${SCRIPT_DIR}"/..
 
-DOCKER_IMAGE=libsignal-node-builder
+DOCKER_IMAGE=libmochi-node-builder
 
 IS_TTY=""
 if [[ -t 0 ]]; then
@@ -23,7 +23,7 @@ docker build --build-arg "UID=${UID:-501}" --build-arg "GID=${GID:-501}" --build
 # We build both architectures in the same run action to save on intermediates
 # (including downloading dependencies)
 # We run `yarn install` to make sure the correct prebuildify version is used.
-docker run ${IS_TTY:+ -it} --init --rm -v "${PWD}":/home/libsignal/src ${DOCKER_IMAGE} sh -c '
+docker run ${IS_TTY:+ -it} --init --rm -v "${PWD}":/home/libmochi/src ${DOCKER_IMAGE} sh -c '
     cd ~/src/node &&
     npx yarn install --ignore-scripts --frozen-lockfile &&
     env CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \

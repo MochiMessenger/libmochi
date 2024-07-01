@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -37,7 +37,7 @@ impl<'a> JniInputStream<'a> {
         })
     }
 
-    fn do_read(&self, buf: &mut [u8]) -> SignalJniResult<usize> {
+    fn do_read(&self, buf: &mut [u8]) -> MochiJniResult<usize> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let java_buf = env.new_byte_array(buf.len() as i32)?;
             let amount_read: jint = call_method_checked(
@@ -55,10 +55,10 @@ impl<'a> JniInputStream<'a> {
         })
     }
 
-    fn do_skip(&self, amount: u64) -> SignalJniResult<()> {
+    fn do_skip(&self, amount: u64) -> MochiJniResult<()> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let java_amount = amount.try_into().map_err(|_| {
-                SignalJniError::Io(io::Error::new(
+                MochiJniError::Io(io::Error::new(
                     io::ErrorKind::UnexpectedEof,
                     "InputStream::skip more than i64::MAX not supported",
                 ))
@@ -72,7 +72,7 @@ impl<'a> JniInputStream<'a> {
             )?;
 
             if amount_skipped != java_amount {
-                return Err(SignalJniError::Io(io::Error::new(
+                return Err(MochiJniError::Io(io::Error::new(
                     io::ErrorKind::UnexpectedEof,
                     "InputStream skipped less than requested",
                 )));

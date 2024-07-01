@@ -1,11 +1,11 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 syntax = "proto2";
 
-package signal.proto.chat_websocket;
+package mochi.proto.chat_websocket;
 
 message WebSocketRequestMessage {
   optional string verb = 1;

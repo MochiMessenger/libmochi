@@ -1,8 +1,8 @@
-This directory contains pre-generated acknowledgments for the Rust dependencies of libsignal. CI enforces that they are kept up to date.
+This directory contains pre-generated acknowledgments for the Rust dependencies of libmochi. CI enforces that they are kept up to date.
 
 ## Updating
 
-If you update libsignal's dependencies, you'll need to update this listing. Install [cargo-about][] if you haven't already:
+If you update libmochi's dependencies, you'll need to update this listing. Install [cargo-about][] if you haven't already:
 
 ```shell
 cargo +stable install --locked cargo-about --version $(cat acknowledgments/cargo-about-version)

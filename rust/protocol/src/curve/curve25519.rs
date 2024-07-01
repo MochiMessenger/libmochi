@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -49,12 +49,12 @@ impl PrivateKey {
 
     /// Calculates an XEdDSA signature using the X25519 private key directly.
     ///
-    /// Refer to <https://signal.org/docs/specifications/xeddsa/#curve25519> for more details.
+    /// Refer to <https://mochi.org/docs/specifications/xeddsa/#curve25519> for more details.
     ///
     /// Note that this implementation varies slightly from that paper in that the sign bit is not
     /// fixed to 0, but rather passed back in the most significant bit of the signature which would
     /// otherwise always be 0. This is for compatibility with the implementation found in
-    /// libsignal-protocol-java.
+    /// libmochi-protocol-java.
     pub fn calculate_signature<R>(
         &self,
         csprng: &mut R,

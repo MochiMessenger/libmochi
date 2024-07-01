@@ -1,10 +1,10 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use criterion::{criterion_group, criterion_main, Criterion};
 
-use libsignal_protocol::kem::{KeyPair, KeyType};
+use libmochi_protocol::kem::{KeyPair, KeyType};
 
 use std::hint::black_box;
 

@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -17,8 +17,8 @@ pub type RawCancellationId = u64;
 
 /// A C callback used to report the results of Rust futures.
 ///
-/// cbindgen will produce independent C types like `SignalCPromisei32` and
-/// `SignalCPromiseProtocolAddress`.
+/// cbindgen will produce independent C types like `MochiCPromisei32` and
+/// `MochiCPromiseProtocolAddress`.
 ///
 /// This derives Copy because it behaves like a C type; nevertheless, a promise should still only be
 /// completed once.
@@ -26,7 +26,7 @@ pub type RawCancellationId = u64;
 #[repr(C)]
 pub struct CPromise<T> {
     complete: extern "C" fn(
-        error: *mut SignalFfiError,
+        error: *mut MochiFfiError,
         result: *const T,
         context: *const std::ffi::c_void,
     ),
@@ -61,10 +61,10 @@ impl<T: ResultTypeInfo> Drop for PromiseCompleter<T> {
     }
 }
 
-pub struct FutureResultReporter<T: ResultTypeInfo>(SignalFfiResult<T>);
+pub struct FutureResultReporter<T: ResultTypeInfo>(MochiFfiResult<T>);
 
 impl<T: ResultTypeInfo> FutureResultReporter<T> {
-    pub fn new(result: SignalFfiResult<T>) -> Self {
+    pub fn new(result: MochiFfiResult<T>) -> Self {
         Self(result)
     }
 }
@@ -105,9 +105,9 @@ impl<T: ResultTypeInfo + std::panic::UnwindSafe> ResultReporter for FutureResult
 /// ## Example
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::ffi::*;
-/// # use libsignal_bridge_types::{AsyncRuntime, ResultReporter};
-/// # use libsignal_bridge_types::support::NoOpAsyncRuntime;
+/// # use libmochi_bridge_types::ffi::*;
+/// # use libmochi_bridge_types::{AsyncRuntime, ResultReporter};
+/// # use libmochi_bridge_types::support::NoOpAsyncRuntime;
 /// # fn test(promise: &mut CPromise<i32>, async_runtime: &NoOpAsyncRuntime) {
 /// run_future_on_runtime(async_runtime, promise, |_cancel| async {
 ///     let result: i32 = 1 + 2;
@@ -131,10 +131,10 @@ pub fn run_future_on_runtime<R, F, O>(
     promise.cancellation_id = cancellation_id.into();
 }
 
-/// Catches panics that occur in `future` and converts them to [`SignalFfiError::UnexpectedPanic`].
+/// Catches panics that occur in `future` and converts them to [`MochiFfiError::UnexpectedPanic`].
 pub fn catch_unwind<T>(
-    future: impl Future<Output = SignalFfiResult<T>> + Send + std::panic::UnwindSafe + 'static,
-) -> impl Future<Output = SignalFfiResult<T>> + Send + std::panic::UnwindSafe + 'static {
+    future: impl Future<Output = MochiFfiResult<T>> + Send + std::panic::UnwindSafe + 'static,
+) -> impl Future<Output = MochiFfiResult<T>> + Send + std::panic::UnwindSafe + 'static {
     future
         .catch_unwind()
         .unwrap_or_else(|panic| Err(UnexpectedPanic(panic).into()))

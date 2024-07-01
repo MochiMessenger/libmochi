@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -14,14 +14,14 @@ import {
   SvrDataMissingError,
   SvrRestoreFailedError,
   SvrRequestFailedError,
-  LibSignalError,
+  LibMochiError,
 } from './Errors';
 import { ServerMessageAck, Wrapper } from '../Native';
 import { Buffer } from 'node:buffer';
 
 const DEFAULT_CHAT_REQUEST_TIMEOUT_MILLIS = 5000;
 
-// This must match the libsignal-bridge Rust enum of the same name.
+// This must match the libmochi-bridge Rust enum of the same name.
 export enum Environment {
   Staging = 0,
   Production = 1,
@@ -36,7 +36,7 @@ export type CDSRequestOptionsType = {
   e164s: Array<string>;
   acisAndAccessKeys: Array<{ aci: string; accessKey: string }>;
   returnAcisWithoutUaks: boolean;
-  abortSignal?: AbortSignal;
+  abortMochi?: AbortMochi;
 };
 
 export type CDSResponseEntryType<Aci, Pni> = {
@@ -79,11 +79,11 @@ export class TokioAsyncContext {
   }
 
   makeCancellable<T>(
-    abortSignal: AbortSignal | undefined,
+    abortMochi: AbortMochi | undefined,
     promise: Promise<T>
   ): Promise<T> {
     if (
-      abortSignal !== undefined &&
+      abortMochi !== undefined &&
       '_cancellationToken' in promise &&
       typeof promise._cancellationToken === 'bigint'
     ) {
@@ -92,10 +92,10 @@ export class TokioAsyncContext {
         Native.TokioAsyncContext_cancel(this, cancellationToken);
       };
 
-      if (abortSignal.aborted) {
+      if (abortMochi.aborted) {
         cancel();
       } else {
-        abortSignal.addEventListener('abort', cancel);
+        abortMochi.addEventListener('abort', cancel);
       }
     }
     return promise;
@@ -235,13 +235,13 @@ export class ChatService {
    * automatic reconnect attempt will be made.
    *
    * @throws {AppExpiredError} if the current app version is too old (as judged by the server).
-   * @throws {LibSignalError} with other codes for other failures.
+   * @throws {LibMochiError} with other codes for other failures.
    */
   connectUnauthenticated(options?: {
-    abortSignal?: AbortSignal;
+    abortMochi?: AbortMochi;
   }): Promise<Native.ChatServiceDebugInfo> {
     return this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.ChatService_connect_unauth(this.asyncContext, this.chatService)
     );
   }
@@ -257,13 +257,13 @@ export class ChatService {
    *
    * @throws {AppExpiredError} if the current app version is too old (as judged by the server).
    * @throws {DeviceDelinkedError} if the current device has been delinked.
-   * @throws {LibSignalError} with other codes for other failures.
+   * @throws {LibMochiError} with other codes for other failures.
    */
   connectAuthenticated(options?: {
-    abortSignal?: AbortSignal;
+    abortMochi?: AbortMochi;
   }): Promise<Native.ChatServiceDebugInfo> {
     return this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.ChatService_connect_auth(this.asyncContext, this.chatService)
     );
   }
@@ -279,10 +279,10 @@ export class ChatService {
    */
   unauthenticatedFetchAndDebug(
     chatRequest: ChatRequest,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<Native.ResponseAndDebugInfo> {
     return this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.ChatService_unauth_send_and_debug(
         this.asyncContext,
         this.chatService,
@@ -300,10 +300,10 @@ export class ChatService {
    */
   unauthenticatedFetch(
     chatRequest: ChatRequest,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<Native.ChatResponse> {
     return this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.ChatService_unauth_send(
         this.asyncContext,
         this.chatService,
@@ -324,10 +324,10 @@ export class ChatService {
    */
   authenticatedFetchAndDebug(
     chatRequest: ChatRequest,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<Native.ResponseAndDebugInfo> {
     return this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.ChatService_auth_send_and_debug(
         this.asyncContext,
         this.chatService,
@@ -345,10 +345,10 @@ export class ChatService {
    */
   authenticatedFetch(
     chatRequest: ChatRequest,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<Native.ChatResponse> {
     return this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.ChatService_auth_send(
         this.asyncContext,
         this.chatService,
@@ -440,7 +440,7 @@ export class Net {
       e164s,
       acisAndAccessKeys,
       returnAcisWithoutUaks,
-      abortSignal,
+      abortMochi,
     }: ReadonlyDeep<CDSRequestOptionsType>
   ): Promise<CDSResponseType<string, string>> {
     const request = newNativeHandle(Native.LookupRequest_new());
@@ -462,7 +462,7 @@ export class Net {
     );
 
     const lookup = await this.asyncContext.makeCancellable(
-      abortSignal,
+      abortMochi,
       Native.CdsiLookup_new(
         this.asyncContext,
         this.connectionManager,
@@ -472,7 +472,7 @@ export class Net {
       )
     );
     return await this.asyncContext.makeCancellable(
-      abortSignal,
+      abortMochi,
       Native.CdsiLookup_complete(this.asyncContext, newNativeHandle(lookup))
     );
   }
@@ -526,7 +526,7 @@ export interface Svr3Client {
    * connection timeout), problems establishing the Noise connection to the
    * enclaves, or invalid arguments' values. {@link IoError} errors can, in
    * general, be retried, although there is already a retry-with-backoff
-   * mechanism inside libsignal used to connect to the SVR3 servers. Other
+   * mechanism inside libmochi used to connect to the SVR3 servers. Other
    * exceptions are caused by the bad input or data missing on the server. They
    * are therefore non-actionable and are guaranteed to be thrown again when
    * retried.
@@ -536,7 +536,7 @@ export interface Svr3Client {
     password: string,
     maxTries: number,
     auth: Readonly<ServiceAuth>,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<Buffer>;
 
   /**
@@ -560,7 +560,7 @@ export interface Svr3Client {
    * the connection timeout), problems establishing the Noise connection to the
    * enclaves, or invalid arguments' values. {@link IoError} errors can, in
    * general, be retried, although there is already a retry-with-backoff
-   * mechanism inside libsignal used to connect to the SVR3 servers. Other
+   * mechanism inside libmochi used to connect to the SVR3 servers. Other
    * exceptions are caused by the bad input or data missing on the server. They
    * are therefore non-actionable and are guaranteed to be thrown again when
    * retried.
@@ -578,7 +578,7 @@ export interface Svr3Client {
     password: string,
     shareSet: Buffer,
     auth: Readonly<ServiceAuth>,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<RestoredSecret>;
 
   /**
@@ -601,14 +601,14 @@ export interface Svr3Client {
    * the connection timeout), problems establishing the Noise connection to the
    * enclaves, or invalid arguments' values. {@link IoError} errors can, in
    * general, be retried, although there is already a retry-with-backoff
-   * mechanism inside libsignal used to connect to the SVR3 servers. Other
+   * mechanism inside libmochi used to connect to the SVR3 servers. Other
    * exceptions are caused by the bad input or data missing on the server. They
    * are therefore non-actionable and are guaranteed to be thrown again when
    * retried.
    */
   remove(
     auth: Readonly<ServiceAuth>,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<void>;
 }
 
@@ -637,10 +637,10 @@ class Svr3ClientImpl implements Svr3Client {
     password: string,
     maxTries: number,
     auth: Readonly<ServiceAuth>,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<Buffer> {
     return this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.Svr3Backup(
         this.asyncContext,
         this.connectionManager,
@@ -657,10 +657,10 @@ class Svr3ClientImpl implements Svr3Client {
     password: string,
     shareSet: Buffer,
     auth: Readonly<ServiceAuth>,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<RestoredSecret> {
     const serialized = await this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.Svr3Restore(
         this.asyncContext,
         this.connectionManager,
@@ -674,10 +674,10 @@ class Svr3ClientImpl implements Svr3Client {
   }
   async remove(
     auth: Readonly<ServiceAuth>,
-    options?: { abortSignal?: AbortSignal }
+    options?: { abortMochi?: AbortMochi }
   ): Promise<void> {
     return this.asyncContext.makeCancellable(
-      options?.abortSignal,
+      options?.abortMochi,
       Native.Svr3Remove(
         this.asyncContext,
         this.connectionManager,

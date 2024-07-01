@@ -1,42 +1,42 @@
 # Overview
 
-libsignal contains platform-agnostic APIs used by the official Signal clients and servers, exposed
+libmochi contains platform-agnostic APIs used by the official Mochi clients and servers, exposed
 as a Java, Swift, or TypeScript library. The underlying implementations are written in Rust:
 
-- libsignal-protocol: Implements the Signal protocol, including the [Double Ratchet algorithm][]. A
-  replacement for [libsignal-protocol-java][] and [libsignal-metadata-java][].
-- signal-crypto: Cryptographic primitives such as AES-GCM. We use [RustCrypto][]'s where we can
+- libmochi-protocol: Implements the Mochi protocol, including the [Double Ratchet algorithm][]. A
+  replacement for [libmochi-protocol-java][] and [libmochi-metadata-java][].
+- mochi-crypto: Cryptographic primitives such as AES-GCM. We use [RustCrypto][]'s where we can
   but sometimes have differing needs.
-- device-transfer: Support logic for Signal's device-to-device transfer feature.
+- device-transfer: Support logic for Mochi's device-to-device transfer feature.
 - attest: Functionality for remote attestation of [SGX enclaves][] and server-side [HSMs][].
-- zkgroup: Functionality for [zero-knowledge groups][] and related features available in Signal.
-- zkcredential: An abstraction for the sort of zero-knowledge credentials used by zkgroup, based on the paper "[The Signal Private Group System][]" by Chase, Perrin, and Zaverucha.
+- zkgroup: Functionality for [zero-knowledge groups][] and related features available in Mochi.
+- zkcredential: An abstraction for the sort of zero-knowledge credentials used by zkgroup, based on the paper "[The Mochi Private Group System][]" by Chase, Perrin, and Zaverucha.
 - poksho: Utilities for implementing zero-knowledge proofs (such as those used by zkgroup); stands for "proof-of-knowledge, stateful-hash-object".
-- pin: Functionality for consistently using [PINs][] as passwords in Signal's Secure Value Recovery system.
+- pin: Functionality for consistently using [PINs][] as passwords in Mochi's Secure Value Recovery system.
 - usernames: Functionality for username generation, hashing, and proofs.
 - media: Utilities for manipulating media.
 
-This repository is used by the Signal client apps ([Android][], [iOS][], and [Desktop][]) as well as
-server-side. Use outside of Signal is unsupported. In particular, the products of this repository
+This repository is used by the Mochi client apps ([Android][], [iOS][], and [Desktop][]) as well as
+server-side. Use outside of Mochi is unsupported. In particular, the products of this repository
 are the Java, Swift, and TypeScript libraries that wrap the underlying Rust implementations. All
 APIs and implementations are subject to change without notice, as are the JNI, C, and Node add-on
 "bridge" layers. However, backwards-incompatible changes to the Java, Swift, TypeScript, and
 non-bridge Rust APIs will be reflected in the version number on a best-effort basis, including
 increases to the minimum supported tools versions.
 
-[Double Ratchet algorithm]: https://signal.org/docs/
-[libsignal-protocol-java]: https://github.com/signalapp/libsignal-protocol-java
-[libsignal-metadata-java]: https://github.com/signalapp/libsignal-metadata-java
+[Double Ratchet algorithm]: https://mochi.org/docs/
+[libmochi-protocol-java]: https://github.com/mochimessenger/libmochi-protocol-java
+[libmochi-metadata-java]: https://github.com/mochimessenger/libmochi-metadata-java
 [RustCrypto]: https://github.com/RustCrypto
 [Noise protocol]: http://noiseprotocol.org/
 [SGX enclaves]: https://www.intel.com/content/www/us/en/architecture-and-technology/software-guard-extensions.html
 [HSMs]: https://en.wikipedia.org/wiki/Hardware_security_module
-[zero-knowledge groups]: https://signal.org/blog/signal-private-group-system/
-[The Signal Private Group System]: https://eprint.iacr.org/2019/1416.pdf
-[PINs]: https://signal.org/blog/signal-pins/
-[Android]: https://github.com/signalapp/Signal-Android
-[iOS]: https://github.com/signalapp/Signal-iOS
-[Desktop]: https://github.com/signalapp/Signal-Desktop
+[zero-knowledge groups]: https://mochi.org/blog/mochi-private-group-system/
+[The Mochi Private Group System]: https://eprint.iacr.org/2019/1416.pdf
+[PINs]: https://mochi.org/blog/mochi-pins/
+[Android]: https://github.com/mochimessenger/Mochi-Android
+[iOS]: https://github.com/mochimessenger/Mochi-iOS
+[Desktop]: https://github.com/mochimessenger/Mochi-Desktop
 
 
 # Building
@@ -90,14 +90,14 @@ addition to rebuilding.
 
 ### Maven Central
 
-Signal publishes Java packages on [Maven Central](https://central.sonatype.org) for its own use,
-under the names org.signal:libsignal-server, org.signal:libsignal-client, and
-org.signal:libsignal-android. libsignal-client and libsignal-server contain native libraries for
+Mochi publishes Java packages on [Maven Central](https://central.sonatype.org) for its own use,
+under the names org.mochi:libmochi-server, org.mochi:libmochi-client, and
+org.mochi:libmochi-android. libmochi-client and libmochi-server contain native libraries for
 Debian-flavored x86_64 Linux as well as Windows (x86_64) and macOS (x86_64 and arm64).
-libsignal-android contains native libraries for armeabi-v7a, arm64-v8a, x86, and x86_64 Android.
+libmochi-android contains native libraries for armeabi-v7a, arm64-v8a, x86, and x86_64 Android.
 
-When building for Android you need *both* libsignal-android and libsignal-client, but the Windows
-and macOS libraries in libsignal-client won't automatically be excluded from your final app. You can
+When building for Android you need *both* libmochi-android and libmochi-client, but the Windows
+and macOS libraries in libmochi-client won't automatically be excluded from your final app. You can
 explicitly exclude them using `packagingOptions`:
 
 ```
@@ -105,8 +105,8 @@ android {
   // ...
   packagingOptions {
     resources {
-      exclude "libsignal_jni.dylib"
-      exclude "signal_jni.dll"
+      exclude "libmochi_jni.dylib"
+      exclude "mochi_jni.dll"
     }
   }
   // ...
@@ -143,24 +143,24 @@ addition to rebuilding.
 
 ### NPM
 
-Signal publishes the NPM package `@signalapp/libsignal-client` for its own use, including native
+Mochi publishes the NPM package `@mochimessenger/libmochi-client` for its own use, including native
 libraries for Windows, macOS, and Debian-flavored Linux. Both x64 and arm64 builds are included for
 all three platforms, but the arm64 builds for Windows and Linux are considered experimental, since
-there are no official builds of Signal for those architectures.
+there are no official builds of Mochi for those architectures.
 
 
 # Contributions
 
-Signal does accept external contributions to this project. However unless the change is
+Mochi does accept external contributions to this project. However unless the change is
 simple and easily understood, for example fixing a bug or portability issue, adding a new
 test, or improving performance, first open an issue to discuss your intended change as not
 all changes can be accepted.
 
-Contributions that will not be used directly by one of Signal's official client apps may still be
+Contributions that will not be used directly by one of Mochi's official client apps may still be
 considered, but only if they do not pose an undue maintenance burden or conflict with the goals of
 the project.
 
-Signing a [CLA (Contributor License Agreement)](https://signal.org/cla/) is required for all contributions.
+Signing a [CLA (Contributor License Agreement)](https://mochi.org/cla/) is required for all contributions.
 
 # Legal things
 ## Cryptography Notice
@@ -178,6 +178,6 @@ Administration Regulations, Section 740.13) for both object code and source code
 
 ## License
 
-Copyright 2020-2024 Signal Messenger, LLC
+Copyright 2020-2024 Mochi Messenger, LLC
 
 Licensed under the GNU AGPLv3: https://www.gnu.org/licenses/agpl-3.0.html

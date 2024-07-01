@@ -1,20 +1,20 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 // These testing endpoints aren't generated in device builds, to save on code size.
 #if !os(iOS) || targetEnvironment(simulator)
 
-@testable import LibSignalClient
-import SignalFfi
+@testable import LibMochiClient
+import MochiFfi
 import XCTest
 
 private func fakeAsyncRuntime() -> OpaquePointer! {
     OpaquePointer(bitPattern: -1)
 }
 
-private func invokeFnIgnoringResult<T>(fn: (UnsafeMutablePointer<T>?) -> SignalFfiErrorRef?) throws {
+private func invokeFnIgnoringResult<T>(fn: (UnsafeMutablePointer<T>?) -> MochiFfiErrorRef?) throws {
     // Swift doesn't have a way to declare uninitialized local variables, so we have to allocate one on the heap.
     // This will almost certainly get stack-promoted, but since this is a test it doesn't really matter anyway.
     let output = UnsafeMutablePointer<T>.allocate(capacity: 1)
@@ -25,150 +25,150 @@ private func invokeFnIgnoringResult<T>(fn: (UnsafeMutablePointer<T>?) -> SignalF
 final class BridgingTests: XCTestCase {
     func testErrorOnBorrow() async throws {
         do {
-            try checkError(signal_testing_error_on_borrow_sync(nil))
+            try checkError(mochi_testing_error_on_borrow_sync(nil))
             XCTFail("should have failed")
-        } catch SignalError.invalidArgument(_) {
+        } catch MochiError.invalidArgument(_) {
             // good
         }
 
         do {
-            try checkError(signal_testing_error_on_borrow_async(nil))
+            try checkError(mochi_testing_error_on_borrow_async(nil))
             XCTFail("should have failed")
-        } catch SignalError.invalidArgument(_) {
+        } catch MochiError.invalidArgument(_) {
             // good
         }
 
         do {
             _ = try await invokeAsyncFunction {
-                signal_testing_error_on_borrow_io($0, fakeAsyncRuntime(), nil)
+                mochi_testing_error_on_borrow_io($0, fakeAsyncRuntime(), nil)
             }
             XCTFail("should have failed")
-        } catch SignalError.invalidArgument(_) {
+        } catch MochiError.invalidArgument(_) {
             // good
         }
     }
 
     func testPanicOnBorrow() async throws {
         do {
-            try checkError(signal_testing_panic_on_borrow_sync(nil))
+            try checkError(mochi_testing_panic_on_borrow_sync(nil))
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
 
         do {
-            try checkError(signal_testing_panic_on_borrow_async(nil))
+            try checkError(mochi_testing_panic_on_borrow_async(nil))
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
 
         do {
             _ = try await invokeAsyncFunction {
-                signal_testing_panic_on_borrow_io($0, fakeAsyncRuntime(), nil)
+                mochi_testing_panic_on_borrow_io($0, fakeAsyncRuntime(), nil)
             }
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
     }
 
     func testPanicOnLoad() async throws {
         do {
-            try checkError(signal_testing_panic_on_load_sync(nil, nil))
+            try checkError(mochi_testing_panic_on_load_sync(nil, nil))
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
 
         do {
-            try checkError(signal_testing_panic_on_load_async(nil, nil))
+            try checkError(mochi_testing_panic_on_load_async(nil, nil))
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
 
         do {
             _ = try await invokeAsyncFunction {
-                signal_testing_panic_on_load_io($0, fakeAsyncRuntime(), nil, nil)
+                mochi_testing_panic_on_load_io($0, fakeAsyncRuntime(), nil, nil)
             }
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
     }
 
     func testPanicInBody() async throws {
         do {
-            try checkError(signal_testing_panic_in_body_sync(nil))
+            try checkError(mochi_testing_panic_in_body_sync(nil))
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
 
         do {
-            try checkError(signal_testing_panic_in_body_async(nil))
+            try checkError(mochi_testing_panic_in_body_async(nil))
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
 
         do {
             _ = try await invokeAsyncFunction {
-                signal_testing_panic_in_body_io($0, fakeAsyncRuntime(), nil)
+                mochi_testing_panic_in_body_io($0, fakeAsyncRuntime(), nil)
             }
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
     }
 
     func testErrorOnReturn() async throws {
         do {
-            try invokeFnIgnoringResult { signal_testing_error_on_return_sync($0, nil) }
+            try invokeFnIgnoringResult { mochi_testing_error_on_return_sync($0, nil) }
             XCTFail("should have failed")
-        } catch SignalError.invalidArgument(_) {
+        } catch MochiError.invalidArgument(_) {
             // good
         }
 
         do {
-            try invokeFnIgnoringResult { signal_testing_error_on_return_async($0, nil) }
+            try invokeFnIgnoringResult { mochi_testing_error_on_return_async($0, nil) }
             XCTFail("should have failed")
-        } catch SignalError.invalidArgument(_) {
+        } catch MochiError.invalidArgument(_) {
             // good
         }
 
         do {
             _ = try await invokeAsyncFunction {
-                signal_testing_error_on_return_io($0, fakeAsyncRuntime(), nil)
+                mochi_testing_error_on_return_io($0, fakeAsyncRuntime(), nil)
             }
             XCTFail("should have failed")
-        } catch SignalError.invalidArgument(_) {
+        } catch MochiError.invalidArgument(_) {
             // good
         }
     }
 
     func testPanicOnReturn() async throws {
         do {
-            try invokeFnIgnoringResult { signal_testing_panic_on_return_sync($0, nil) }
+            try invokeFnIgnoringResult { mochi_testing_panic_on_return_sync($0, nil) }
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
 
         do {
-            try invokeFnIgnoringResult { signal_testing_panic_on_return_async($0, nil) }
+            try invokeFnIgnoringResult { mochi_testing_panic_on_return_async($0, nil) }
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
 
         do {
             _ = try await invokeAsyncFunction {
-                signal_testing_panic_on_return_io($0, fakeAsyncRuntime(), nil)
+                mochi_testing_panic_on_return_io($0, fakeAsyncRuntime(), nil)
             }
             XCTFail("should have failed")
-        } catch SignalError.internalError(_) {
+        } catch MochiError.internalError(_) {
             // good
         }
     }
@@ -176,7 +176,7 @@ final class BridgingTests: XCTestCase {
     func testReturnStringArray() throws {
         let EXPECTED = ["easy", "as", "ABC", "123"]
         let array = try invokeFnReturningStringArray {
-            signal_testing_return_string_array($0)
+            mochi_testing_return_string_array($0)
         }
         XCTAssertEqual(array, EXPECTED)
     }
@@ -188,10 +188,10 @@ final class BridgingTests: XCTestCase {
         let result = try first.withUnsafeBytes { first in
             try empty.withUnsafeBytes { empty in
                 try second.withUnsafeBytes { second in
-                    let slices = [SignalBorrowedBuffer(first), SignalBorrowedBuffer(empty), SignalBorrowedBuffer(second)]
+                    let slices = [MochiBorrowedBuffer(first), MochiBorrowedBuffer(empty), MochiBorrowedBuffer(second)]
                     return try slices.withUnsafeBufferPointer { slices in
                         try invokeFnReturningBytestringArray {
-                            signal_testing_process_bytestring_array($0, SignalBorrowedSliceOfBuffers(base: slices.baseAddress, length: slices.count))
+                            mochi_testing_process_bytestring_array($0, MochiBorrowedSliceOfBuffers(base: slices.baseAddress, length: slices.count))
                         }
                     }
                 }
@@ -201,10 +201,10 @@ final class BridgingTests: XCTestCase {
     }
 
     func testBytestringArrayEmpty() throws {
-        let slices: [SignalBorrowedBuffer] = []
+        let slices: [MochiBorrowedBuffer] = []
         let result = try slices.withUnsafeBufferPointer { slices in
             try invokeFnReturningBytestringArray {
-                signal_testing_process_bytestring_array($0, SignalBorrowedSliceOfBuffers(base: slices.baseAddress, length: slices.count))
+                mochi_testing_process_bytestring_array($0, MochiBorrowedSliceOfBuffers(base: slices.baseAddress, length: slices.count))
             }
         }
         XCTAssertEqual(result, [])

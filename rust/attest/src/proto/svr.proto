@@ -1,15 +1,15 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 syntax = "proto3";
 
-package org.signal.svr;
+package org.mochi.svr;
 
 message ClientHandshakeStart {
   // Public key associated with this server's enclave. For use in test-only
   // contexts where attestation is not available
-  // Should not be used in libsignal
+  // Should not be used in libmochi
   reserved 1; // bytes test_only_pubkey = 1;
 
   // Remote-attestation evidence associated with the public key

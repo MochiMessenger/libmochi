@@ -1,12 +1,12 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import Foundation
 import XCTest
 
-import LibSignalClient
+import LibMochiClient
 
 class ServiceIdTests: TestCaseBase {
     static let TEST_UUID_STRING = "e36fdce7-36da-4c6f-a21b-9afe2b754650"
@@ -55,11 +55,11 @@ class ServiceIdTests: TestCaseBase {
         do {
             _ = try ServiceId.parseFrom(serviceIdString: "ACI:" + Self.TEST_UUID_STRING)
             XCTFail("Should have failed")
-        } catch SignalError.invalidArgument {}
+        } catch MochiError.invalidArgument {}
         do {
             _ = try ServiceId.parseFrom(serviceIdString: "")
             XCTFail("Should have failed")
-        } catch SignalError.invalidArgument {}
+        } catch MochiError.invalidArgument {}
     }
 
     func testParseFromBinary() throws {
@@ -76,11 +76,11 @@ class ServiceIdTests: TestCaseBase {
         do {
             _ = try ServiceId.parseFrom(serviceIdBinary: [0] + Self.TEST_UUID_BYTES)
             XCTFail("Should have failed")
-        } catch SignalError.invalidArgument {}
+        } catch MochiError.invalidArgument {}
         do {
             _ = try ServiceId.parseFrom(serviceIdBinary: [])
             XCTFail("Should have failed")
-        } catch SignalError.invalidArgument {}
+        } catch MochiError.invalidArgument {}
     }
 
     // swiftlint:enable force_cast

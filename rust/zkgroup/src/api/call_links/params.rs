@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -28,7 +28,7 @@ pub struct CallLinkPublicParams {
 impl CallLinkSecretParams {
     pub fn derive_from_root_key(root_key: &[u8]) -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20230419_CallLinkSecretParams_DeriveFromRootKey",
+            b"Mochi_ZKGroup_20230419_CallLinkSecretParams_DeriveFromRootKey",
             root_key,
         );
         let uid_enc_key_pair = zkcredential::attributes::KeyPair::derive_from(sho.as_mut());
@@ -46,7 +46,7 @@ impl CallLinkSecretParams {
         }
     }
 
-    pub fn encrypt_uid(&self, user_id: libsignal_core::Aci) -> api::groups::UuidCiphertext {
+    pub fn encrypt_uid(&self, user_id: libmochi_core::Aci) -> api::groups::UuidCiphertext {
         let uid = crypto::uid_struct::UidStruct::from_service_id(user_id.into());
         self.encrypt_uid_struct(uid)
     }
@@ -65,7 +65,7 @@ impl CallLinkSecretParams {
     pub fn decrypt_uid(
         &self,
         ciphertext: api::groups::UuidCiphertext,
-    ) -> Result<libsignal_core::Aci, ZkGroupVerificationFailure> {
+    ) -> Result<libmochi_core::Aci, ZkGroupVerificationFailure> {
         let uid = crypto::uid_encryption::UidEncryptionDomain::decrypt(
             &self.uid_enc_key_pair,
             &ciphertext.ciphertext,

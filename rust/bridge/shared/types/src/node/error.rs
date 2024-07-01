@@ -1,18 +1,18 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use std::fmt;
 
-use libsignal_net::chat::ChatServiceError;
-use libsignal_net::svr3::Error as Svr3Error;
-use signal_media::sanitize::mp4::{Error as Mp4Error, ParseError as Mp4ParseError};
-use signal_media::sanitize::webp::{Error as WebpError, ParseError as WebpParseError};
+use libmochi_net::chat::ChatServiceError;
+use libmochi_net::svr3::Error as Svr3Error;
+use mochi_media::sanitize::mp4::{Error as Mp4Error, ParseError as Mp4ParseError};
+use mochi_media::sanitize::webp::{Error as WebpError, ParseError as WebpParseError};
 
 use super::*;
 
 const ERRORS_PROPERTY_NAME: &str = "Errors";
-const ERROR_CLASS_NAME: &str = "LibSignalErrorBase";
+const ERROR_CLASS_NAME: &str = "LibMochiErrorBase";
 
 #[allow(non_snake_case)]
 fn node_registerErrors(mut cx: FunctionContext) -> JsResult<JsValue> {
@@ -56,7 +56,7 @@ fn new_js_error<'a>(
         Err(failure) => {
             log::warn!(
                 "could not construct {}: {}",
-                name.unwrap_or("LibSignalError"),
+                name.unwrap_or("LibMochiError"),
                 failure
                     .to_string(cx)
                     .map(|s| s.value(cx))
@@ -114,7 +114,7 @@ impl std::fmt::Display for ThrownException {
 
 impl std::error::Error for ThrownException {}
 
-pub trait SignalNodeError: Sized + fmt::Display {
+pub trait MochiNodeError: Sized + fmt::Display {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -140,7 +140,7 @@ const SVR3_REQUEST_FAILED: &str = "SvrRequestFailed";
 const SVR3_RESTORE_FAILED: &str = "SvrRestoreFailed";
 const UNSUPPORTED_MEDIA_INPUT: &str = "UnsupportedMediaInput";
 
-impl SignalNodeError for neon::result::Throw {
+impl MochiNodeError for neon::result::Throw {
     fn throw<'a>(
         self,
         _cx: &mut impl Context<'a>,
@@ -151,7 +151,7 @@ impl SignalNodeError for neon::result::Throw {
     }
 }
 
-impl SignalNodeError for SignalProtocolError {
+impl MochiNodeError for MochiProtocolError {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -160,7 +160,7 @@ impl SignalNodeError for SignalProtocolError {
     ) -> JsResult<'a, JsValue> {
         // Check for some dedicated error types first.
         let custom_error = match &self {
-            SignalProtocolError::DuplicatedMessage(..) => new_js_error(
+            MochiProtocolError::DuplicatedMessage(..) => new_js_error(
                 cx,
                 module,
                 Some("DuplicatedMessage"),
@@ -168,7 +168,7 @@ impl SignalNodeError for SignalProtocolError {
                 operation_name,
                 None,
             ),
-            SignalProtocolError::SealedSenderSelfSend => new_js_error(
+            MochiProtocolError::SealedSenderSelfSend => new_js_error(
                 cx,
                 module,
                 Some("SealedSenderSelfSend"),
@@ -176,7 +176,7 @@ impl SignalNodeError for SignalProtocolError {
                 operation_name,
                 None,
             ),
-            SignalProtocolError::UntrustedIdentity(addr) => {
+            MochiProtocolError::UntrustedIdentity(addr) => {
                 let props = cx.empty_object();
                 let addr_string = cx.string(addr.name());
                 props.set(cx, "_addr", addr_string)?;
@@ -189,7 +189,7 @@ impl SignalNodeError for SignalProtocolError {
                     Some(props),
                 )
             }
-            SignalProtocolError::InvalidRegistrationId(addr, _value) => {
+            MochiProtocolError::InvalidRegistrationId(addr, _value) => {
                 let props = cx.empty_object();
                 let addr = addr.clone().convert_into(cx)?;
                 props.set(cx, "_addr", addr)?;
@@ -202,7 +202,7 @@ impl SignalNodeError for SignalProtocolError {
                     Some(props),
                 )
             }
-            SignalProtocolError::InvalidSessionStructure(..) => new_js_error(
+            MochiProtocolError::InvalidSessionStructure(..) => new_js_error(
                 cx,
                 module,
                 Some("InvalidSession"),
@@ -210,7 +210,7 @@ impl SignalNodeError for SignalProtocolError {
                 operation_name,
                 None,
             ),
-            SignalProtocolError::InvalidSenderKeySession { distribution_id } => {
+            MochiProtocolError::InvalidSenderKeySession { distribution_id } => {
                 let props = cx.empty_object();
                 let distribution_id_str =
                     cx.string(format!("{:x}", distribution_id.as_hyphenated()));
@@ -237,19 +237,19 @@ impl SignalNodeError for SignalProtocolError {
     }
 }
 
-impl SignalNodeError for device_transfer::Error {}
+impl MochiNodeError for device_transfer::Error {}
 
-impl SignalNodeError for attest::hsm_enclave::Error {}
+impl MochiNodeError for attest::hsm_enclave::Error {}
 
-impl SignalNodeError for attest::enclave::Error {}
+impl MochiNodeError for attest::enclave::Error {}
 
-impl SignalNodeError for signal_crypto::Error {}
+impl MochiNodeError for mochi_crypto::Error {}
 
-impl SignalNodeError for zkgroup::ZkGroupVerificationFailure {}
+impl MochiNodeError for zkgroup::ZkGroupVerificationFailure {}
 
-impl SignalNodeError for zkgroup::ZkGroupDeserializationFailure {}
+impl MochiNodeError for zkgroup::ZkGroupDeserializationFailure {}
 
-impl SignalNodeError for usernames::UsernameError {
+impl MochiNodeError for usernames::UsernameError {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -281,9 +281,9 @@ impl SignalNodeError for usernames::UsernameError {
     }
 }
 
-impl SignalNodeError for usernames::ProofVerificationFailure {}
+impl MochiNodeError for usernames::ProofVerificationFailure {}
 
-impl SignalNodeError for usernames::UsernameLinkError {
+impl MochiNodeError for usernames::UsernameLinkError {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -309,7 +309,7 @@ impl SignalNodeError for usernames::UsernameLinkError {
     }
 }
 
-impl SignalNodeError for Mp4Error {
+impl MochiNodeError for Mp4Error {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -339,7 +339,7 @@ impl SignalNodeError for Mp4Error {
     }
 }
 
-impl SignalNodeError for WebpError {
+impl MochiNodeError for WebpError {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -370,7 +370,7 @@ impl SignalNodeError for WebpError {
     }
 }
 
-impl SignalNodeError for std::io::Error {
+impl MochiNodeError for std::io::Error {
     fn throw<'a>(
         mut self,
         cx: &mut impl Context<'a>,
@@ -396,7 +396,7 @@ impl SignalNodeError for std::io::Error {
     }
 }
 
-impl SignalNodeError for libsignal_net::chat::ChatServiceError {
+impl MochiNodeError for libmochi_net::chat::ChatServiceError {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -421,7 +421,7 @@ impl SignalNodeError for libsignal_net::chat::ChatServiceError {
     }
 }
 
-impl SignalNodeError for http::uri::InvalidUri {
+impl MochiNodeError for http::uri::InvalidUri {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -440,7 +440,7 @@ impl SignalNodeError for http::uri::InvalidUri {
     }
 }
 
-impl SignalNodeError for libsignal_net::cdsi::LookupError {
+impl MochiNodeError for libmochi_net::cdsi::LookupError {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -478,7 +478,7 @@ impl SignalNodeError for libsignal_net::cdsi::LookupError {
     }
 }
 
-impl SignalNodeError for libsignal_net::svr3::Error {
+impl MochiNodeError for libmochi_net::svr3::Error {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -517,7 +517,7 @@ impl SignalNodeError for libsignal_net::svr3::Error {
     }
 }
 
-impl SignalNodeError for CancellationError {
+impl MochiNodeError for CancellationError {
     fn throw<'a>(
         self,
         cx: &mut impl Context<'a>,
@@ -562,7 +562,7 @@ impl fmt::Display for CallbackError {
 
 impl std::error::Error for CallbackError {}
 
-/// Converts a JavaScript error message to a [`SignalProtocolError::ApplicationCallbackError`].
-pub fn js_error_to_rust(func: &'static str, err: String) -> SignalProtocolError {
-    SignalProtocolError::ApplicationCallbackError(func, Box::new(CallbackError::new(err)))
+/// Converts a JavaScript error message to a [`MochiProtocolError::ApplicationCallbackError`].
+pub fn js_error_to_rust(func: &'static str, err: String) -> MochiProtocolError {
+    MochiProtocolError::ApplicationCallbackError(func, Box::new(CallbackError::new(err)))
 }

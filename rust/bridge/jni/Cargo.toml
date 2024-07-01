@@ -1,23 +1,23 @@
 #
-# Copyright (C) 2020-2021 Signal Messenger, LLC.
+# Copyright (C) 2020-2021 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
 [package]
-name = "libsignal-jni"
+name = "libmochi-jni"
 version = "0.52.1"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 edition = "2021"
 license = "AGPL-3.0-only"
 
 [lib]
-name = "signal_jni"
+name = "mochi_jni"
 crate-type = ["cdylib"]
 
 [dependencies]
-libsignal-bridge = { path = "../shared", features = ["jni", "signal-media"] }
-libsignal-protocol = { path = "../../protocol" }
-signal-crypto = { path = "../../crypto" }
+libmochi-bridge = { path = "../shared", features = ["jni", "mochi-media"] }
+libmochi-protocol = { path = "../../protocol" }
+mochi-crypto = { path = "../../crypto" }
 
 cfg-if = "1.0.0"
 jni = "0.21.0"
@@ -25,7 +25,7 @@ log = "0.4"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
 
 [features]
-testing-fns = ["libsignal-bridge/testing-fns"]
+testing-fns = ["libmochi-bridge/testing-fns"]
 
 [target.aarch64-linux-android.dependencies]
 cpufeatures = "0.2.2" # Make sure 64-bit Android gets optimized crypto

@@ -1,15 +1,15 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_bridge_macros::*;
+use libmochi_bridge_macros::*;
 
 use crate::support::*;
 use crate::*;
 use ::attest::svr2::lookup_groupid;
-use ::signal_pin::{local_pin_hash, verify_local_pin_hash, PinHash, Result};
-use signal_pin::Error;
+use ::mochi_pin::{local_pin_hash, verify_local_pin_hash, PinHash, Result};
+use mochi_pin::Error;
 
 bridge_handle_fns!(PinHash, node = false);
 

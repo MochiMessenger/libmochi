@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Signal Messenger, LLC.
+// Copyright (C) 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 

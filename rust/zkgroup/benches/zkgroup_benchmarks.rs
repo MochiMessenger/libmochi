@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -17,8 +17,8 @@ fn benchmark_integration_auth(c: &mut Criterion) {
     let group_public_params = group_secret_params.get_public_params();
 
     // Random UID and issueTime
-    let aci = libsignal_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
-    let pni = libsignal_core::Pni::from_uuid_bytes(zkgroup::TEST_ARRAY_16_1);
+    let aci = libmochi_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
+    let pni = libmochi_core::Pni::from_uuid_bytes(zkgroup::TEST_ARRAY_16_1);
     let redemption_time = zkgroup::Timestamp::from_epoch_seconds(123456);
 
     // SERVER
@@ -119,7 +119,7 @@ pub fn benchmark_integration_profile(c: &mut Criterion) {
         zkgroup::groups::GroupSecretParams::derive_from_master_key(master_key);
     let group_public_params = group_secret_params.get_public_params();
 
-    let aci = libsignal_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
+    let aci = libmochi_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
     let profile_key =
         zkgroup::profiles::ProfileKey::create(zkgroup::common::constants::TEST_ARRAY_32_1);
     let profile_key_commitment = profile_key.get_commitment(aci);
@@ -288,17 +288,17 @@ pub fn benchmark_group_send_endorsements(c: &mut Criterion) {
     let group_secret_params =
         zkgroup::groups::GroupSecretParams::derive_from_master_key(master_key);
 
-    let aci = libsignal_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
+    let aci = libmochi_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
 
-    let all_members: Vec<libsignal_core::ServiceId> = std::iter::once(aci)
+    let all_members: Vec<libmochi_core::ServiceId> = std::iter::once(aci)
         .chain((1u16..).map(|i| {
             // Generate arbitrary v5 (hash-based) UUIDs for the rest of the group.
-            libsignal_core::Aci::from(uuid::Uuid::new_v5(
+            libmochi_core::Aci::from(uuid::Uuid::new_v5(
                 &uuid::Uuid::from_bytes(zkgroup::TEST_ARRAY_16_1),
                 &i.to_be_bytes(),
             ))
         }))
-        .map(libsignal_core::ServiceId::from)
+        .map(libmochi_core::ServiceId::from)
         .take(1000)
         .collect();
     let all_member_ciphertexts: Vec<_> = all_members

@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -15,7 +15,7 @@ use crate::infra::AsyncDuplexStream;
 use async_trait::async_trait;
 use bincode::Options as _;
 use futures_util::future::try_join_all;
-use libsignal_svr3::{Backup, EvaluationResult, MaskedShareSet, Query, Restore};
+use libmochi_svr3::{Backup, EvaluationResult, MaskedShareSet, Query, Restore};
 use rand_core::CryptoRngCore;
 use serde::{Deserialize, Serialize};
 use std::num::NonZeroU32;
@@ -117,12 +117,12 @@ impl OpaqueMaskedShareSet {
 /// SVR3-specific error type
 ///
 /// In its essence it is simply a union of three other error types:
-/// - libsignal_svr3::Error for the errors originating in the PPSS implementation. Most of them are
+/// - libmochi_svr3::Error for the errors originating in the PPSS implementation. Most of them are
 ///   unlikely due to the way higher level APIs invoke the lower-level primitives from
-///   libsignal_svr3.
+///   libmochi_svr3.
 /// - DeserializeError for the errors deserializing the OpaqueMaskedShareSet that is stored as a
 ///   simple blob by the clients and may be corrupted.
-/// - libsignal_net::svr::Error for network related errors.
+/// - libmochi_net::svr::Error for network related errors.
 #[derive(Debug, Error, displaydoc::Display)]
 #[ignore_extra_doc_attributes]
 pub enum Error {
@@ -135,7 +135,7 @@ pub enum Error {
     /// Enclave attestation failed: {0}
     AttestationError(attest::enclave::Error),
     /// SVR3 request failed with status {0}
-    RequestFailed(libsignal_svr3::ErrorStatus),
+    RequestFailed(libmochi_svr3::ErrorStatus),
     /// Failure to restore data. {0} tries remaining.
     ///
     /// This could be caused by an invalid password or share set.
@@ -161,14 +161,14 @@ impl From<attest::enclave::Error> for Error {
     }
 }
 
-impl From<libsignal_svr3::Error> for Error {
-    fn from(err: libsignal_svr3::Error) -> Self {
-        use libsignal_svr3::{Error as LogicError, PPSSError};
+impl From<libmochi_svr3::Error> for Error {
+    fn from(err: libmochi_svr3::Error) -> Self {
+        use libmochi_svr3::{Error as LogicError, PPSSError};
         match err {
             LogicError::Ppss(PPSSError::InvalidCommitment, tries_remaining) => {
                 Self::RestoreFailed(tries_remaining)
             }
-            LogicError::BadResponseStatus(libsignal_svr3::ErrorStatus::Missing) => {
+            LogicError::BadResponseStatus(libmochi_svr3::ErrorStatus::Missing) => {
                 Self::DataMissing
             }
             LogicError::Oprf(_)
@@ -264,7 +264,7 @@ impl<S: AsyncDuplexStream + 'static, Env: PpssSetup<S>> PpssOps<S> for Env {
     }
 
     async fn remove(connections: Self::Connections) -> Result<(), Error> {
-        let requests = std::iter::repeat(libsignal_svr3::make_remove_request());
+        let requests = std::iter::repeat(libmochi_svr3::make_remove_request());
         let mut connections = connections.into_connections();
         let futures = connections
             .as_mut()

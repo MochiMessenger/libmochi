@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -153,7 +153,7 @@ pub fn derive_default_generator_points<D: Domain>(
     storage: &std::sync::OnceLock<[RistrettoPoint; 2]>,
 ) -> &[RistrettoPoint; 2] {
     fn derive_impl<D: Domain>() -> [RistrettoPoint; 2] {
-        let mut sho = poksho::ShoHmacSha256::new(b"Signal_ZKCredential_Domain_20231011");
+        let mut sho = poksho::ShoHmacSha256::new(b"Mochi_ZKCredential_Domain_20231011");
         sho.absorb_and_ratchet(D::ID.as_bytes());
         let G_a1 = sho.get_point();
         let G_a2 = sho.get_point();
@@ -173,7 +173,7 @@ pub fn derive_default_generator_points<D: Domain>(
 ///
 /// Using different keys for different attribute types prevents "type confusion", where two
 /// attributes coincidentally have the same encoding as RistrettoPoints. The encryption may also
-/// have other purposes, such as the encryption of UUIDs and profile keys in a Signal group, and
+/// have other purposes, such as the encryption of UUIDs and profile keys in a Mochi group, and
 /// therefore being able to use existing keys is important.
 ///
 /// The private key in this system is a pair of scalars `a1` and `a2`. Attributes are encrypted as
@@ -209,7 +209,7 @@ impl<D> PartialEq for KeyPair<D> {
 ///
 /// Using different keys for different attribute types prevents "type confusion", where two
 /// attributes coincidentally have the same encoding as RistrettoPoints. The encryption may also
-/// have other purposes, such as the encryption of UUIDs and profile keys in a Signal group, and
+/// have other purposes, such as the encryption of UUIDs and profile keys in a Mochi group, and
 /// therefore being able to use existing keys is important.
 ///
 /// Defined in Chase-Perrin-Zaverucha section 4.1.

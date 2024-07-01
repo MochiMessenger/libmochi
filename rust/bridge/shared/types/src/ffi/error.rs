@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -9,12 +9,12 @@ use std::io::{Error as IoError, ErrorKind as IoErrorKind};
 use attest::enclave::Error as EnclaveError;
 use attest::hsm_enclave::Error as HsmEnclaveError;
 use device_transfer::Error as DeviceTransferError;
-use libsignal_net::chat::ChatServiceError;
-use libsignal_net::infra::ws::WebSocketConnectError;
-use libsignal_net::svr3::Error as Svr3Error;
-use libsignal_protocol::*;
-use signal_crypto::Error as SignalCryptoError;
-use signal_pin::Error as PinError;
+use libmochi_net::chat::ChatServiceError;
+use libmochi_net::infra::ws::WebSocketConnectError;
+use libmochi_net::svr3::Error as Svr3Error;
+use libmochi_protocol::*;
+use mochi_crypto::Error as MochiCryptoError;
+use mochi_pin::Error as PinError;
 use usernames::{UsernameError, UsernameLinkError};
 use zkgroup::{ZkGroupDeserializationFailure, ZkGroupVerificationFailure};
 
@@ -24,7 +24,7 @@ use super::{FutureCancelled, NullPointerError, UnexpectedPanic};
 
 #[derive(Debug)]
 #[repr(C)]
-pub enum SignalErrorCode {
+pub enum MochiErrorCode {
     #[allow(dead_code)]
     UnknownError = 1,
     InvalidState = 2,
@@ -117,7 +117,7 @@ pub struct WrongErrorKind;
 
 pub trait FfiError: UpcastAsAny + fmt::Debug + Send + 'static {
     fn describe(&self) -> String;
-    fn code(&self) -> SignalErrorCode;
+    fn code(&self) -> MochiErrorCode;
 
     fn provide_address(&self) -> Result<ProtocolAddress, WrongErrorKind> {
         Err(WrongErrorKind)
@@ -140,18 +140,18 @@ pub trait FfiError: UpcastAsAny + fmt::Debug + Send + 'static {
 ///
 /// [ThinBox]: https://doc.rust-lang.org/std/boxed/struct.ThinBox.html
 #[derive(Debug)]
-pub struct SignalFfiError(Box<dyn FfiError + Send>);
+pub struct MochiFfiError(Box<dyn FfiError + Send>);
 
-impl SignalFfiError {
+impl MochiFfiError {
     pub fn downcast_ref<T: FfiError>(&self) -> Option<&T> {
         (*self.0).upcast_as_any().downcast_ref()
     }
 }
 
-/// SignalFfiError is a typed wrapper around a Box, and as such it's reasonable for it to have the
+/// MochiFfiError is a typed wrapper around a Box, and as such it's reasonable for it to have the
 /// same Deref behavior as a Box. All the interesting functionality is present on the [`FfiError`]
 /// trait.
-impl std::ops::Deref for SignalFfiError {
+impl std::ops::Deref for MochiFfiError {
     type Target = dyn FfiError;
 
     fn deref(&self) -> &Self::Target {
@@ -159,22 +159,22 @@ impl std::ops::Deref for SignalFfiError {
     }
 }
 
-impl fmt::Display for SignalFfiError {
+impl fmt::Display for MochiFfiError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0.describe())
     }
 }
 
-impl<T: FfiError> From<T> for SignalFfiError {
+impl<T: FfiError> From<T> for MochiFfiError {
     fn from(mut value: T) -> Self {
-        // Special case: if the error being boxed is an IoError containing a SignalProtocolError,
-        // extract the SignalProtocolError up front.
+        // Special case: if the error being boxed is an IoError containing a MochiProtocolError,
+        // extract the MochiProtocolError up front.
         match (&mut value as &mut dyn std::any::Any).downcast_mut::<IoError>() {
             Some(e) => {
                 let original_error = (e.kind() == IoErrorKind::Other)
                     .then(|| {
                         e.get_mut()
-                            .and_then(|e| e.downcast_mut::<SignalProtocolError>())
+                            .and_then(|e| e.downcast_mut::<MochiProtocolError>())
                     })
                     .flatten()
                     .map(|e| {
@@ -182,7 +182,7 @@ impl<T: FfiError> From<T> for SignalFfiError {
                         // its place, so leave some random (cheap-to-construct) error.
                         // TODO: use IoError::downcast() once it is stabilized
                         // (https://github.com/rust-lang/rust/issues/99262).
-                        std::mem::replace(e, SignalProtocolError::InvalidPreKeyId)
+                        std::mem::replace(e, MochiProtocolError::InvalidPreKeyId)
                     });
                 if let Some(original_error) = original_error {
                     Self(Box::new(original_error))
@@ -195,49 +195,49 @@ impl<T: FfiError> From<T> for SignalFfiError {
     }
 }
 
-impl FfiError for SignalProtocolError {
+impl FfiError for MochiProtocolError {
     fn describe(&self) -> String {
         self.to_string()
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
-            Self::InvalidArgument(_) => SignalErrorCode::InvalidArgument,
-            Self::InvalidState(_, _) => SignalErrorCode::InvalidState,
-            Self::InvalidProtobufEncoding => SignalErrorCode::ProtobufError,
+            Self::InvalidArgument(_) => MochiErrorCode::InvalidArgument,
+            Self::InvalidState(_, _) => MochiErrorCode::InvalidState,
+            Self::InvalidProtobufEncoding => MochiErrorCode::ProtobufError,
             Self::CiphertextMessageTooShort(_)
             | Self::InvalidMessage(_, _)
             | Self::InvalidSealedSenderMessage(_)
-            | Self::BadKEMCiphertextLength(_, _) => SignalErrorCode::InvalidMessage,
-            Self::LegacyCiphertextVersion(_) => SignalErrorCode::LegacyCiphertextVersion,
-            Self::UnrecognizedCiphertextVersion(_) => SignalErrorCode::UnknownCiphertextVersion,
+            | Self::BadKEMCiphertextLength(_, _) => MochiErrorCode::InvalidMessage,
+            Self::LegacyCiphertextVersion(_) => MochiErrorCode::LegacyCiphertextVersion,
+            Self::UnrecognizedCiphertextVersion(_) => MochiErrorCode::UnknownCiphertextVersion,
             Self::UnrecognizedMessageVersion(_) | Self::UnknownSealedSenderVersion(_) => {
-                SignalErrorCode::UnrecognizedMessageVersion
+                MochiErrorCode::UnrecognizedMessageVersion
             }
-            Self::FingerprintVersionMismatch(_, _) => SignalErrorCode::FingerprintVersionMismatch,
-            Self::FingerprintParsingError => SignalErrorCode::FingerprintParsingError,
+            Self::FingerprintVersionMismatch(_, _) => MochiErrorCode::FingerprintVersionMismatch,
+            Self::FingerprintParsingError => MochiErrorCode::FingerprintParsingError,
             Self::NoKeyTypeIdentifier
             | Self::BadKeyType(_)
             | Self::BadKeyLength(_, _)
             | Self::InvalidMacKeyLength(_)
             | Self::BadKEMKeyType(_)
             | Self::WrongKEMKeyType(_, _)
-            | Self::BadKEMKeyLength(_, _) => SignalErrorCode::InvalidKey,
-            Self::SignatureValidationFailed => SignalErrorCode::InvalidSignature,
-            Self::UntrustedIdentity(_) => SignalErrorCode::UntrustedIdentity,
+            | Self::BadKEMKeyLength(_, _) => MochiErrorCode::InvalidKey,
+            Self::SignatureValidationFailed => MochiErrorCode::InvalidSignature,
+            Self::UntrustedIdentity(_) => MochiErrorCode::UntrustedIdentity,
             Self::InvalidPreKeyId | Self::InvalidSignedPreKeyId | Self::InvalidKyberPreKeyId => {
-                SignalErrorCode::InvalidKeyIdentifier
+                MochiErrorCode::InvalidKeyIdentifier
             }
             Self::NoSenderKeyState { .. } | Self::SessionNotFound(_) => {
-                SignalErrorCode::SessionNotFound
+                MochiErrorCode::SessionNotFound
             }
-            Self::InvalidSessionStructure(_) => SignalErrorCode::InvalidSession,
-            Self::InvalidSenderKeySession { .. } => SignalErrorCode::InvalidSenderKeySession,
-            Self::InvalidRegistrationId(_, _) => SignalErrorCode::InvalidRegistrationId,
-            Self::DuplicatedMessage(_, _) => SignalErrorCode::DuplicatedMessage,
-            Self::FfiBindingError(_) => SignalErrorCode::InternalError,
-            Self::ApplicationCallbackError(_, _) => SignalErrorCode::CallbackError,
-            Self::SealedSenderSelfSend => SignalErrorCode::SealedSenderSelfSend,
+            Self::InvalidSessionStructure(_) => MochiErrorCode::InvalidSession,
+            Self::InvalidSenderKeySession { .. } => MochiErrorCode::InvalidSenderKeySession,
+            Self::InvalidRegistrationId(_, _) => MochiErrorCode::InvalidRegistrationId,
+            Self::DuplicatedMessage(_, _) => MochiErrorCode::DuplicatedMessage,
+            Self::FfiBindingError(_) => MochiErrorCode::InternalError,
+            Self::ApplicationCallbackError(_, _) => MochiErrorCode::CallbackError,
+            Self::SealedSenderSelfSend => MochiErrorCode::SealedSenderSelfSend,
         }
     }
 
@@ -261,10 +261,10 @@ impl FfiError for DeviceTransferError {
         format!("Device transfer operation failed: {self}")
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
-            Self::KeyDecodingFailed => SignalErrorCode::InvalidKey,
-            Self::InternalError(_) => SignalErrorCode::InternalError,
+            Self::KeyDecodingFailed => MochiErrorCode::InvalidKey,
+            Self::InternalError(_) => MochiErrorCode::InternalError,
         }
     }
 }
@@ -274,15 +274,15 @@ impl FfiError for HsmEnclaveError {
         format!("HSM enclave operation failed: {self}")
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
             Self::HSMCommunicationError(_) | Self::HSMHandshakeError(_) => {
-                SignalErrorCode::InvalidMessage
+                MochiErrorCode::InvalidMessage
             }
-            Self::TrustedCodeError => SignalErrorCode::UntrustedIdentity,
-            Self::InvalidPublicKeyError => SignalErrorCode::InvalidKey,
-            Self::InvalidCodeHashError => SignalErrorCode::InvalidArgument,
-            Self::InvalidBridgeStateError => SignalErrorCode::InvalidState,
+            Self::TrustedCodeError => MochiErrorCode::UntrustedIdentity,
+            Self::InvalidPublicKeyError => MochiErrorCode::InvalidKey,
+            Self::InvalidCodeHashError => MochiErrorCode::InvalidArgument,
+            Self::InvalidBridgeStateError => MochiErrorCode::InvalidState,
         }
     }
 }
@@ -292,13 +292,13 @@ impl FfiError for EnclaveError {
         format!("SGX operation failed: {self}")
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
             Self::AttestationError(_) | Self::NoiseError(_) | Self::NoiseHandshakeError(_) => {
-                SignalErrorCode::InvalidMessage
+                MochiErrorCode::InvalidMessage
             }
-            Self::AttestationDataError { .. } => SignalErrorCode::InvalidAttestationData,
-            Self::InvalidBridgeStateError => SignalErrorCode::InvalidState,
+            Self::AttestationDataError { .. } => MochiErrorCode::InvalidAttestationData,
+            Self::InvalidBridgeStateError => MochiErrorCode::InvalidState,
         }
     }
 }
@@ -308,27 +308,27 @@ impl FfiError for PinError {
         self.to_string()
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
             Self::Argon2Error(_) | Self::DecodingError(_) | Self::MrenclaveLookupError => {
-                SignalErrorCode::InvalidArgument
+                MochiErrorCode::InvalidArgument
             }
         }
     }
 }
 
-impl FfiError for SignalCryptoError {
+impl FfiError for MochiCryptoError {
     fn describe(&self) -> String {
         format!("Cryptographic operation failed: {self}")
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
             Self::UnknownAlgorithm(_, _)
             | Self::InvalidKeySize
             | Self::InvalidNonceSize
-            | Self::InvalidInputSize => SignalErrorCode::InvalidArgument,
-            Self::InvalidTag => SignalErrorCode::InvalidMessage,
+            | Self::InvalidInputSize => MochiErrorCode::InvalidArgument,
+            Self::InvalidTag => MochiErrorCode::InvalidMessage,
         }
     }
 }
@@ -338,8 +338,8 @@ impl FfiError for ZkGroupVerificationFailure {
         self.to_string()
     }
 
-    fn code(&self) -> SignalErrorCode {
-        SignalErrorCode::VerificationFailure
+    fn code(&self) -> MochiErrorCode {
+        MochiErrorCode::VerificationFailure
     }
 }
 
@@ -348,8 +348,8 @@ impl FfiError for ZkGroupDeserializationFailure {
         self.to_string()
     }
 
-    fn code(&self) -> SignalErrorCode {
-        SignalErrorCode::InvalidType
+    fn code(&self) -> MochiErrorCode {
+        MochiErrorCode::InvalidType
     }
 }
 
@@ -358,24 +358,24 @@ impl FfiError for UsernameError {
         self.to_string()
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
-            Self::MissingSeparator => SignalErrorCode::UsernameMissingSeparator,
-            Self::NicknameCannotBeEmpty => SignalErrorCode::UsernameCannotBeEmpty,
-            Self::NicknameCannotStartWithDigit => SignalErrorCode::UsernameCannotStartWithDigit,
-            Self::BadNicknameCharacter => SignalErrorCode::UsernameBadNicknameCharacter,
-            Self::NicknameTooShort => SignalErrorCode::UsernameTooShort,
-            Self::NicknameTooLong => SignalErrorCode::UsernameTooLong,
-            Self::DiscriminatorCannotBeEmpty => SignalErrorCode::UsernameDiscriminatorCannotBeEmpty,
-            Self::DiscriminatorCannotBeZero => SignalErrorCode::UsernameDiscriminatorCannotBeZero,
+            Self::MissingSeparator => MochiErrorCode::UsernameMissingSeparator,
+            Self::NicknameCannotBeEmpty => MochiErrorCode::UsernameCannotBeEmpty,
+            Self::NicknameCannotStartWithDigit => MochiErrorCode::UsernameCannotStartWithDigit,
+            Self::BadNicknameCharacter => MochiErrorCode::UsernameBadNicknameCharacter,
+            Self::NicknameTooShort => MochiErrorCode::UsernameTooShort,
+            Self::NicknameTooLong => MochiErrorCode::UsernameTooLong,
+            Self::DiscriminatorCannotBeEmpty => MochiErrorCode::UsernameDiscriminatorCannotBeEmpty,
+            Self::DiscriminatorCannotBeZero => MochiErrorCode::UsernameDiscriminatorCannotBeZero,
             Self::DiscriminatorCannotBeSingleDigit => {
-                SignalErrorCode::UsernameDiscriminatorCannotBeSingleDigit
+                MochiErrorCode::UsernameDiscriminatorCannotBeSingleDigit
             }
             Self::DiscriminatorCannotHaveLeadingZeros => {
-                SignalErrorCode::UsernameDiscriminatorCannotHaveLeadingZeros
+                MochiErrorCode::UsernameDiscriminatorCannotHaveLeadingZeros
             }
-            Self::BadDiscriminatorCharacter => SignalErrorCode::UsernameBadDiscriminatorCharacter,
-            Self::DiscriminatorTooLarge => SignalErrorCode::UsernameDiscriminatorTooLarge,
+            Self::BadDiscriminatorCharacter => MochiErrorCode::UsernameBadDiscriminatorCharacter,
+            Self::DiscriminatorTooLarge => MochiErrorCode::UsernameDiscriminatorTooLarge,
         }
     }
 }
@@ -385,8 +385,8 @@ impl FfiError for usernames::ProofVerificationFailure {
         self.to_string()
     }
 
-    fn code(&self) -> SignalErrorCode {
-        SignalErrorCode::VerificationFailure
+    fn code(&self) -> MochiErrorCode {
+        MochiErrorCode::VerificationFailure
     }
 }
 
@@ -395,14 +395,14 @@ impl FfiError for UsernameLinkError {
         self.to_string()
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
-            Self::InputDataTooLong => SignalErrorCode::UsernameTooLong,
-            Self::InvalidEntropyDataLength => SignalErrorCode::UsernameLinkInvalidEntropyDataLength,
+            Self::InputDataTooLong => MochiErrorCode::UsernameTooLong,
+            Self::InvalidEntropyDataLength => MochiErrorCode::UsernameLinkInvalidEntropyDataLength,
             Self::UsernameLinkDataTooShort
             | Self::HmacMismatch
             | Self::BadCiphertext
-            | Self::InvalidDecryptedDataStructure => SignalErrorCode::UsernameLinkInvalid,
+            | Self::InvalidDecryptedDataStructure => MochiErrorCode::UsernameLinkInvalid,
         }
     }
 }
@@ -412,22 +412,22 @@ impl FfiError for IoError {
         format!("IO error: {self}")
     }
 
-    fn code(&self) -> SignalErrorCode {
-        // Parallels the unwrapping that happens when converting to a boxed SignalFfiError.
+    fn code(&self) -> MochiErrorCode {
+        // Parallels the unwrapping that happens when converting to a boxed MochiFfiError.
         (self.kind() == IoErrorKind::Other)
             .then(|| {
                 Some(
                     self.get_ref()?
-                        .downcast_ref::<SignalProtocolError>()?
+                        .downcast_ref::<MochiProtocolError>()?
                         .code(),
                 )
             })
             .flatten()
-            .unwrap_or(SignalErrorCode::IoError)
+            .unwrap_or(MochiErrorCode::IoError)
     }
 }
 
-impl FfiError for libsignal_net::cdsi::LookupError {
+impl FfiError for libmochi_net::cdsi::LookupError {
     fn describe(&self) -> String {
         match self {
             Self::Protocol | Self::InvalidResponse | Self::ParseError | Self::Server { .. } => {
@@ -445,18 +445,18 @@ impl FfiError for libsignal_net::cdsi::LookupError {
         }
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
             Self::Protocol | Self::InvalidResponse | Self::ParseError | Self::Server { .. } => {
-                SignalErrorCode::NetworkProtocol
+                MochiErrorCode::NetworkProtocol
             }
             Self::AttestationError(e) => e.code(),
-            Self::RateLimited { .. } => SignalErrorCode::RateLimited,
-            Self::InvalidToken => SignalErrorCode::CdsiInvalidToken,
-            Self::ConnectTransport(_) => SignalErrorCode::IoError,
-            Self::WebSocket(_) => SignalErrorCode::WebSocket,
-            Self::ConnectionTimedOut => SignalErrorCode::ConnectionTimedOut,
-            Self::InvalidArgument { .. } => SignalErrorCode::InvalidArgument,
+            Self::RateLimited { .. } => MochiErrorCode::RateLimited,
+            Self::InvalidToken => MochiErrorCode::CdsiInvalidToken,
+            Self::ConnectTransport(_) => MochiErrorCode::IoError,
+            Self::WebSocket(_) => MochiErrorCode::WebSocket,
+            Self::ConnectionTimedOut => MochiErrorCode::ConnectionTimedOut,
+            Self::InvalidArgument { .. } => MochiErrorCode::InvalidArgument,
         }
     }
 
@@ -492,21 +492,21 @@ impl FfiError for Svr3Error {
         }
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
             Self::Connect(e) => match e {
-                WebSocketConnectError::Transport(_) => SignalErrorCode::IoError,
-                WebSocketConnectError::Timeout => SignalErrorCode::ConnectionTimedOut,
+                WebSocketConnectError::Transport(_) => MochiErrorCode::IoError,
+                WebSocketConnectError::Timeout => MochiErrorCode::ConnectionTimedOut,
                 WebSocketConnectError::WebSocketError(_)
-                | WebSocketConnectError::RejectedByServer(_) => SignalErrorCode::WebSocket,
+                | WebSocketConnectError::RejectedByServer(_) => MochiErrorCode::WebSocket,
             },
-            Self::Service(_) => SignalErrorCode::WebSocket,
-            Self::ConnectionTimedOut => SignalErrorCode::ConnectionTimedOut,
+            Self::Service(_) => MochiErrorCode::WebSocket,
+            Self::ConnectionTimedOut => MochiErrorCode::ConnectionTimedOut,
             Self::AttestationError(inner) => inner.code(),
-            Self::Protocol(_) => SignalErrorCode::NetworkProtocol,
-            Self::RequestFailed(_) => SignalErrorCode::UnknownError,
-            Self::RestoreFailed(_) => SignalErrorCode::SvrRestoreFailed,
-            Self::DataMissing => SignalErrorCode::SvrDataMissing,
+            Self::Protocol(_) => MochiErrorCode::NetworkProtocol,
+            Self::RequestFailed(_) => MochiErrorCode::UnknownError,
+            Self::RestoreFailed(_) => MochiErrorCode::SvrRestoreFailed,
+            Self::DataMissing => MochiErrorCode::SvrDataMissing,
         }
     }
 
@@ -540,24 +540,24 @@ impl FfiError for ChatServiceError {
         }
     }
 
-    fn code(&self) -> SignalErrorCode {
+    fn code(&self) -> MochiErrorCode {
         match self {
-            Self::WebSocket(_) => SignalErrorCode::WebSocket,
+            Self::WebSocket(_) => MochiErrorCode::WebSocket,
             Self::AllConnectionRoutesFailed { .. } | Self::ServiceUnavailable => {
-                SignalErrorCode::ConnectionFailed
+                MochiErrorCode::ConnectionFailed
             }
             Self::UnexpectedFrameReceived
             | Self::ServerRequestMissingId
-            | Self::IncomingDataInvalid => SignalErrorCode::NetworkProtocol,
+            | Self::IncomingDataInvalid => MochiErrorCode::NetworkProtocol,
             Self::FailedToPassMessageToIncomingChannel | Self::RequestHasInvalidHeader => {
-                SignalErrorCode::InternalError
+                MochiErrorCode::InternalError
             }
             Self::Timeout | Self::TimeoutEstablishingConnection { .. } => {
-                SignalErrorCode::ConnectionTimedOut
+                MochiErrorCode::ConnectionTimedOut
             }
-            Self::ServiceInactive => SignalErrorCode::ChatServiceInactive,
-            Self::AppExpired => SignalErrorCode::AppExpired,
-            Self::DeviceDeregistered => SignalErrorCode::DeviceDeregistered,
+            Self::ServiceInactive => MochiErrorCode::ChatServiceInactive,
+            Self::AppExpired => MochiErrorCode::AppExpired,
+            Self::DeviceDeregistered => MochiErrorCode::DeviceDeregistered,
         }
     }
 }
@@ -567,13 +567,13 @@ impl FfiError for http::uri::InvalidUri {
         format!("invalid argument: {self}")
     }
 
-    fn code(&self) -> SignalErrorCode {
-        SignalErrorCode::InvalidArgument
+    fn code(&self) -> MochiErrorCode {
+        MochiErrorCode::InvalidArgument
     }
 }
 
-#[cfg(feature = "signal-media")]
-impl FfiError for signal_media::sanitize::mp4::Error {
+#[cfg(feature = "mochi-media")]
+impl FfiError for mochi_media::sanitize::mp4::Error {
     fn describe(&self) -> String {
         match self {
             Self::Io(e) => e.describe(),
@@ -581,26 +581,26 @@ impl FfiError for signal_media::sanitize::mp4::Error {
         }
     }
 
-    fn code(&self) -> SignalErrorCode {
-        use signal_media::sanitize::mp4::ParseError;
+    fn code(&self) -> MochiErrorCode {
+        use mochi_media::sanitize::mp4::ParseError;
         match self {
             Self::Io(e) => e.code(),
             Self::Parse(e) => match e.kind {
                 ParseError::InvalidBoxLayout { .. }
                 | ParseError::InvalidInput { .. }
                 | ParseError::MissingRequiredBox { .. }
-                | ParseError::TruncatedBox => SignalErrorCode::InvalidMediaInput,
+                | ParseError::TruncatedBox => MochiErrorCode::InvalidMediaInput,
 
                 ParseError::UnsupportedBoxLayout { .. }
                 | ParseError::UnsupportedBox { .. }
-                | ParseError::UnsupportedFormat { .. } => SignalErrorCode::UnsupportedMediaInput,
+                | ParseError::UnsupportedFormat { .. } => MochiErrorCode::UnsupportedMediaInput,
             },
         }
     }
 }
 
-#[cfg(feature = "signal-media")]
-impl FfiError for signal_media::sanitize::webp::Error {
+#[cfg(feature = "mochi-media")]
+impl FfiError for mochi_media::sanitize::webp::Error {
     fn describe(&self) -> String {
         match self {
             Self::Io(e) => e.describe(),
@@ -608,8 +608,8 @@ impl FfiError for signal_media::sanitize::webp::Error {
         }
     }
 
-    fn code(&self) -> SignalErrorCode {
-        use signal_media::sanitize::webp::ParseError;
+    fn code(&self) -> MochiErrorCode {
+        use mochi_media::sanitize::webp::ParseError;
         match self {
             Self::Io(e) => e.code(),
             Self::Parse(e) => match e.kind {
@@ -617,10 +617,10 @@ impl FfiError for signal_media::sanitize::webp::Error {
                 | ParseError::InvalidInput { .. }
                 | ParseError::InvalidVp8lPrefixCode { .. }
                 | ParseError::MissingRequiredChunk { .. }
-                | ParseError::TruncatedChunk => SignalErrorCode::InvalidMediaInput,
+                | ParseError::TruncatedChunk => MochiErrorCode::InvalidMediaInput,
 
                 ParseError::UnsupportedChunk { .. } | ParseError::UnsupportedVp8lVersion { .. } => {
-                    SignalErrorCode::UnsupportedMediaInput
+                    MochiErrorCode::UnsupportedMediaInput
                 }
             },
         }
@@ -632,8 +632,8 @@ impl FfiError for NullPointerError {
         "null pointer".to_owned()
     }
 
-    fn code(&self) -> SignalErrorCode {
-        SignalErrorCode::NullParameter
+    fn code(&self) -> MochiErrorCode {
+        MochiErrorCode::NullParameter
     }
 }
 
@@ -642,8 +642,8 @@ impl FfiError for UnexpectedPanic {
         format!("unexpected panic: {}", describe_panic(&self.0))
     }
 
-    fn code(&self) -> SignalErrorCode {
-        SignalErrorCode::InternalError
+    fn code(&self) -> MochiErrorCode {
+        MochiErrorCode::InternalError
     }
 }
 
@@ -652,8 +652,8 @@ impl FfiError for std::str::Utf8Error {
         "invalid UTF8 string".to_owned()
     }
 
-    fn code(&self) -> SignalErrorCode {
-        SignalErrorCode::InvalidUtf8String
+    fn code(&self) -> MochiErrorCode {
+        MochiErrorCode::InvalidUtf8String
     }
 }
 
@@ -662,12 +662,12 @@ impl FfiError for FutureCancelled {
         "cancelled".to_owned()
     }
 
-    fn code(&self) -> SignalErrorCode {
-        SignalErrorCode::Cancelled
+    fn code(&self) -> MochiErrorCode {
+        MochiErrorCode::Cancelled
     }
 }
 
-pub type SignalFfiResult<T> = Result<T, SignalFfiError>;
+pub type MochiFfiResult<T> = Result<T, MochiFfiError>;
 
 /// Represents an error returned by a callback, following the C conventions that 0 means "success".
 #[derive(Debug)]

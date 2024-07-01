@@ -1,27 +1,27 @@
 #
-# Copyright (C) 2020 Signal Messenger, LLC.
+# Copyright (C) 2020 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
 [package]
-name = "libsignal-bridge"
+name = "libmochi-bridge"
 version = "0.1.0"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 edition = "2021"
 license = "AGPL-3.0-only"
 
 [dependencies]
 attest = { path = "../../attest" }
 device-transfer = { path = "../../device-transfer" }
-libsignal-bridge-macros = { path = "macros" }
-libsignal-bridge-types = { path = "types" }
-libsignal-core = { path = "../../core" }
-libsignal-message-backup = { path = "../../message-backup" }
-libsignal-net = { path = "../../net" }
-libsignal-protocol = { path = "../../protocol" }
-signal-crypto = { path = "../../crypto" }
-signal-media = { path = "../../media", optional = true }
-signal-pin = { path = "../../pin" }
+libmochi-bridge-macros = { path = "macros" }
+libmochi-bridge-types = { path = "types" }
+libmochi-core = { path = "../../core" }
+libmochi-message-backup = { path = "../../message-backup" }
+libmochi-net = { path = "../../net" }
+libmochi-protocol = { path = "../../protocol" }
+mochi-crypto = { path = "../../crypto" }
+mochi-media = { path = "../../media", optional = true }
+mochi-pin = { path = "../../pin" }
 usernames = { path = "../../usernames" }
 zkgroup = { path = "../../zkgroup" }
 
@@ -54,14 +54,14 @@ thiserror = "1.0.50"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 uuid = "1.1.2"
 
-# Enable this for all libsignal app language libraries
+# Enable this for all libmochi app language libraries
 subtle = { version = "2.5", features = ["core_hint_black_box"] }
 
 bytemuck = { version = "1.13.0", optional = true }
 jni = { version = "0.21", package = "jni", optional = true }
 linkme = { version = "0.3.9", optional = true }
 neon = { version = "1.0.0", optional = true, default-features = false, features = ["napi-6"] }
-signal-neon-futures = { path = "../node/futures", optional = true }
+mochi-neon-futures = { path = "../node/futures", optional = true }
 strum = { version = "0.26", features = ["derive"] }
 
 [dev-dependencies]
@@ -71,8 +71,8 @@ testing_logger = "0.1.1"
 tokio = { version = "1", features = ["test-util", "time", "macros"] }
 
 [features]
-ffi = ["libsignal-bridge-types/ffi"]
-jni = ["dep:jni", "bytemuck", "libsignal-bridge-types/jni"]
-node = ["neon", "linkme", "signal-neon-futures", "libsignal-bridge-types/node"]
-signal-media = ["dep:signal-media", "libsignal-bridge-types/signal-media"]
+ffi = ["libmochi-bridge-types/ffi"]
+jni = ["dep:jni", "bytemuck", "libmochi-bridge-types/jni"]
+node = ["neon", "linkme", "mochi-neon-futures", "libmochi-bridge-types/node"]
+mochi-media = ["dep:mochi-media", "libmochi-bridge-types/mochi-media"]
 testing-fns = []

@@ -1,18 +1,18 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use criterion::{criterion_group, criterion_main, Criterion, SamplingMode};
 use futures_util::FutureExt;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 
 use uuid::Uuid;
 
 #[path = "../tests/support/mod.rs"]
 mod support;
 
-pub fn ratchet_forward_result(c: &mut Criterion) -> Result<(), SignalProtocolError> {
+pub fn ratchet_forward_result(c: &mut Criterion) -> Result<(), MochiProtocolError> {
     let mut group = c.benchmark_group("ratchet");
     group.sampling_mode(SamplingMode::Flat);
     group.sample_size(10); //minimum allowed...

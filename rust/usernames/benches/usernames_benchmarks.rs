@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use criterion::{criterion_group, criterion_main, Criterion};
@@ -21,7 +21,7 @@ pub fn username_proof(username: &str, randomness: &[u8]) -> Result<Vec<u8>, User
 fn bench_usernames(c: &mut Criterion) {
     let mut rng = OsRng;
     let usernames =
-        Username::candidates_from(&mut rng, "signal", NicknameLimits::default()).unwrap();
+        Username::candidates_from(&mut rng, "mochi", NicknameLimits::default()).unwrap();
 
     let mut infinite_usernames = usernames.iter().cycle();
     c.bench_function("username_hash", |b| {

@@ -6,7 +6,7 @@ plugins {
     id 'signing'
 }
 
-archivesBaseName = "libsignal-android"
+archivesBaseName = "libmochi-android"
 
 repositories {
     google()
@@ -15,7 +15,7 @@ repositories {
 }
 
 android {
-    namespace 'org.signal.libsignal'
+    namespace 'org.mochi.libmochi'
 
     compileSdk 34
     ndkVersion '25.2.9519653'
@@ -24,10 +24,10 @@ android {
         minSdkVersion 21
         targetSdkVersion 33
         multiDexEnabled true
-        testInstrumentationRunner "org.signal.libsignal.util.AndroidJUnitRunner"
+        testInstrumentationRunner "org.mochi.libmochi.util.AndroidJUnitRunner"
         // Automatically propagate matching environment variables into Java properties.
         // See the custom AndroidJUnitRunner and TestEnvironment classes for more details.
-        testInstrumentationRunnerArguments["org.signal.libsignal.test.environment"] = collectTestEnvironment()
+        testInstrumentationRunnerArguments["org.mochi.libmochi.test.environment"] = collectTestEnvironment()
     }
 
     compileOptions {
@@ -51,7 +51,7 @@ android {
 
     packagingOptions {
         jniLibs {
-            pickFirst 'lib/*/libsignal_jni.so'
+            pickFirst 'lib/*/libmochi_jni.so'
         }
     }
 
@@ -63,7 +63,7 @@ android {
 String collectTestEnvironment() {
     def result = []
     System.getenv().each { k, v ->
-        if (k.startsWith("LIBSIGNAL_TESTING_")) {
+        if (k.startsWith("LIBMOCHI_TESTING_")) {
             // Limit what characters we accept in values.
             // This is going to get mashed down to a single command-line argument.
             // (This pattern is only meant to head off likely problems and was not specifically
@@ -159,7 +159,7 @@ task makeTestJniLibraries(type:Exec) {
 
 task collectAssets(type:Copy) {
     from('../../acknowledgments/acknowledgments.md') {
-        rename 'acknowledgments.md', 'libsignal.md'
+        rename 'acknowledgments.md', 'libmochi.md'
     }
     into 'src/main/assets/acknowledgments'
 }
@@ -176,13 +176,13 @@ afterEvaluate {
                 pom {
                     name = archivesBaseName
                     packaging = 'aar'
-                    description = 'Signal Protocol cryptography library for Android'
-                    url = 'https://github.com/signalapp/libsignal'
+                    description = 'Mochi Protocol cryptography library for Android'
+                    url = 'https://github.com/mochimessenger/libmochi'
 
                     scm {
-                        url = 'scm:git@github.com:signalapp/libsignal.git'
-                        connection = 'scm:git@github.com:signalapp/libsignal.git'
-                        developerConnection = 'scm:git@github.com:signalapp/libsignal.git'
+                        url = 'scm:git@github.com:mochimessenger/libmochi.git'
+                        connection = 'scm:git@github.com:mochimessenger/libmochi.git'
+                        developerConnection = 'scm:git@github.com:mochimessenger/libmochi.git'
                     }
 
                     licenses {
@@ -194,7 +194,7 @@ afterEvaluate {
 
                     developers {
                         developer {
-                            name = 'Signal Messenger LLC'
+                            name = 'Mochi Messenger LLC'
                         }
                     }
                 }

@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -11,7 +11,7 @@ use boring::x509::store::X509StoreBuilder;
 use boring::x509::X509;
 use rustls::client::danger::ServerCertVerifier;
 
-const SIGNAL_ROOT_CERT_DER: &[u8] = include_bytes!("../../res/signal.cer");
+const MOCHI_ROOT_CERT_DER: &[u8] = include_bytes!("../../res/mochi.cer");
 
 #[derive(thiserror::Error, Debug, displaydoc::Display)]
 pub enum Error {
@@ -30,7 +30,7 @@ impl From<ErrorStack> for Error {
 #[derive(Debug, Clone)]
 pub enum RootCertificates {
     Native,
-    Signal,
+    Mochi,
     FromDer(Cow<'static, [u8]>),
 }
 
@@ -54,7 +54,7 @@ impl RootCertificates {
                 }
                 return set_up_platform_verifier(connector, host_name, verifier);
             }
-            RootCertificates::Signal => SIGNAL_ROOT_CERT_DER,
+            RootCertificates::Mochi => MOCHI_ROOT_CERT_DER,
             RootCertificates::FromDer(der) => der,
         };
         let mut store_builder = X509StoreBuilder::new()?;

@@ -2,9 +2,9 @@
 #
 # Uses bloaty from https://github.com/google/bloaty. Run as
 #
-#   ./crates_code_size.bloaty target/aarch64-linux-android/release/libsignal_jni.so -- baseline.so
+#   ./crates_code_size.bloaty target/aarch64-linux-android/release/libmochi_jni.so -- baseline.so
 #
-# where baseline.so is the same file (here, libsignal_jni.so) built at the
+# where baseline.so is the same file (here, libmochi_jni.so) built at the
 # version to compare against.
 #
 # We use VM size because otherwise the debug sections are included.

@@ -1,22 +1,22 @@
 #
-# Copyright 2020-2021 Signal Messenger, LLC.
+# Copyright 2020-2021 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
 [package]
-name = "signal-neon-futures"
+name = "mochi-neon-futures"
 version = "0.1.0"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 license = "AGPL-3.0-only"
 edition = "2021"
 
 [[test]]
-name = "signal-neon-futures-tests"
+name = "mochi-neon-futures-tests"
 path = "tests/node.rs"
 harness = false
 
 [[bench]]
-name = "signal-neon-futures-bench"
+name = "mochi-neon-futures-bench"
 path = "benches/node.rs"
 harness = false
 
@@ -25,7 +25,7 @@ futures-util = "0.3.7"
 neon = { version = "1.0.0", default-features = false, features = ["napi-4"] }
 
 [dev-dependencies]
-signal-neon-futures-tests = { path = "tests-node-module" }
+mochi-neon-futures-tests = { path = "tests-node-module" }
 
 [features]
 napi-6 = ["neon/napi-6"]

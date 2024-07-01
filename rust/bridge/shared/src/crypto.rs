@@ -1,15 +1,15 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use ::signal_crypto;
-use libsignal_bridge_macros::*;
-use signal_crypto::{Aes256Ctr32, CryptographicHash, CryptographicMac, Error, Result};
+use ::mochi_crypto;
+use libmochi_bridge_macros::*;
+use mochi_crypto::{Aes256Ctr32, CryptographicHash, CryptographicMac, Error, Result};
 
 use aes_gcm_siv::aead::generic_array::typenum::Unsigned;
 use aes_gcm_siv::{AeadCore, AeadInPlace, KeyInit};
-use libsignal_bridge_types::crypto::{Aes256GcmDecryption, Aes256GcmEncryption, Aes256GcmSiv};
+use libmochi_bridge_types::crypto::{Aes256GcmDecryption, Aes256GcmEncryption, Aes256GcmSiv};
 
 use crate::support::*;
 use crate::*;

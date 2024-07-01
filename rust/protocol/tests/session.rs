@@ -1,17 +1,17 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 mod support;
 
 use futures_util::FutureExt;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use rand::rngs::OsRng;
 
 use std::time::{Duration, SystemTime};
 use support::*;
 
-type TestResult = Result<(), SignalProtocolError>;
+type TestResult = Result<(), MochiProtocolError>;
 
 // Use this function to debug tests
 #[allow(dead_code)]
@@ -86,8 +86,8 @@ fn test_basic_prekey() -> TestResult {
                 CiphertextMessageType::PreKey
             );
 
-            let incoming_message = CiphertextMessage::PreKeySignalMessage(
-                PreKeySignalMessage::try_from(outgoing_message.serialize())?,
+            let incoming_message = CiphertextMessage::PreKeyMochiMessage(
+                PreKeyMochiMessage::try_from(outgoing_message.serialize())?,
             );
 
             let ptext = decrypt(
@@ -173,7 +173,7 @@ fn test_basic_prekey() -> TestResult {
                 decrypt(&mut bob_store_builder.store, &alice_address, &outgoing_message)
                     .await
                     .unwrap_err(),
-                SignalProtocolError::UntrustedIdentity(a) if a == alice_address
+                MochiProtocolError::UntrustedIdentity(a) if a == alice_address
             ));
 
             assert!(
@@ -490,8 +490,8 @@ fn test_repeat_bundle_message() -> TestResult {
                 CiphertextMessageType::PreKey
             );
 
-            let incoming_message = CiphertextMessage::PreKeySignalMessage(
-                PreKeySignalMessage::try_from(outgoing_message1.serialize())?,
+            let incoming_message = CiphertextMessage::PreKeyMochiMessage(
+                PreKeyMochiMessage::try_from(outgoing_message1.serialize())?,
             );
 
             let ptext = decrypt(
@@ -520,8 +520,8 @@ fn test_repeat_bundle_message() -> TestResult {
 
             // The test
 
-            let incoming_message2 = CiphertextMessage::PreKeySignalMessage(
-                PreKeySignalMessage::try_from(outgoing_message2.serialize())?,
+            let incoming_message2 = CiphertextMessage::PreKeyMochiMessage(
+                PreKeyMochiMessage::try_from(outgoing_message2.serialize())?,
             );
 
             let ptext = decrypt(
@@ -627,8 +627,8 @@ fn test_bad_message_bundle() -> TestResult {
             let mut corrupted_message: Vec<u8> = outgoing_message.clone();
             corrupted_message[outgoing_message.len() - 10] ^= 1;
 
-            let incoming_message = CiphertextMessage::PreKeySignalMessage(
-                PreKeySignalMessage::try_from(corrupted_message.as_slice())?,
+            let incoming_message = CiphertextMessage::PreKeyMochiMessage(
+                PreKeyMochiMessage::try_from(corrupted_message.as_slice())?,
             );
 
             assert!(decrypt(bob_store, &alice_address, &incoming_message)
@@ -636,8 +636,8 @@ fn test_bad_message_bundle() -> TestResult {
                 .is_err());
             assert!(bob_store.get_pre_key(pre_key_id).await.is_ok());
 
-            let incoming_message = CiphertextMessage::PreKeySignalMessage(
-                PreKeySignalMessage::try_from(outgoing_message.as_slice())?,
+            let incoming_message = CiphertextMessage::PreKeyMochiMessage(
+                PreKeyMochiMessage::try_from(outgoing_message.as_slice())?,
             );
 
             let ptext = decrypt(bob_store, &alice_address, &incoming_message).await?;
@@ -648,7 +648,7 @@ fn test_bad_message_bundle() -> TestResult {
             );
             assert!(matches!(
                 bob_store.get_pre_key(pre_key_id).await.unwrap_err(),
-                SignalProtocolError::InvalidPreKeyId
+                MochiProtocolError::InvalidPreKeyId
             ));
 
             Ok(())
@@ -718,8 +718,8 @@ fn test_optional_one_time_prekey() -> TestResult {
                 CiphertextMessageType::PreKey
             );
 
-            let incoming_message = CiphertextMessage::PreKeySignalMessage(
-                PreKeySignalMessage::try_from(outgoing_message.serialize())?,
+            let incoming_message = CiphertextMessage::PreKeyMochiMessage(
+                PreKeyMochiMessage::try_from(outgoing_message.serialize())?,
             );
 
             let ptext = decrypt(
@@ -809,7 +809,7 @@ fn test_message_key_limits() -> TestResult {
                 .unwrap_err();
             assert!(matches!(
                 err,
-                SignalProtocolError::DuplicatedMessage(2300, 5)
+                MochiProtocolError::DuplicatedMessage(2300, 5)
             ));
             Ok(())
         }
@@ -904,7 +904,7 @@ fn test_basic_simultaneous_initiate() -> TestResult {
             let alice_plaintext = decrypt(
                 alice_store,
                 &bob_address,
-                &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                     message_for_alice.serialize(),
                 )?),
             )
@@ -917,7 +917,7 @@ fn test_basic_simultaneous_initiate() -> TestResult {
             let bob_plaintext = decrypt(
                 bob_store,
                 &alice_address,
-                &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                     message_for_bob.serialize(),
                 )?),
             )
@@ -950,7 +950,7 @@ fn test_basic_simultaneous_initiate() -> TestResult {
             let response_plaintext = decrypt(
                 bob_store,
                 &alice_address,
-                &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                     alice_response.serialize(),
                 )?),
             )
@@ -971,7 +971,7 @@ fn test_basic_simultaneous_initiate() -> TestResult {
             let response_plaintext = decrypt(
                 alice_store,
                 &bob_address,
-                &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                     bob_response.serialize(),
                 )?),
             )
@@ -1078,7 +1078,7 @@ fn test_simultaneous_initiate_with_lossage() -> TestResult {
             let bob_plaintext = decrypt(
                 bob_store,
                 &alice_address,
-                &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                     message_for_bob.serialize(),
                 )?),
             )
@@ -1104,7 +1104,7 @@ fn test_simultaneous_initiate_with_lossage() -> TestResult {
             let response_plaintext = decrypt(
                 bob_store,
                 &alice_address,
-                &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                     alice_response.serialize(),
                 )?),
             )
@@ -1125,7 +1125,7 @@ fn test_simultaneous_initiate_with_lossage() -> TestResult {
             let response_plaintext = decrypt(
                 alice_store,
                 &bob_address,
-                &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                     bob_response.serialize(),
                 )?),
             )
@@ -1232,7 +1232,7 @@ fn test_simultaneous_initiate_lost_message() -> TestResult {
             let alice_plaintext = decrypt(
                 alice_store,
                 &bob_address,
-                &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                     message_for_alice.serialize(),
                 )?),
             )
@@ -1245,7 +1245,7 @@ fn test_simultaneous_initiate_lost_message() -> TestResult {
             let bob_plaintext = decrypt(
                 bob_store,
                 &alice_address,
-                &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                     message_for_bob.serialize(),
                 )?),
             )
@@ -1286,7 +1286,7 @@ fn test_simultaneous_initiate_lost_message() -> TestResult {
             let response_plaintext = decrypt(
                 alice_store,
                 &bob_address,
-                &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                     bob_response.serialize(),
                 )?),
             )
@@ -1400,7 +1400,7 @@ fn test_simultaneous_initiate_repeated_messages() -> TestResult {
                 let alice_plaintext = decrypt(
                     &mut alice_store_builder.store,
                     &bob_address,
-                    &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                    &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                         message_for_alice.serialize(),
                     )?),
                 )
@@ -1413,7 +1413,7 @@ fn test_simultaneous_initiate_repeated_messages() -> TestResult {
                 let bob_plaintext = decrypt(
                     &mut bob_store_builder.store,
                     &alice_address,
-                    &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                    &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                         message_for_bob.serialize(),
                     )?),
                 )
@@ -1471,7 +1471,7 @@ fn test_simultaneous_initiate_repeated_messages() -> TestResult {
                 let alice_plaintext = decrypt(
                     &mut alice_store_builder.store,
                     &bob_address,
-                    &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                    &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                         message_for_alice.serialize(),
                     )?),
                 )
@@ -1484,7 +1484,7 @@ fn test_simultaneous_initiate_repeated_messages() -> TestResult {
                 let bob_plaintext = decrypt(
                     &mut bob_store_builder.store,
                     &alice_address,
-                    &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                    &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                         message_for_bob.serialize(),
                     )?),
                 )
@@ -1544,7 +1544,7 @@ fn test_simultaneous_initiate_repeated_messages() -> TestResult {
             let response_plaintext = decrypt(
                 &mut alice_store_builder.store,
                 &bob_address,
-                &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                     bob_response.serialize(),
                 )?),
             )
@@ -1681,7 +1681,7 @@ fn test_simultaneous_initiate_lost_message_repeated_messages() -> TestResult {
                 let alice_plaintext = decrypt(
                     &mut alice_store_builder.store,
                     &bob_address,
-                    &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                    &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                         message_for_alice.serialize(),
                     )?),
                 )
@@ -1694,7 +1694,7 @@ fn test_simultaneous_initiate_lost_message_repeated_messages() -> TestResult {
                 let bob_plaintext = decrypt(
                     &mut bob_store_builder.store,
                     &alice_address,
-                    &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                    &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                         message_for_bob.serialize(),
                     )?),
                 )
@@ -1752,7 +1752,7 @@ fn test_simultaneous_initiate_lost_message_repeated_messages() -> TestResult {
                 let alice_plaintext = decrypt(
                     &mut alice_store_builder.store,
                     &bob_address,
-                    &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                    &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                         message_for_alice.serialize(),
                     )?),
                 )
@@ -1765,7 +1765,7 @@ fn test_simultaneous_initiate_lost_message_repeated_messages() -> TestResult {
                 let bob_plaintext = decrypt(
                     &mut bob_store_builder.store,
                     &alice_address,
-                    &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                    &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                         message_for_bob.serialize(),
                     )?),
                 )
@@ -1825,7 +1825,7 @@ fn test_simultaneous_initiate_lost_message_repeated_messages() -> TestResult {
             let response_plaintext = decrypt(
                 &mut alice_store_builder.store,
                 &bob_address,
-                &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                     bob_response.serialize(),
                 )?),
             )
@@ -1848,7 +1848,7 @@ fn test_simultaneous_initiate_lost_message_repeated_messages() -> TestResult {
             let blast_from_the_past = decrypt(
                 &mut bob_store_builder.store,
                 &alice_address,
-                &CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::try_from(
+                &CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::try_from(
                     lost_message_for_bob.serialize(),
                 )?),
             )
@@ -1876,7 +1876,7 @@ fn test_simultaneous_initiate_lost_message_repeated_messages() -> TestResult {
             let response_plaintext = decrypt(
                 &mut alice_store_builder.store,
                 &bob_address,
-                &CiphertextMessage::SignalMessage(SignalMessage::try_from(
+                &CiphertextMessage::MochiMessage(MochiMessage::try_from(
                     bob_response.serialize(),
                 )?),
             )
@@ -1948,8 +1948,8 @@ fn test_zero_is_a_valid_prekey_id() -> TestResult {
             CiphertextMessageType::PreKey
         );
 
-        let incoming_message = CiphertextMessage::PreKeySignalMessage(
-            PreKeySignalMessage::try_from(outgoing_message.serialize())?,
+        let incoming_message = CiphertextMessage::PreKeyMochiMessage(
+            PreKeyMochiMessage::try_from(outgoing_message.serialize())?,
         );
 
         let ptext = decrypt(
@@ -2047,7 +2047,7 @@ fn test_unacknowledged_sessions_eventually_expire() -> TestResult {
         .await
         .unwrap_err();
         assert!(
-            matches!(&error, SignalProtocolError::SessionNotFound(addr) if addr == &bob_address),
+            matches!(&error, MochiProtocolError::SessionNotFound(addr) if addr == &bob_address),
             "{:?}",
             error
         );
@@ -2157,9 +2157,9 @@ fn run_session_interaction(alice_session: SessionRecord, bob_session: SessionRec
 }
 
 async fn run_interaction(
-    alice_store: &mut InMemSignalProtocolStore,
+    alice_store: &mut InMemMochiProtocolStore,
     alice_address: &ProtocolAddress,
-    bob_store: &mut InMemSignalProtocolStore,
+    bob_store: &mut InMemMochiProtocolStore,
     bob_address: &ProtocolAddress,
 ) -> TestResult {
     let alice_ptext = "It's rabbit season";
@@ -2250,7 +2250,7 @@ async fn is_session_id_equal(
     alice_address: &ProtocolAddress,
     bob_store: &dyn ProtocolStore,
     bob_address: &ProtocolAddress,
-) -> Result<bool, SignalProtocolError> {
+) -> Result<bool, MochiProtocolError> {
     Ok(alice_store
         .load_session(bob_address)
         .await?

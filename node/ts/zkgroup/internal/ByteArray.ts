@@ -1,9 +1,9 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import { LibSignalErrorBase } from '../../Errors';
+import { LibMochiErrorBase } from '../../Errors';
 import * as Native from '../../../Native';
 
 export const UNCHECKED_AND_UNCLONED: unique symbol = Symbol();
@@ -28,7 +28,7 @@ export default class ByteArray {
   ): (contents: Buffer) => void {
     return (contents) => {
       if (contents.length !== expectedLength) {
-        throw new LibSignalErrorBase(
+        throw new LibMochiErrorBase(
           `Length of array supplied was ${contents.length} expected ${expectedLength}`,
           undefined,
           this.name

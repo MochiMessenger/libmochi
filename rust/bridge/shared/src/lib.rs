@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -9,26 +9,26 @@
 #[cfg(not(any(feature = "ffi", feature = "jni", feature = "node")))]
 compile_error!("Feature \"ffi\", \"jni\", or \"node\" must be enabled for this crate.");
 
-pub use libsignal_bridge_types::{
+pub use libmochi_bridge_types::{
     bridge_as_handle, bridge_deserialize, bridge_fixed_length_serializable_fns, bridge_get,
     bridge_handle_fns, bridge_serializable_handle_fns, describe_panic, io, support,
 };
 
 #[cfg(feature = "node")]
-pub use libsignal_bridge_types::node_register;
+pub use libmochi_bridge_types::node_register;
 #[cfg(feature = "ffi")]
-pub use libsignal_bridge_types::{ffi_arg_type, ffi_result_type};
+pub use libmochi_bridge_types::{ffi_arg_type, ffi_result_type};
 #[cfg(feature = "jni")]
-pub use libsignal_bridge_types::{jni_arg_type, jni_args, jni_class_name, jni_result_type};
+pub use libmochi_bridge_types::{jni_arg_type, jni_args, jni_class_name, jni_result_type};
 
 #[cfg(feature = "ffi")]
-pub use libsignal_bridge_types::ffi;
+pub use libmochi_bridge_types::ffi;
 
 #[cfg(feature = "jni")]
-pub use libsignal_bridge_types::jni;
+pub use libmochi_bridge_types::jni;
 
 #[cfg(feature = "node")]
-pub use libsignal_bridge_types::node;
+pub use libmochi_bridge_types::node;
 
 pub mod logging;
 
@@ -60,7 +60,7 @@ pub mod incremental_mac;
 pub mod message_backup;
 pub mod usernames;
 
-#[cfg(feature = "signal-media")]
+#[cfg(feature = "mochi-media")]
 pub mod media;
 
 // These APIs are only useful for tests. To save on code size, we omit them by default.

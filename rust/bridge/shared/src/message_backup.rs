@@ -1,17 +1,17 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 #[cfg(any(feature = "jni", feature = "ffi"))]
 use futures_util::FutureExt as _;
-use libsignal_bridge_macros::*;
-use libsignal_bridge_types::message_backup::*;
-use libsignal_message_backup::backup::Purpose;
-use libsignal_message_backup::frame::LimitedReaderFactory;
+use libmochi_bridge_macros::*;
+use libmochi_bridge_types::message_backup::*;
+use libmochi_message_backup::backup::Purpose;
+use libmochi_message_backup::frame::LimitedReaderFactory;
 
-use libsignal_message_backup::{BackupReader, ReadResult};
-use libsignal_protocol::Aci;
+use libmochi_message_backup::{BackupReader, ReadResult};
+use libmochi_protocol::Aci;
 
 use crate::io::{AsyncInput, InputStream};
 use crate::support::*;

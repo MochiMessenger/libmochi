@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2022 Signal Messenger, LLC.
+// Copyright 2021-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use attest::client_connection;

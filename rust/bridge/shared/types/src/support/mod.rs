@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -41,7 +41,7 @@ pub(crate) unsafe fn extend_lifetime<'a, 'b: 'a, T: ?Sized>(some_ref: &'a T) -> 
 /// Full form:
 ///
 /// ```ignore
-/// # #[macro_use] extern crate libsignal_bridge_types;
+/// # #[macro_use] extern crate libmochi_bridge_types;
 /// # struct Foo;
 /// # #[cfg(ignore_even_when_running_all_tests)]
 /// bridge_as_handle!(Foo, mut = true, ffi = foo, jni = Foo, node = Foo);
@@ -66,16 +66,16 @@ pub(crate) unsafe fn extend_lifetime<'a, 'b: 'a, T: ?Sized>(some_ref: &'a T) -> 
 ///   (Note that you can't write `mut = false` because I was lazy with the macros.)
 ///
 /// - "Destroy" functions are generated for FFI and JNI based on the name of the type:
-///   `signal_foo_destroy` and `Native.Foo_Destroy`.
+///   `mochi_foo_destroy` and `Native.Foo_Destroy`.
 ///
-/// - If `clone = true` is passed to `bridge_handle_fns`, a `signal_foo_clone` function will be
+/// - If `clone = true` is passed to `bridge_handle_fns`, a `mochi_foo_clone` function will be
 ///   generated for the FFI bridge as well. `Foo` must adopt `Clone`.
 ///
 /// # Representation
 ///
 /// Each bridge represents a boxed Rust value differently:
 ///
-/// - FFI: boxed values are opaque structs with manual memory management (`SignalFoo *`).
+/// - FFI: boxed values are opaque structs with manual memory management (`MochiFoo *`).
 ///   Note that the pointer may not refer directly to a `Foo` on the Rust side; that's an
 ///   implementation detail. (For example, it could point to a type tag.)
 ///
@@ -125,7 +125,7 @@ pub use {bridge_as_handle, bridge_handle_fns};
 /// Example:
 ///
 /// ```ignore
-/// # #[macro_use] extern crate libsignal_bridge_macros;
+/// # #[macro_use] extern crate libmochi_bridge_macros;
 /// # struct Foo;
 /// # impl Foo {
 /// #     fn try_from(buf: &[u8]) -> Result<Self, ()> {
@@ -160,7 +160,7 @@ macro_rules! bridge_deserialize {
 /// Full form:
 ///
 /// ```ignore
-/// # #[macro_use] extern crate libsignal_bridge_types;
+/// # #[macro_use] extern crate libmochi_bridge_types;
 /// # struct Foo;
 /// impl Foo {
 ///     fn bar(&self) -> &str {
@@ -179,7 +179,7 @@ macro_rules! bridge_deserialize {
 /// Roughly equivalent to
 ///
 /// ```ignore
-/// # #[macro_use] extern crate libsignal_bridge_macros;
+/// # #[macro_use] extern crate libmochi_bridge_macros;
 /// # struct Foo;
 /// # impl Foo {
 /// #     fn bar(&self) -> &str {

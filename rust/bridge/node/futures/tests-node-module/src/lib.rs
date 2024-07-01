@@ -1,10 +1,10 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use neon::prelude::*;
-use signal_neon_futures::*;
+use mochi_neon_futures::*;
 use std::sync::Arc;
 
 mod panics_and_throws;
@@ -59,7 +59,7 @@ fn increment_promise(mut cx: FunctionContext) -> JsResult<JsPromise> {
         .map_err(|e| PersistentException::new(cx, e))
     })?;
 
-    signal_neon_futures::promise(&mut cx, async move {
+    mochi_neon_futures::promise(&mut cx, async move {
         let value = future.await?;
         settle_promise(move |cx| Ok(cx.number(value + 1.0)))
     })
@@ -82,7 +82,7 @@ fn increment_callback_promise(mut cx: FunctionContext) -> JsResult<JsPromise> {
         .map_err(|e| PersistentException::new(cx, e))
     })?;
 
-    signal_neon_futures::promise(&mut cx, async move {
+    mochi_neon_futures::promise(&mut cx, async move {
         let value = future.await?;
         settle_promise(move |cx| Ok(cx.number(value + 1.0)))
     })

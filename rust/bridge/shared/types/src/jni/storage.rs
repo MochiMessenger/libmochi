@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -29,7 +29,7 @@ impl<'a> JniIdentityKeyStore<'a> {
         check_jobject_type(
             env,
             store,
-            ClassName("org.signal.libsignal.protocol.state.IdentityKeyStore"),
+            ClassName("org.mochi.libmochi.protocol.state.IdentityKeyStore"),
         )?;
         Ok(Self {
             env: EnvHandle::new(env).into(),
@@ -39,9 +39,9 @@ impl<'a> JniIdentityKeyStore<'a> {
 }
 
 impl<'a> JniIdentityKeyStore<'a> {
-    fn do_get_identity_key_pair(&self) -> Result<IdentityKeyPair, SignalJniError> {
+    fn do_get_identity_key_pair(&self) -> Result<IdentityKeyPair, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
-            let callback_args = jni_args!(() -> org.signal.libsignal.protocol.IdentityKeyPair);
+            let callback_args = jni_args!(() -> org.mochi.libmochi.protocol.IdentityKeyPair);
             let bits = get_object_with_serialization(
                 env,
                 self.store,
@@ -50,7 +50,7 @@ impl<'a> JniIdentityKeyStore<'a> {
             )?;
 
             match bits {
-                None => Err(SignalProtocolError::InvalidState(
+                None => Err(MochiProtocolError::InvalidState(
                     "get_identity_key_pair",
                     "no local identity key".to_string(),
                 )
@@ -60,7 +60,7 @@ impl<'a> JniIdentityKeyStore<'a> {
         })
     }
 
-    fn do_get_local_registration_id(&self) -> Result<u32, SignalJniError> {
+    fn do_get_local_registration_id(&self) -> Result<u32, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let i: jint = call_method_checked(
                 env,
@@ -76,18 +76,18 @@ impl<'a> JniIdentityKeyStore<'a> {
         &mut self,
         address: &ProtocolAddress,
         identity: &IdentityKey,
-    ) -> Result<bool, SignalJniError> {
+    ) -> Result<bool, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let address_jobject = protocol_address_to_jobject(env, address)?;
             let key_handle = identity.public_key().convert_into(env)?;
             let key_jobject = jobject_from_native_handle(
                 env,
-                ClassName("org.signal.libsignal.protocol.IdentityKey"),
+                ClassName("org.mochi.libmochi.protocol.IdentityKey"),
                 key_handle,
             )?;
             let callback_args = jni_args!((
-            address_jobject => org.signal.libsignal.protocol.SignalProtocolAddress,
-            key_jobject => org.signal.libsignal.protocol.IdentityKey
+            address_jobject => org.mochi.libmochi.protocol.MochiProtocolAddress,
+            key_jobject => org.mochi.libmochi.protocol.IdentityKey
         ) -> boolean);
             let result: jboolean =
                 call_method_checked(env, self.store, "saveIdentity", callback_args)?;
@@ -100,19 +100,19 @@ impl<'a> JniIdentityKeyStore<'a> {
         address: &ProtocolAddress,
         identity: &IdentityKey,
         direction: Direction,
-    ) -> Result<bool, SignalJniError> {
+    ) -> Result<bool, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let address_jobject = protocol_address_to_jobject(env, address)?;
             let key_handle = identity.public_key().convert_into(env)?;
             let key_jobject = jobject_from_native_handle(
                 env,
-                ClassName("org.signal.libsignal.protocol.IdentityKey"),
+                ClassName("org.mochi.libmochi.protocol.IdentityKey"),
                 key_handle,
             )?;
 
             let direction_class = find_class(
                 env,
-                ClassName("org.signal.libsignal.protocol.state.IdentityKeyStore$Direction"),
+                ClassName("org.mochi.libmochi.protocol.state.IdentityKeyStore$Direction"),
             )?;
             let field_name = match direction {
                 Direction::Sending => "SENDING",
@@ -123,15 +123,15 @@ impl<'a> JniIdentityKeyStore<'a> {
                 .get_static_field(
                     direction_class,
                     field_name,
-                    jni_signature!(org.signal.libsignal.protocol.state.IdentityKeyStore::Direction),
+                    jni_signature!(org.mochi.libmochi.protocol.state.IdentityKeyStore::Direction),
                 )?
                 .try_into()
                 .expect("already checked type");
 
             let callback_args = jni_args!((
-            address_jobject => org.signal.libsignal.protocol.SignalProtocolAddress,
-            key_jobject => org.signal.libsignal.protocol.IdentityKey,
-            field_value => org.signal.libsignal.protocol.state.IdentityKeyStore::Direction,
+            address_jobject => org.mochi.libmochi.protocol.MochiProtocolAddress,
+            key_jobject => org.mochi.libmochi.protocol.IdentityKey,
+            field_value => org.mochi.libmochi.protocol.state.IdentityKeyStore::Direction,
         ) -> boolean);
             let result: jboolean =
                 call_method_checked(env, self.store, "isTrustedIdentity", callback_args)?;
@@ -143,14 +143,14 @@ impl<'a> JniIdentityKeyStore<'a> {
     fn do_get_identity(
         &self,
         address: &ProtocolAddress,
-    ) -> Result<Option<IdentityKey>, SignalJniError> {
+    ) -> Result<Option<IdentityKey>, MochiJniError> {
         self.env
             .borrow_mut()
-            .with_local_frame(8, |env| -> SignalJniResult<Option<IdentityKey>> {
+            .with_local_frame(8, |env| -> MochiJniResult<Option<IdentityKey>> {
                 let address_jobject = protocol_address_to_jobject(env, address)?;
                 let callback_args = jni_args!((
-                    address_jobject => org.signal.libsignal.protocol.SignalProtocolAddress,
-                ) -> org.signal.libsignal.protocol.IdentityKey);
+                    address_jobject => org.mochi.libmochi.protocol.MochiProtocolAddress,
+                ) -> org.mochi.libmochi.protocol.IdentityKey);
 
                 let bits =
                     get_object_with_serialization(env, self.store, callback_args, "getIdentity")?;
@@ -165,11 +165,11 @@ impl<'a> JniIdentityKeyStore<'a> {
 
 #[async_trait(? Send)]
 impl<'a> IdentityKeyStore for JniIdentityKeyStore<'a> {
-    async fn get_identity_key_pair(&self) -> Result<IdentityKeyPair, SignalProtocolError> {
+    async fn get_identity_key_pair(&self) -> Result<IdentityKeyPair, MochiProtocolError> {
         Ok(self.do_get_identity_key_pair()?)
     }
 
-    async fn get_local_registration_id(&self) -> Result<u32, SignalProtocolError> {
+    async fn get_local_registration_id(&self) -> Result<u32, MochiProtocolError> {
         Ok(self.do_get_local_registration_id()?)
     }
 
@@ -177,7 +177,7 @@ impl<'a> IdentityKeyStore for JniIdentityKeyStore<'a> {
         &mut self,
         address: &ProtocolAddress,
         identity: &IdentityKey,
-    ) -> Result<bool, SignalProtocolError> {
+    ) -> Result<bool, MochiProtocolError> {
         Ok(self.do_save_identity(address, identity)?)
     }
 
@@ -186,14 +186,14 @@ impl<'a> IdentityKeyStore for JniIdentityKeyStore<'a> {
         address: &ProtocolAddress,
         identity: &IdentityKey,
         direction: Direction,
-    ) -> Result<bool, SignalProtocolError> {
+    ) -> Result<bool, MochiProtocolError> {
         Ok(self.do_is_trusted_identity(address, identity, direction)?)
     }
 
     async fn get_identity(
         &self,
         address: &ProtocolAddress,
-    ) -> Result<Option<IdentityKey>, SignalProtocolError> {
+    ) -> Result<Option<IdentityKey>, MochiProtocolError> {
         Ok(self.do_get_identity(address)?)
     }
 }
@@ -211,7 +211,7 @@ impl<'a> JniPreKeyStore<'a> {
         check_jobject_type(
             env,
             store,
-            ClassName("org.signal.libsignal.protocol.state.PreKeyStore"),
+            ClassName("org.mochi.libmochi.protocol.state.PreKeyStore"),
         )?;
         Ok(Self {
             env: EnvHandle::new(env).into(),
@@ -221,17 +221,17 @@ impl<'a> JniPreKeyStore<'a> {
 }
 
 impl<'a> JniPreKeyStore<'a> {
-    fn do_get_pre_key(&self, prekey_id: u32) -> Result<PreKeyRecord, SignalJniError> {
+    fn do_get_pre_key(&self, prekey_id: u32) -> Result<PreKeyRecord, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let callback_args = jni_args!((
             prekey_id.convert_into(env)? => int
-        ) -> org.signal.libsignal.protocol.state.PreKeyRecord);
+        ) -> org.mochi.libmochi.protocol.state.PreKeyRecord);
             let pk: Option<PreKeyRecord> =
                 get_object_with_native_handle(env, self.store, callback_args, "loadPreKey")?;
             match pk {
                 Some(pk) => Ok(pk),
-                None => Err(SignalJniError::Protocol(
-                    SignalProtocolError::InvalidPreKeyId,
+                None => Err(MochiJniError::Protocol(
+                    MochiProtocolError::InvalidPreKeyId,
                 )),
             }
         })
@@ -241,24 +241,24 @@ impl<'a> JniPreKeyStore<'a> {
         &mut self,
         prekey_id: u32,
         record: &PreKeyRecord,
-    ) -> Result<(), SignalJniError> {
+    ) -> Result<(), MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let record_handle = record.clone().convert_into(env)?;
             let jobject_record = jobject_from_native_handle(
                 env,
-                ClassName("org.signal.libsignal.protocol.state.PreKeyRecord"),
+                ClassName("org.mochi.libmochi.protocol.state.PreKeyRecord"),
                 record_handle,
             )?;
             let callback_args = jni_args!((
             prekey_id.convert_into(env)? => int,
-            jobject_record => org.signal.libsignal.protocol.state.PreKeyRecord
+            jobject_record => org.mochi.libmochi.protocol.state.PreKeyRecord
         ) -> void);
             call_method_checked(env, self.store, "storePreKey", callback_args)?;
             Ok(())
         })
     }
 
-    fn do_remove_pre_key(&mut self, prekey_id: u32) -> Result<(), SignalJniError> {
+    fn do_remove_pre_key(&mut self, prekey_id: u32) -> Result<(), MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let java_id = prekey_id.convert_into(env)?;
             call_method_checked(
@@ -274,7 +274,7 @@ impl<'a> JniPreKeyStore<'a> {
 
 #[async_trait(? Send)]
 impl<'a> PreKeyStore for JniPreKeyStore<'a> {
-    async fn get_pre_key(&self, prekey_id: PreKeyId) -> Result<PreKeyRecord, SignalProtocolError> {
+    async fn get_pre_key(&self, prekey_id: PreKeyId) -> Result<PreKeyRecord, MochiProtocolError> {
         Ok(self.do_get_pre_key(prekey_id.into())?)
     }
 
@@ -282,11 +282,11 @@ impl<'a> PreKeyStore for JniPreKeyStore<'a> {
         &mut self,
         prekey_id: PreKeyId,
         record: &PreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         Ok(self.do_save_pre_key(prekey_id.into(), record)?)
     }
 
-    async fn remove_pre_key(&mut self, prekey_id: PreKeyId) -> Result<(), SignalProtocolError> {
+    async fn remove_pre_key(&mut self, prekey_id: PreKeyId) -> Result<(), MochiProtocolError> {
         Ok(self.do_remove_pre_key(prekey_id.into())?)
     }
 }
@@ -304,7 +304,7 @@ impl<'a> JniSignedPreKeyStore<'a> {
         check_jobject_type(
             env,
             store,
-            ClassName("org.signal.libsignal.protocol.state.SignedPreKeyStore"),
+            ClassName("org.mochi.libmochi.protocol.state.SignedPreKeyStore"),
         )?;
         Ok(Self {
             env: EnvHandle::new(env).into(),
@@ -314,17 +314,17 @@ impl<'a> JniSignedPreKeyStore<'a> {
 }
 
 impl<'a> JniSignedPreKeyStore<'a> {
-    fn do_get_signed_pre_key(&self, prekey_id: u32) -> Result<SignedPreKeyRecord, SignalJniError> {
+    fn do_get_signed_pre_key(&self, prekey_id: u32) -> Result<SignedPreKeyRecord, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let callback_args = jni_args!((
             prekey_id.convert_into(env)? => int
-        ) -> org.signal.libsignal.protocol.state.SignedPreKeyRecord);
+        ) -> org.mochi.libmochi.protocol.state.SignedPreKeyRecord);
             let spk: Option<SignedPreKeyRecord> =
                 get_object_with_native_handle(env, self.store, callback_args, "loadSignedPreKey")?;
             match spk {
                 Some(spk) => Ok(spk),
-                None => Err(SignalJniError::Protocol(
-                    SignalProtocolError::InvalidSignedPreKeyId,
+                None => Err(MochiJniError::Protocol(
+                    MochiProtocolError::InvalidSignedPreKeyId,
                 )),
             }
         })
@@ -334,17 +334,17 @@ impl<'a> JniSignedPreKeyStore<'a> {
         &mut self,
         prekey_id: u32,
         record: &SignedPreKeyRecord,
-    ) -> Result<(), SignalJniError> {
+    ) -> Result<(), MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let record_handle = record.clone().convert_into(env)?;
             let jobject_record = jobject_from_native_handle(
                 env,
-                ClassName("org.signal.libsignal.protocol.state.SignedPreKeyRecord"),
+                ClassName("org.mochi.libmochi.protocol.state.SignedPreKeyRecord"),
                 record_handle,
             )?;
             let callback_args = jni_args!((
             prekey_id.convert_into(env)? => int,
-            jobject_record => org.signal.libsignal.protocol.state.SignedPreKeyRecord
+            jobject_record => org.mochi.libmochi.protocol.state.SignedPreKeyRecord
         ) -> void);
             call_method_checked(env, self.store, "storeSignedPreKey", callback_args)?;
             Ok(())
@@ -357,7 +357,7 @@ impl<'a> SignedPreKeyStore for JniSignedPreKeyStore<'a> {
     async fn get_signed_pre_key(
         &self,
         prekey_id: SignedPreKeyId,
-    ) -> Result<SignedPreKeyRecord, SignalProtocolError> {
+    ) -> Result<SignedPreKeyRecord, MochiProtocolError> {
         Ok(self.do_get_signed_pre_key(prekey_id.into())?)
     }
 
@@ -365,7 +365,7 @@ impl<'a> SignedPreKeyStore for JniSignedPreKeyStore<'a> {
         &mut self,
         prekey_id: SignedPreKeyId,
         record: &SignedPreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         Ok(self.do_save_signed_pre_key(prekey_id.into(), record)?)
     }
 }
@@ -383,7 +383,7 @@ impl<'a> JniKyberPreKeyStore<'a> {
         check_jobject_type(
             env,
             store,
-            ClassName("org.signal.libsignal.protocol.state.KyberPreKeyStore"),
+            ClassName("org.mochi.libmochi.protocol.state.KyberPreKeyStore"),
         )?;
         Ok(Self {
             env: EnvHandle::new(env).into(),
@@ -393,17 +393,17 @@ impl<'a> JniKyberPreKeyStore<'a> {
 }
 
 impl<'a> JniKyberPreKeyStore<'a> {
-    fn do_get_kyber_pre_key(&self, prekey_id: u32) -> Result<KyberPreKeyRecord, SignalJniError> {
+    fn do_get_kyber_pre_key(&self, prekey_id: u32) -> Result<KyberPreKeyRecord, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let callback_args = jni_args!((
             prekey_id.convert_into(env)? => int
-        ) -> org.signal.libsignal.protocol.state.KyberPreKeyRecord);
+        ) -> org.mochi.libmochi.protocol.state.KyberPreKeyRecord);
             let kpk: Option<KyberPreKeyRecord> =
                 get_object_with_native_handle(env, self.store, callback_args, "loadKyberPreKey")?;
             match kpk {
                 Some(kpk) => Ok(kpk),
-                None => Err(SignalJniError::Protocol(
-                    SignalProtocolError::InvalidKyberPreKeyId,
+                None => Err(MochiJniError::Protocol(
+                    MochiProtocolError::InvalidKyberPreKeyId,
                 )),
             }
         })
@@ -413,24 +413,24 @@ impl<'a> JniKyberPreKeyStore<'a> {
         &mut self,
         prekey_id: u32,
         record: &KyberPreKeyRecord,
-    ) -> Result<(), SignalJniError> {
+    ) -> Result<(), MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let record_handle = record.clone().convert_into(env)?;
             let jobject_record = jobject_from_native_handle(
                 env,
-                ClassName("org.signal.libsignal.protocol.state.KyberPreKeyRecord"),
+                ClassName("org.mochi.libmochi.protocol.state.KyberPreKeyRecord"),
                 record_handle,
             )?;
             let callback_args = jni_args!((
             prekey_id.convert_into(env)? => int,
-            jobject_record => org.signal.libsignal.protocol.state.KyberPreKeyRecord
+            jobject_record => org.mochi.libmochi.protocol.state.KyberPreKeyRecord
         ) -> void);
             call_method_checked(env, self.store, "storeKyberPreKey", callback_args)?;
             Ok(())
         })
     }
 
-    fn do_mark_kyber_pre_key_used(&mut self, prekey_id: u32) -> Result<(), SignalJniError> {
+    fn do_mark_kyber_pre_key_used(&mut self, prekey_id: u32) -> Result<(), MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let java_id = prekey_id.convert_into(env)?;
             call_method_checked(
@@ -449,7 +449,7 @@ impl<'a> KyberPreKeyStore for JniKyberPreKeyStore<'a> {
     async fn get_kyber_pre_key(
         &self,
         prekey_id: KyberPreKeyId,
-    ) -> Result<KyberPreKeyRecord, SignalProtocolError> {
+    ) -> Result<KyberPreKeyRecord, MochiProtocolError> {
         Ok(self.do_get_kyber_pre_key(prekey_id.into())?)
     }
 
@@ -457,14 +457,14 @@ impl<'a> KyberPreKeyStore for JniKyberPreKeyStore<'a> {
         &mut self,
         prekey_id: KyberPreKeyId,
         record: &KyberPreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         Ok(self.do_save_kyber_pre_key(prekey_id.into(), record)?)
     }
 
     async fn mark_kyber_pre_key_used(
         &mut self,
         prekey_id: KyberPreKeyId,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         Ok(self.do_mark_kyber_pre_key_used(prekey_id.into())?)
     }
 }
@@ -482,7 +482,7 @@ impl<'a> JniSessionStore<'a> {
         check_jobject_type(
             env,
             store,
-            ClassName("org.signal.libsignal.protocol.state.SessionStore"),
+            ClassName("org.mochi.libmochi.protocol.state.SessionStore"),
         )?;
         Ok(Self {
             env: EnvHandle::new(env).into(),
@@ -495,13 +495,13 @@ impl<'a> JniSessionStore<'a> {
     fn do_load_session(
         &self,
         address: &ProtocolAddress,
-    ) -> Result<Option<SessionRecord>, SignalJniError> {
+    ) -> Result<Option<SessionRecord>, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let address_jobject = protocol_address_to_jobject(env, address)?;
 
             let callback_args = jni_args!((
-            address_jobject => org.signal.libsignal.protocol.SignalProtocolAddress
-        ) -> org.signal.libsignal.protocol.state.SessionRecord);
+            address_jobject => org.mochi.libmochi.protocol.MochiProtocolAddress
+        ) -> org.mochi.libmochi.protocol.state.SessionRecord);
             get_object_with_native_handle(env, self.store, callback_args, "loadSession")
         })
     }
@@ -510,19 +510,19 @@ impl<'a> JniSessionStore<'a> {
         &mut self,
         address: &ProtocolAddress,
         record: &SessionRecord,
-    ) -> Result<(), SignalJniError> {
+    ) -> Result<(), MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let address_jobject = protocol_address_to_jobject(env, address)?;
             let record_handle = record.clone().convert_into(env)?;
             let session_jobject = jobject_from_native_handle(
                 env,
-                ClassName("org.signal.libsignal.protocol.state.SessionRecord"),
+                ClassName("org.mochi.libmochi.protocol.state.SessionRecord"),
                 record_handle,
             )?;
 
             let callback_args = jni_args!((
-            address_jobject => org.signal.libsignal.protocol.SignalProtocolAddress,
-            session_jobject => org.signal.libsignal.protocol.state.SessionRecord,
+            address_jobject => org.mochi.libmochi.protocol.MochiProtocolAddress,
+            session_jobject => org.mochi.libmochi.protocol.state.SessionRecord,
         ) -> void);
             call_method_checked(env, self.store, "storeSession", callback_args)?;
             Ok(())
@@ -535,7 +535,7 @@ impl<'a> SessionStore for JniSessionStore<'a> {
     async fn load_session(
         &self,
         address: &ProtocolAddress,
-    ) -> Result<Option<SessionRecord>, SignalProtocolError> {
+    ) -> Result<Option<SessionRecord>, MochiProtocolError> {
         Ok(self.do_load_session(address)?)
     }
 
@@ -543,7 +543,7 @@ impl<'a> SessionStore for JniSessionStore<'a> {
         &mut self,
         address: &ProtocolAddress,
         record: &SessionRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         Ok(self.do_store_session(address, record)?)
     }
 }
@@ -561,7 +561,7 @@ impl<'a> JniSenderKeyStore<'a> {
         check_jobject_type(
             env,
             store,
-            ClassName("org.signal.libsignal.protocol.groups.state.SenderKeyStore"),
+            ClassName("org.mochi.libmochi.protocol.groups.state.SenderKeyStore"),
         )?;
         Ok(Self {
             env: EnvHandle::new(env).into(),
@@ -576,21 +576,21 @@ impl<'a> JniSenderKeyStore<'a> {
         sender: &ProtocolAddress,
         distribution_id: Uuid,
         record: &SenderKeyRecord,
-    ) -> Result<(), SignalJniError> {
+    ) -> Result<(), MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let sender_jobject = protocol_address_to_jobject(env, sender)?;
             let distribution_id_jobject = distribution_id.convert_into(env)?;
             let record_handle = record.clone().convert_into(env)?;
             let sender_key_record_jobject = jobject_from_native_handle(
                 env,
-                ClassName("org.signal.libsignal.protocol.groups.state.SenderKeyRecord"),
+                ClassName("org.mochi.libmochi.protocol.groups.state.SenderKeyRecord"),
                 record_handle,
             )?;
 
             let callback_args = jni_args!((
-            sender_jobject => org.signal.libsignal.protocol.SignalProtocolAddress,
+            sender_jobject => org.mochi.libmochi.protocol.MochiProtocolAddress,
             distribution_id_jobject => java.util.UUID,
-            sender_key_record_jobject => org.signal.libsignal.protocol.groups.state.SenderKeyRecord,
+            sender_key_record_jobject => org.mochi.libmochi.protocol.groups.state.SenderKeyRecord,
         ) -> void);
             call_method_checked(env, self.store, "storeSenderKey", callback_args)?;
 
@@ -602,14 +602,14 @@ impl<'a> JniSenderKeyStore<'a> {
         &mut self,
         sender: &ProtocolAddress,
         distribution_id: Uuid,
-    ) -> Result<Option<SenderKeyRecord>, SignalJniError> {
+    ) -> Result<Option<SenderKeyRecord>, MochiJniError> {
         self.env.borrow_mut().with_local_frame(8, |env| {
             let sender_jobject = protocol_address_to_jobject(env, sender)?;
             let distribution_id_jobject = distribution_id.convert_into(env)?;
             let callback_args = jni_args!((
-            sender_jobject => org.signal.libsignal.protocol.SignalProtocolAddress,
+            sender_jobject => org.mochi.libmochi.protocol.MochiProtocolAddress,
             distribution_id_jobject => java.util.UUID,
-        ) -> org.signal.libsignal.protocol.groups.state.SenderKeyRecord);
+        ) -> org.mochi.libmochi.protocol.groups.state.SenderKeyRecord);
             get_object_with_native_handle(env, self.store, callback_args, "loadSenderKey")
         })
     }
@@ -622,7 +622,7 @@ impl<'a> SenderKeyStore for JniSenderKeyStore<'a> {
         sender: &ProtocolAddress,
         distribution_id: Uuid,
         record: &SenderKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         Ok(self.do_store_sender_key(sender, distribution_id, record)?)
     }
 
@@ -630,7 +630,7 @@ impl<'a> SenderKeyStore for JniSenderKeyStore<'a> {
         &mut self,
         sender: &ProtocolAddress,
         distribution_id: Uuid,
-    ) -> Result<Option<SenderKeyRecord>, SignalProtocolError> {
+    ) -> Result<Option<SenderKeyRecord>, MochiProtocolError> {
         Ok(self.do_load_sender_key(sender, distribution_id)?)
     }
 }

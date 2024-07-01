@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@
 #![allow(dead_code)]
 
 use futures_util::FutureExt;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use rand::rngs::OsRng;
 use rand::{CryptoRng, Rng};
 
@@ -19,20 +19,20 @@ use std::time::SystemTime;
 pub(crate) const PRE_KYBER_MESSAGE_VERSION: u32 = 3;
 pub(crate) const KYBER_AWARE_MESSAGE_VERSION: u32 = 4;
 
-pub fn test_in_memory_protocol_store() -> Result<InMemSignalProtocolStore, SignalProtocolError> {
+pub fn test_in_memory_protocol_store() -> Result<InMemMochiProtocolStore, MochiProtocolError> {
     let mut csprng = OsRng;
     let identity_key = IdentityKeyPair::generate(&mut csprng);
     // Valid registration IDs fit in 14 bits.
     let registration_id: u8 = csprng.gen();
 
-    InMemSignalProtocolStore::new(identity_key, registration_id as u32)
+    InMemMochiProtocolStore::new(identity_key, registration_id as u32)
 }
 
 pub async fn encrypt(
-    store: &mut InMemSignalProtocolStore,
+    store: &mut InMemMochiProtocolStore,
     remote_address: &ProtocolAddress,
     msg: &str,
-) -> Result<CiphertextMessage, SignalProtocolError> {
+) -> Result<CiphertextMessage, MochiProtocolError> {
     message_encrypt(
         msg.as_bytes(),
         remote_address,
@@ -44,10 +44,10 @@ pub async fn encrypt(
 }
 
 pub async fn decrypt(
-    store: &mut InMemSignalProtocolStore,
+    store: &mut InMemMochiProtocolStore,
     remote_address: &ProtocolAddress,
     msg: &CiphertextMessage,
-) -> Result<Vec<u8>, SignalProtocolError> {
+) -> Result<Vec<u8>, MochiProtocolError> {
     let mut csprng = OsRng;
     message_decrypt(
         msg,
@@ -65,7 +65,7 @@ pub async fn decrypt(
 pub async fn create_pre_key_bundle<R: Rng + CryptoRng>(
     store: &mut dyn ProtocolStore,
     mut csprng: &mut R,
-) -> Result<PreKeyBundle, SignalProtocolError> {
+) -> Result<PreKeyBundle, MochiProtocolError> {
     let pre_key_pair = KeyPair::generate(&mut csprng);
     let signed_pre_key_pair = KeyPair::generate(&mut csprng);
     let kyber_pre_key_pair = kem::KeyPair::generate(kem::KeyType::Kyber1024);
@@ -139,7 +139,7 @@ pub async fn create_pre_key_bundle<R: Rng + CryptoRng>(
     Ok(pre_key_bundle)
 }
 
-pub fn initialize_sessions_v3() -> Result<(SessionRecord, SessionRecord), SignalProtocolError> {
+pub fn initialize_sessions_v3() -> Result<(SessionRecord, SessionRecord), MochiProtocolError> {
     let mut csprng = OsRng;
     let alice_identity = IdentityKeyPair::generate(&mut csprng);
     let bob_identity = IdentityKeyPair::generate(&mut csprng);
@@ -149,7 +149,7 @@ pub fn initialize_sessions_v3() -> Result<(SessionRecord, SessionRecord), Signal
     let bob_base_key = KeyPair::generate(&mut csprng);
     let bob_ephemeral_key = bob_base_key;
 
-    let alice_params = AliceSignalProtocolParameters::new(
+    let alice_params = AliceMochiProtocolParameters::new(
         alice_identity,
         alice_base_key,
         *bob_identity.identity_key(),
@@ -159,7 +159,7 @@ pub fn initialize_sessions_v3() -> Result<(SessionRecord, SessionRecord), Signal
 
     let alice_session = initialize_alice_session_record(&alice_params, &mut csprng)?;
 
-    let bob_params = BobSignalProtocolParameters::new(
+    let bob_params = BobMochiProtocolParameters::new(
         bob_identity,
         bob_base_key,
         None,
@@ -175,7 +175,7 @@ pub fn initialize_sessions_v3() -> Result<(SessionRecord, SessionRecord), Signal
     Ok((alice_session, bob_session))
 }
 
-pub fn initialize_sessions_v4() -> Result<(SessionRecord, SessionRecord), SignalProtocolError> {
+pub fn initialize_sessions_v4() -> Result<(SessionRecord, SessionRecord), MochiProtocolError> {
     let mut csprng = OsRng;
     let alice_identity = IdentityKeyPair::generate(&mut csprng);
     let bob_identity = IdentityKeyPair::generate(&mut csprng);
@@ -187,7 +187,7 @@ pub fn initialize_sessions_v4() -> Result<(SessionRecord, SessionRecord), Signal
 
     let bob_kyber_key = kem::KeyPair::generate(kem::KeyType::Kyber1024);
 
-    let alice_params = AliceSignalProtocolParameters::new(
+    let alice_params = AliceMochiProtocolParameters::new(
         alice_identity,
         alice_base_key,
         *bob_identity.identity_key(),
@@ -205,7 +205,7 @@ pub fn initialize_sessions_v4() -> Result<(SessionRecord, SessionRecord), Signal
         bytes.into_boxed_slice()
     };
 
-    let bob_params = BobSignalProtocolParameters::new(
+    let bob_params = BobMochiProtocolParameters::new(
         bob_identity,
         bob_base_key,
         None,
@@ -246,7 +246,7 @@ impl From<u32> for IdChoice {
 
 pub struct TestStoreBuilder {
     rng: OsRng,
-    pub(crate) store: InMemSignalProtocolStore,
+    pub(crate) store: InMemMochiProtocolStore,
     id_range: RangeFrom<u32>,
 }
 
@@ -257,7 +257,7 @@ impl TestStoreBuilder {
         // Valid registration IDs fit in 14 bits.
         let registration_id: u8 = rng.gen();
 
-        let store = InMemSignalProtocolStore::new(identity_key, registration_id as u32)
+        let store = InMemMochiProtocolStore::new(identity_key, registration_id as u32)
             .expect("can create store");
         Self {
             rng,
@@ -266,7 +266,7 @@ impl TestStoreBuilder {
         }
     }
 
-    pub fn from_store(store: &InMemSignalProtocolStore) -> Self {
+    pub fn from_store(store: &InMemMochiProtocolStore) -> Self {
         Self {
             rng: OsRng,
             store: store.clone(),
@@ -445,17 +445,17 @@ impl TestStoreBuilder {
 }
 
 pub trait HasSessionVersion {
-    fn session_version(&self, address: &ProtocolAddress) -> Result<u32, SignalProtocolError>;
+    fn session_version(&self, address: &ProtocolAddress) -> Result<u32, MochiProtocolError>;
 }
 
 impl HasSessionVersion for TestStoreBuilder {
-    fn session_version(&self, address: &ProtocolAddress) -> Result<u32, SignalProtocolError> {
+    fn session_version(&self, address: &ProtocolAddress) -> Result<u32, MochiProtocolError> {
         self.store.session_version(address)
     }
 }
 
-impl HasSessionVersion for InMemSignalProtocolStore {
-    fn session_version(&self, address: &ProtocolAddress) -> Result<u32, SignalProtocolError> {
+impl HasSessionVersion for InMemMochiProtocolStore {
+    fn session_version(&self, address: &ProtocolAddress) -> Result<u32, MochiProtocolError> {
         self.load_session(address)
             .now_or_never()
             .expect("sync")?

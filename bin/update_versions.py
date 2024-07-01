@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# Copyright 2021 Signal Messenger, LLC.
+# Copyright 2021 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -41,7 +41,7 @@ def bridge_path(bridge):
 
 
 VERSION_FILES = [
-    ('LibSignalClient.podspec', PODSPEC_PATTERN),
+    ('LibMochiClient.podspec', PODSPEC_PATTERN),
     (os.path.join('java', 'build.gradle'), GRADLE_PATTERN),
     (os.path.join('node', 'package.json'), NODE_PATTERN),
     (os.path.join('rust', 'core', 'src', 'version.rs'), RUST_PATTERN),

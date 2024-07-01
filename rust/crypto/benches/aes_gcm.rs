@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -20,7 +20,7 @@ pub fn aes_gcm(c: &mut Criterion) {
 
         group.bench_function(BenchmarkId::new("encrypt", *size), |b| {
             b.iter(|| {
-                let mut gcm_enc = signal_crypto::Aes256GcmEncryption::new(&key, &nonce, &aad)
+                let mut gcm_enc = mochi_crypto::Aes256GcmEncryption::new(&key, &nonce, &aad)
                     .expect("valid key size");
                 gcm_enc.encrypt(&mut buf);
                 gcm_enc.compute_tag();
@@ -28,7 +28,7 @@ pub fn aes_gcm(c: &mut Criterion) {
         });
         group.bench_function(BenchmarkId::new("decrypt", *size), |b| {
             b.iter(|| {
-                let mut gcm_dec = signal_crypto::Aes256GcmDecryption::new(&key, &nonce, &aad)
+                let mut gcm_dec = mochi_crypto::Aes256GcmDecryption::new(&key, &nonce, &aad)
                     .expect("valid key size");
                 gcm_dec.decrypt(&mut buf);
                 gcm_dec.verify_tag(&tag).unwrap_err();

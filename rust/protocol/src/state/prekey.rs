@@ -1,10 +1,10 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use crate::proto::storage::PreKeyRecordStructure;
-use crate::{KeyPair, PrivateKey, PublicKey, Result, SignalProtocolError};
+use crate::{KeyPair, PrivateKey, PublicKey, Result, MochiProtocolError};
 
 use prost::Message;
 
@@ -53,7 +53,7 @@ impl PreKeyRecord {
     pub fn deserialize(data: &[u8]) -> Result<Self> {
         Ok(Self {
             pre_key: PreKeyRecordStructure::decode(data)
-                .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?,
+                .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?,
         })
     }
 

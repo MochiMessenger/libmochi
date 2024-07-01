@@ -1,5 +1,5 @@
 #
-# Copyright 2020 Signal Messenger, LLC.
+# Copyright 2020 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -37,8 +37,8 @@ check_rust() {
   fi
 }
 
-# usage: copy_built_library target/release signal_node out_dir/libsignal_node.node
-#        copy_built_library target/release signal_jni out_dir/
+# usage: copy_built_library target/release mochi_node out_dir/libmochi_node.node
+#        copy_built_library target/release mochi_jni out_dir/
 copy_built_library() {
   for possible_library_name in "lib$2.dylib" "lib$2.so" "$2.dll"; do
     possible_library_path="$1/${possible_library_name}"

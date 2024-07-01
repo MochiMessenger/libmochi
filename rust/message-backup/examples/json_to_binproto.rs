@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2024 Signal Messenger, LLC.
+// Copyright (C) 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -26,7 +26,7 @@ fn main() {
 
     let contents = assert_matches!(contents, serde_json::Value::Array(contents) => contents);
     let serialized =
-        libsignal_message_backup::backup::convert_from_json(contents).expect("failed to convert");
+        libmochi_message_backup::backup::convert_from_json(contents).expect("failed to convert");
 
     std::io::stdout()
         .write_all(&serialized)

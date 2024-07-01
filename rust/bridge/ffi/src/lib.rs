@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,8 +7,8 @@
 #![warn(clippy::unwrap_used)]
 
 use futures_util::FutureExt;
-use libsignal_bridge::ffi::*;
-use libsignal_protocol::*;
+use libmochi_bridge::ffi::*;
+use libmochi_protocol::*;
 
 use std::ffi::{c_char, c_uchar, c_uint, CString};
 use std::panic::AssertUnwindSafe;
@@ -16,12 +16,12 @@ use std::panic::AssertUnwindSafe;
 pub mod logging;
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_print_ptr(p: *const std::ffi::c_void) {
+pub unsafe extern "C" fn mochi_print_ptr(p: *const std::ffi::c_void) {
     println!("In rust that's {:?}", p);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_free_string(buf: *const c_char) {
+pub unsafe extern "C" fn mochi_free_string(buf: *const c_char) {
     if buf.is_null() {
         return;
     }
@@ -29,7 +29,7 @@ pub unsafe extern "C" fn signal_free_string(buf: *const c_char) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_free_buffer(buf: *const c_uchar, buf_len: usize) {
+pub unsafe extern "C" fn mochi_free_buffer(buf: *const c_uchar, buf_len: usize) {
     if buf.is_null() {
         return;
     }
@@ -40,31 +40,31 @@ pub unsafe extern "C" fn signal_free_buffer(buf: *const c_uchar, buf_len: usize)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_free_list_of_strings(buffer: OwnedBufferOf<CStringPtr>) {
+pub unsafe extern "C" fn mochi_free_list_of_strings(buffer: OwnedBufferOf<CStringPtr>) {
     let strings = buffer.into_box();
     for &s in &*strings {
-        signal_free_string(s);
+        mochi_free_string(s);
     }
     drop(strings);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_free_lookup_response_entry_list(
+pub unsafe extern "C" fn mochi_free_lookup_response_entry_list(
     buffer: OwnedBufferOf<crate::FfiCdsiLookupResponseEntry>,
 ) {
     drop(buffer.into_box())
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_free_bytestring_array(array: BytestringArray) {
+pub unsafe extern "C" fn mochi_free_bytestring_array(array: BytestringArray) {
     drop(array.into_boxed_parts())
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_error_get_message(
-    err: *const SignalFfiError,
+pub unsafe extern "C" fn mochi_error_get_message(
+    err: *const MochiFfiError,
     out: *mut *const c_char,
-) -> *mut SignalFfiError {
+) -> *mut MochiFfiError {
     let result = (|| {
         let err = err.as_ref().ok_or(NullPointerError)?;
         write_result_to(out, err.to_string())
@@ -77,37 +77,37 @@ pub unsafe extern "C" fn signal_error_get_message(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_error_get_address(
-    err: *const SignalFfiError,
+pub unsafe extern "C" fn mochi_error_get_address(
+    err: *const MochiFfiError,
     out: *mut *mut ProtocolAddress,
-) -> *mut SignalFfiError {
+) -> *mut MochiFfiError {
     let err = AssertUnwindSafe(err);
     run_ffi_safe(|| {
         let err = err.as_ref().ok_or(NullPointerError)?;
         let value = err.provide_address().map_err(|_| {
-            SignalProtocolError::InvalidArgument(format!("cannot get address from error ({})", err))
+            MochiProtocolError::InvalidArgument(format!("cannot get address from error ({})", err))
         })?;
         write_result_to(out, value)
     })
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_error_get_uuid(
-    err: *const SignalFfiError,
+pub unsafe extern "C" fn mochi_error_get_uuid(
+    err: *const MochiFfiError,
     out: *mut [u8; 16],
-) -> *mut SignalFfiError {
+) -> *mut MochiFfiError {
     let err = AssertUnwindSafe(err);
     run_ffi_safe(|| {
         let err = err.as_ref().ok_or(NullPointerError)?;
         let value = err.provide_uuid().map_err(|_| {
-            SignalProtocolError::InvalidArgument(format!("cannot get UUID from error ({})", err))
+            MochiProtocolError::InvalidArgument(format!("cannot get UUID from error ({})", err))
         })?;
         write_result_to(out, value.into_bytes())
     })
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_error_get_type(err: *const SignalFfiError) -> u32 {
+pub unsafe extern "C" fn mochi_error_get_type(err: *const MochiFfiError) -> u32 {
     match err.as_ref() {
         Some(err) => err.code() as u32,
         None => 0,
@@ -115,15 +115,15 @@ pub unsafe extern "C" fn signal_error_get_type(err: *const SignalFfiError) -> u3
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_error_get_retry_after_seconds(
-    err: *const SignalFfiError,
+pub unsafe extern "C" fn mochi_error_get_retry_after_seconds(
+    err: *const MochiFfiError,
     out: *mut u32,
-) -> *mut SignalFfiError {
+) -> *mut MochiFfiError {
     let err = AssertUnwindSafe(err);
     run_ffi_safe(|| {
         let err = err.as_ref().ok_or(NullPointerError)?;
         let value = err.provide_retry_after_seconds().map_err(|_| {
-            SignalProtocolError::InvalidArgument(format!(
+            MochiProtocolError::InvalidArgument(format!(
                 "cannot get retry_after_seconds from error ({})",
                 err
             ))
@@ -133,15 +133,15 @@ pub unsafe extern "C" fn signal_error_get_retry_after_seconds(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_error_get_tries_remaining(
-    err: *const SignalFfiError,
+pub unsafe extern "C" fn mochi_error_get_tries_remaining(
+    err: *const MochiFfiError,
     out: *mut u32,
-) -> *mut SignalFfiError {
+) -> *mut MochiFfiError {
     let err = AssertUnwindSafe(err);
     run_ffi_safe(|| {
         let err = err.as_ref().ok_or(NullPointerError)?;
         let value = err.provide_tries_remaining().map_err(|_| {
-            SignalProtocolError::InvalidArgument(format!(
+            MochiProtocolError::InvalidArgument(format!(
                 "cannot get tries_remaining from error ({})",
                 err
             ))
@@ -151,18 +151,18 @@ pub unsafe extern "C" fn signal_error_get_tries_remaining(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_error_free(err: *mut SignalFfiError) {
+pub unsafe extern "C" fn mochi_error_free(err: *mut MochiFfiError) {
     if !err.is_null() {
         let _boxed_err = Box::from_raw(err);
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_identitykeypair_deserialize(
+pub unsafe extern "C" fn mochi_identitykeypair_deserialize(
     private_key: *mut *mut PrivateKey,
     public_key: *mut *mut PublicKey,
     input: BorrowedSliceOf<c_uchar>,
-) -> *mut SignalFfiError {
+) -> *mut MochiFfiError {
     run_ffi_safe(|| {
         let input = input.as_slice()?;
         let identity_key_pair = IdentityKeyPair::try_from(input)?;
@@ -173,7 +173,7 @@ pub unsafe extern "C" fn signal_identitykeypair_deserialize(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_sealed_session_cipher_decrypt(
+pub unsafe extern "C" fn mochi_sealed_session_cipher_decrypt(
     out: *mut OwnedBufferOf<c_uchar>,
     sender_e164: *mut *const c_char,
     sender_uuid: *mut *const c_char,
@@ -188,7 +188,7 @@ pub unsafe extern "C" fn signal_sealed_session_cipher_decrypt(
     identity_store: *const FfiIdentityKeyStoreStruct,
     prekey_store: *const FfiPreKeyStoreStruct,
     signed_prekey_store: *const FfiSignedPreKeyStoreStruct,
-) -> *mut SignalFfiError {
+) -> *mut MochiFfiError {
     run_ffi_safe(|| {
         let mut kyber_pre_key_store = InMemKyberPreKeyStore::new();
         let ctext = ctext.as_slice()?;

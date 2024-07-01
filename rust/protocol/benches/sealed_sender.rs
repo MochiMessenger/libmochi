@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,7 +7,7 @@ use std::time::SystemTime;
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use futures_util::FutureExt;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use rand::rngs::OsRng;
 use rand::Rng;
 use uuid::Uuid;

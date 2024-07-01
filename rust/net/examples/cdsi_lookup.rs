@@ -6,15 +6,15 @@
 
 use std::time::Duration;
 
-use libsignal_net::infra::connection_manager::ConnectionManager;
-use libsignal_net::infra::dns::DnsResolver;
+use libmochi_net::infra::connection_manager::ConnectionManager;
+use libmochi_net::infra::dns::DnsResolver;
 use tokio::io::AsyncBufReadExt as _;
 
-use libsignal_net::auth::Auth;
-use libsignal_net::cdsi::{CdsiConnection, LookupError, LookupRequest, LookupResponse};
-use libsignal_net::enclave::{Cdsi, EnclaveEndpointConnection};
-use libsignal_net::infra::tcp_ssl::DirectConnector as TcpSslTransportConnector;
-use libsignal_net::infra::TransportConnector;
+use libmochi_net::auth::Auth;
+use libmochi_net::cdsi::{CdsiConnection, LookupError, LookupRequest, LookupResponse};
+use libmochi_net::enclave::{Cdsi, EnclaveEndpointConnection};
+use libmochi_net::infra::tcp_ssl::DirectConnector as TcpSslTransportConnector;
+use libmochi_net::infra::TransportConnector;
 
 async fn cdsi_lookup(
     auth: Auth,
@@ -24,7 +24,7 @@ async fn cdsi_lookup(
     timeout: Duration,
 ) -> Result<LookupResponse, LookupError> {
     let connected = CdsiConnection::connect(endpoint, transport_connector, auth).await?;
-    let (_token, remaining_response) = libsignal_net::utils::timeout(
+    let (_token, remaining_response) = libmochi_net::utils::timeout(
         timeout,
         LookupError::ConnectionTimedOut,
         connected.send_request(request),
@@ -53,7 +53,7 @@ async fn main() {
         return_acis_without_uaks: true,
         ..Default::default()
     };
-    let env = libsignal_net::env::PROD;
+    let env = libmochi_net::env::PROD;
     let endpoint_connection = EnclaveEndpointConnection::new(&env.cdsi, Duration::from_secs(10));
     let transport_connection = TcpSslTransportConnector::new(DnsResolver::default());
     let cdsi_response = cdsi_lookup(

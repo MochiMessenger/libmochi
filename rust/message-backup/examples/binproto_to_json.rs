@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2024 Signal Messenger, LLC.
+// Copyright (C) 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -20,7 +20,7 @@ fn main() {
     eprintln!("reading from {:?}", filename.source);
 
     let json_array =
-        futures::executor::block_on(libsignal_message_backup::backup::convert_to_json(
+        futures::executor::block_on(libmochi_message_backup::backup::convert_to_json(
             AllowStdIo::new(filename.into_reader().expect("failed to open")),
         ))
         .expect("failed to convert");

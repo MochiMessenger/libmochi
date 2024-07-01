@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -42,7 +42,7 @@ impl CredentialPrivateKey {
     /// Creates a new secret key using the given source of random bytes.
     fn generate(randomness: [u8; RANDOMNESS_LEN]) -> Self {
         let mut sho =
-            ShoHmacSha256::new(b"Signal_ZKCredential_CredentialPrivateKey_generate_20230410");
+            ShoHmacSha256::new(b"Mochi_ZKCredential_CredentialPrivateKey_generate_20230410");
         sho.absorb_and_ratchet(&randomness);
 
         let system = *SYSTEM_PARAMS;
@@ -203,7 +203,7 @@ impl SystemParams {
     /// An arbitrary set of independent points generated through a constant sequence of hash
     /// operations.
     fn generate() -> Self {
-        let mut sho = ShoSha256::new(b"Signal_ZKCredential_ConstantSystemParams_generate_20230410");
+        let mut sho = ShoSha256::new(b"Mochi_ZKCredential_ConstantSystemParams_generate_20230410");
         let G_w = sho.get_point();
         let G_wprime = sho.get_point();
 

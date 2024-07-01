@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,7 +7,7 @@
 
 #![warn(missing_docs)]
 
-use crate::{proto, KeyPair, PrivateKey, PublicKey, Result, SignalProtocolError};
+use crate::{proto, KeyPair, PrivateKey, PublicKey, Result, MochiProtocolError};
 
 use rand::{CryptoRng, Rng};
 
@@ -15,7 +15,7 @@ use prost::Message;
 
 // Used for domain separation between alternate-identity signatures and other key-to-key signatures.
 const ALTERNATE_IDENTITY_SIGNATURE_PREFIX_1: &[u8] = &[0xFF; 32];
-const ALTERNATE_IDENTITY_SIGNATURE_PREFIX_2: &[u8] = b"Signal_PNI_Signature";
+const ALTERNATE_IDENTITY_SIGNATURE_PREFIX_2: &[u8] = b"Mochi_PNI_Signature";
 
 /// A public key that represents the identity of a user.
 ///
@@ -66,7 +66,7 @@ impl IdentityKey {
 }
 
 impl TryFrom<&[u8]> for IdentityKey {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         IdentityKey::decode(value)
@@ -160,11 +160,11 @@ impl IdentityKeyPair {
 }
 
 impl TryFrom<&[u8]> for IdentityKeyPair {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         let structure = proto::storage::IdentityKeyPairStructure::decode(value)
-            .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+            .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
         Ok(Self {
             identity_key: IdentityKey::try_from(&structure.public_key[..])?,
             private_key: PrivateKey::deserialize(&structure.private_key)?,
@@ -173,7 +173,7 @@ impl TryFrom<&[u8]> for IdentityKeyPair {
 }
 
 impl TryFrom<PrivateKey> for IdentityKeyPair {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(private_key: PrivateKey) -> Result<Self> {
         let identity_key = IdentityKey::new(private_key.public_key()?);

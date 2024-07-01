@@ -1,12 +1,12 @@
 //
-// Copyright 2021-2022 Signal Messenger, LLC.
+// Copyright 2021-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use ::zkgroup;
-use libsignal_bridge_macros::*;
-use libsignal_bridge_types::zkgroup::validate_serialization;
-use libsignal_protocol::{Aci, Pni, ServiceId};
+use libmochi_bridge_macros::*;
+use libmochi_bridge_types::zkgroup::validate_serialization;
+use libmochi_protocol::{Aci, Pni, ServiceId};
 
 use zkgroup::auth::*;
 use zkgroup::call_links::*;

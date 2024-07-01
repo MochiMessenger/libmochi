@@ -1,11 +1,11 @@
 syntax = "proto3";
 
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-package signal.proto.storage;
+package mochi.proto.storage;
 
 message SessionStructure {
   message Chain {

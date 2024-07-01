@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 //! An example program that demonstrates how to implement 2-out-of-2 PPSS setup
@@ -15,21 +15,21 @@ use std::time::Duration;
 use base64::prelude::{Engine, BASE64_STANDARD};
 use clap::Parser;
 use hex_literal::hex;
-use libsignal_net::infra::dns::DnsResolver;
+use libmochi_net::infra::dns::DnsResolver;
 use nonzero_ext::nonzero;
 use rand_core::{CryptoRngCore, OsRng, RngCore};
 
 use attest::svr2::RaftConfig;
-use libsignal_net::auth::Auth;
-use libsignal_net::enclave::{
+use libmochi_net::auth::Auth;
+use libmochi_net::enclave::{
     EnclaveEndpoint, EnclaveEndpointConnection, EndpointParams, MrEnclave, PpssSetup, Sgx,
     Svr3Flavor,
 };
-use libsignal_net::env::{DomainConfig, PROXY_CONFIG_F_STAGING, PROXY_CONFIG_G};
-use libsignal_net::infra::certs::RootCertificates;
-use libsignal_net::infra::tcp_ssl::DirectConnector as TcpSslTransportConnector;
-use libsignal_net::svr::SvrConnection;
-use libsignal_net::svr3::{OpaqueMaskedShareSet, PpssOps};
+use libmochi_net::env::{DomainConfig, PROXY_CONFIG_F_STAGING, PROXY_CONFIG_G};
+use libmochi_net::infra::certs::RootCertificates;
+use libmochi_net::infra::tcp_ssl::DirectConnector as TcpSslTransportConnector;
+use libmochi_net::svr::SvrConnection;
+use libmochi_net::svr3::{OpaqueMaskedShareSet, PpssOps};
 
 const TEST_SERVER_CERT: RootCertificates = RootCertificates::FromDer(Cow::Borrowed(
     include_bytes!("../res/sgx_test_server_cert.cer"),
@@ -41,7 +41,7 @@ const TEST_SERVER_RAFT_CONFIG: &RaftConfig = &RaftConfig {
     group_id: 5873791967879921865,
 };
 const TEST_SERVER_DOMAIN_CONFIG: DomainConfig = DomainConfig {
-    hostname: "backend1.svr3.test.signal.org",
+    hostname: "backend1.svr3.test.mochi.org",
     port: nonzero!(443_u16),
     ip_v4: &[],
     ip_v6: &[],

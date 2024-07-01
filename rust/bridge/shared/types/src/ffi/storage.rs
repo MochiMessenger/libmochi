@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -50,16 +50,16 @@ pub struct FfiIdentityKeyStoreStruct {
 
 #[async_trait(?Send)]
 impl IdentityKeyStore for &FfiIdentityKeyStoreStruct {
-    async fn get_identity_key_pair(&self) -> Result<IdentityKeyPair, SignalProtocolError> {
+    async fn get_identity_key_pair(&self) -> Result<IdentityKeyPair, MochiProtocolError> {
         let mut key = std::ptr::null_mut();
         let result = (self.get_identity_key_pair)(self.ctx, &mut key);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "get_identity_key_pair",
         ))?;
 
         if key.is_null() {
-            return Err(SignalProtocolError::InvalidState(
+            return Err(MochiProtocolError::InvalidState(
                 "get_identity_key_pair",
                 "no local identity key".to_string(),
             ));
@@ -71,11 +71,11 @@ impl IdentityKeyStore for &FfiIdentityKeyStoreStruct {
         Ok(IdentityKeyPair::new(IdentityKey::new(pub_key), *priv_key))
     }
 
-    async fn get_local_registration_id(&self) -> Result<u32, SignalProtocolError> {
+    async fn get_local_registration_id(&self) -> Result<u32, MochiProtocolError> {
         let mut id = 0;
         let result = (self.get_local_registration_id)(self.ctx, &mut id);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "get_local_registration_id",
         ))?;
 
@@ -86,13 +86,13 @@ impl IdentityKeyStore for &FfiIdentityKeyStoreStruct {
         &mut self,
         address: &ProtocolAddress,
         identity: &IdentityKey,
-    ) -> Result<bool, SignalProtocolError> {
+    ) -> Result<bool, MochiProtocolError> {
         let result = (self.save_identity)(self.ctx, address, identity.public_key());
 
         match result {
             0 => Ok(false),
             1 => Ok(true),
-            r => Err(SignalProtocolError::for_application_callback(
+            r => Err(MochiProtocolError::for_application_callback(
                 "save_identity",
             )(
                 CallbackError::check(r).expect_err("verified non-zero")
@@ -105,7 +105,7 @@ impl IdentityKeyStore for &FfiIdentityKeyStoreStruct {
         address: &ProtocolAddress,
         identity: &IdentityKey,
         direction: Direction,
-    ) -> Result<bool, SignalProtocolError> {
+    ) -> Result<bool, MochiProtocolError> {
         let direction = match direction {
             Direction::Sending => FfiDirection::Sending,
             Direction::Receiving => FfiDirection::Receiving,
@@ -116,7 +116,7 @@ impl IdentityKeyStore for &FfiIdentityKeyStoreStruct {
         match result {
             0 => Ok(false),
             1 => Ok(true),
-            r => Err(SignalProtocolError::for_application_callback(
+            r => Err(MochiProtocolError::for_application_callback(
                 "is_trusted_identity",
             )(
                 CallbackError::check(r).expect_err("verified non-zero")
@@ -127,11 +127,11 @@ impl IdentityKeyStore for &FfiIdentityKeyStoreStruct {
     async fn get_identity(
         &self,
         address: &ProtocolAddress,
-    ) -> Result<Option<IdentityKey>, SignalProtocolError> {
+    ) -> Result<Option<IdentityKey>, MochiProtocolError> {
         let mut key = std::ptr::null_mut();
         let result = (self.get_identity)(self.ctx, &mut key, address);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "get_identity",
         ))?;
 
@@ -162,16 +162,16 @@ pub struct FfiPreKeyStoreStruct {
 
 #[async_trait(?Send)]
 impl PreKeyStore for &FfiPreKeyStoreStruct {
-    async fn get_pre_key(&self, prekey_id: PreKeyId) -> Result<PreKeyRecord, SignalProtocolError> {
+    async fn get_pre_key(&self, prekey_id: PreKeyId) -> Result<PreKeyRecord, MochiProtocolError> {
         let mut record = std::ptr::null_mut();
         let result = (self.load_pre_key)(self.ctx, &mut record, prekey_id.into());
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "load_pre_key",
         ))?;
 
         if record.is_null() {
-            return Err(SignalProtocolError::InvalidPreKeyId);
+            return Err(MochiProtocolError::InvalidPreKeyId);
         }
 
         let record = unsafe { Box::from_raw(record) };
@@ -182,18 +182,18 @@ impl PreKeyStore for &FfiPreKeyStoreStruct {
         &mut self,
         prekey_id: PreKeyId,
         record: &PreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         let result = (self.store_pre_key)(self.ctx, prekey_id.into(), record);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "store_pre_key",
         ))
     }
 
-    async fn remove_pre_key(&mut self, prekey_id: PreKeyId) -> Result<(), SignalProtocolError> {
+    async fn remove_pre_key(&mut self, prekey_id: PreKeyId) -> Result<(), MochiProtocolError> {
         let result = (self.remove_pre_key)(self.ctx, prekey_id.into());
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "remove_pre_key",
         ))
     }
@@ -217,16 +217,16 @@ impl SignedPreKeyStore for &FfiSignedPreKeyStoreStruct {
     async fn get_signed_pre_key(
         &self,
         prekey_id: SignedPreKeyId,
-    ) -> Result<SignedPreKeyRecord, SignalProtocolError> {
+    ) -> Result<SignedPreKeyRecord, MochiProtocolError> {
         let mut record = std::ptr::null_mut();
         let result = (self.load_signed_pre_key)(self.ctx, &mut record, prekey_id.into());
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "load_signed_pre_key",
         ))?;
 
         if record.is_null() {
-            return Err(SignalProtocolError::InvalidSignedPreKeyId);
+            return Err(MochiProtocolError::InvalidSignedPreKeyId);
         }
 
         let record = unsafe { Box::from_raw(record) };
@@ -238,10 +238,10 @@ impl SignedPreKeyStore for &FfiSignedPreKeyStoreStruct {
         &mut self,
         prekey_id: SignedPreKeyId,
         record: &SignedPreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         let result = (self.store_signed_pre_key)(self.ctx, prekey_id.into(), record);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "store_signed_pre_key",
         ))?;
 
@@ -269,16 +269,16 @@ impl KyberPreKeyStore for &FfiKyberPreKeyStoreStruct {
     async fn get_kyber_pre_key(
         &self,
         id: KyberPreKeyId,
-    ) -> Result<KyberPreKeyRecord, SignalProtocolError> {
+    ) -> Result<KyberPreKeyRecord, MochiProtocolError> {
         let mut record = std::ptr::null_mut();
         let result = (self.load_kyber_pre_key)(self.ctx, &mut record, id.into());
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "load_kyber_pre_key",
         ))?;
 
         if record.is_null() {
-            return Err(SignalProtocolError::InvalidKyberPreKeyId);
+            return Err(MochiProtocolError::InvalidKyberPreKeyId);
         }
 
         let record = unsafe { Box::from_raw(record) };
@@ -290,10 +290,10 @@ impl KyberPreKeyStore for &FfiKyberPreKeyStoreStruct {
         &mut self,
         id: KyberPreKeyId,
         record: &KyberPreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         let result = (self.store_kyber_pre_key)(self.ctx, id.into(), record);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "store_kyber_pre_key",
         ))
     }
@@ -301,10 +301,10 @@ impl KyberPreKeyStore for &FfiKyberPreKeyStoreStruct {
     async fn mark_kyber_pre_key_used(
         &mut self,
         id: KyberPreKeyId,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         let result = (self.mark_kyber_pre_key_used)(self.ctx, id.into());
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "mark_kyber_pre_key_used",
         ))
     }
@@ -334,11 +334,11 @@ impl SessionStore for &FfiSessionStoreStruct {
     async fn load_session(
         &self,
         address: &ProtocolAddress,
-    ) -> Result<Option<SessionRecord>, SignalProtocolError> {
+    ) -> Result<Option<SessionRecord>, MochiProtocolError> {
         let mut record = std::ptr::null_mut();
         let result = (self.load_session)(self.ctx, &mut record, address);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "load_session",
         ))?;
 
@@ -355,10 +355,10 @@ impl SessionStore for &FfiSessionStoreStruct {
         &mut self,
         address: &ProtocolAddress,
         record: &SessionRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         let result = (self.store_session)(self.ctx, address, record);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "store_session",
         ))
     }
@@ -392,10 +392,10 @@ impl SenderKeyStore for &FfiSenderKeyStoreStruct {
         sender: &ProtocolAddress,
         distribution_id: Uuid,
         record: &SenderKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         let result = (self.store_sender_key)(self.ctx, sender, distribution_id.as_bytes(), record);
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "store_sender_key",
         ))
     }
@@ -404,12 +404,12 @@ impl SenderKeyStore for &FfiSenderKeyStoreStruct {
         &mut self,
         sender: &ProtocolAddress,
         distribution_id: Uuid,
-    ) -> Result<Option<SenderKeyRecord>, SignalProtocolError> {
+    ) -> Result<Option<SenderKeyRecord>, MochiProtocolError> {
         let mut record = std::ptr::null_mut();
         let result =
             (self.load_sender_key)(self.ctx, &mut record, sender, distribution_id.as_bytes());
 
-        CallbackError::check(result).map_err(SignalProtocolError::for_application_callback(
+        CallbackError::check(result).map_err(MochiProtocolError::for_application_callback(
             "load_sender_key",
         ))?;
 

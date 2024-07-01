@@ -1,14 +1,14 @@
 #
-# Copyright (C) 2023 Signal Messenger, LLC.
+# Copyright (C) 2023 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
 [package]
-name = "signal-pin"
-authors = ["Signal Messenger LLC"]
+name = "mochi-pin"
+authors = ["Mochi Messenger LLC"]
 version = "0.1.0"
 edition = "2021"
-description = "A library for operating on signal pins"
+description = "A library for operating on mochi pins"
 license = "AGPL-3.0-only"
 
 [dependencies]

@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,9 +10,9 @@ use rand::RngCore;
 
 #[inline]
 fn bench_poksho_api<S: poksho::ShoApi, M: Measurement>(group: &mut BenchmarkGroup<M>) {
-    group.bench_function("new", |b| b.iter(|| S::new(b"Signal_label_name_20240221")));
+    group.bench_function("new", |b| b.iter(|| S::new(b"Mochi_label_name_20240221")));
 
-    let mut sho = S::new(b"Signal_label_name_20240221");
+    let mut sho = S::new(b"Mochi_label_name_20240221");
 
     let mut data = [0; 256];
     OsRng.fill_bytes(&mut data);
@@ -30,7 +30,7 @@ fn bench_poksho_api<S: poksho::ShoApi, M: Measurement>(group: &mut BenchmarkGrou
 
     group.bench_function("new, then several absorbs, ratchets, squeezes", |b| {
         b.iter(|| {
-            let mut sho = S::new(b"Signal_label_name_20240221");
+            let mut sho = S::new(b"Mochi_label_name_20240221");
 
             sho.absorb_and_ratchet(b"abc");
             sho.absorb_and_ratchet(&data[..63]);

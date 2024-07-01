@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2024 Signal Messenger, LLC.
+// Copyright (C) 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,11 +10,11 @@ use assert_matches::assert_matches;
 use dir_test::{dir_test, Fixture};
 use futures::io::Cursor;
 use futures::AsyncRead;
-use libsignal_message_backup::backup::Purpose;
-use libsignal_message_backup::frame::{FileReaderFactory, VerifyHmac};
-use libsignal_message_backup::key::{BackupKey, MessageBackupKey};
-use libsignal_message_backup::{BackupReader, ReadResult};
-use libsignal_protocol::Aci;
+use libmochi_message_backup::backup::Purpose;
+use libmochi_message_backup::frame::{FileReaderFactory, VerifyHmac};
+use libmochi_message_backup::key::{BackupKey, MessageBackupKey};
+use libmochi_message_backup::{BackupReader, ReadResult};
+use libmochi_protocol::Aci;
 
 const BACKUP_PURPOSE: Purpose = Purpose::RemoteBackup;
 
@@ -32,7 +32,7 @@ fn is_valid_json_proto(input: Fixture<&str>) {
     let json_contents = json5::from_str(json_contents).expect("invalid JSON");
     let json_array = assert_matches!(json_contents, serde_json::Value::Array(contents) => contents);
     let binproto =
-        libsignal_message_backup::backup::convert_from_json(json_array).expect("failed to convert");
+        libmochi_message_backup::backup::convert_from_json(json_array).expect("failed to convert");
     validate_proto(&binproto)
 }
 
@@ -152,7 +152,7 @@ fn invalid_jsonproto(input: Fixture<PathBuf>) {
         .expect("invalid JSON");
     let json_array = assert_matches!(json_contents, serde_json::Value::Array(contents) => contents);
     let binproto =
-        libsignal_message_backup::backup::convert_from_json(json_array).expect("failed to convert");
+        libmochi_message_backup::backup::convert_from_json(json_array).expect("failed to convert");
 
     let input = Cursor::new(&*binproto);
     let reader = BackupReader::new_unencrypted(input, Purpose::RemoteBackup);

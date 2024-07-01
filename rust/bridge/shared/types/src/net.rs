@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,21 +7,21 @@ use std::num::NonZeroU16;
 use std::panic::RefUnwindSafe;
 
 use http::uri::PathAndQuery;
-use libsignal_net::auth::Auth;
-use libsignal_net::enclave::{
+use libmochi_net::auth::Auth;
+use libmochi_net::enclave::{
     Cdsi, EnclaveEndpoint, EnclaveEndpointConnection, EnclaveKind, Nitro, PpssSetup, Sgx, Tpm2Snp,
 };
-use libsignal_net::env;
-use libsignal_net::env::{add_user_agent_header, Env, Svr3Env};
-use libsignal_net::infra::connection_manager::MultiRouteConnectionManager;
-use libsignal_net::infra::dns::DnsResolver;
-use libsignal_net::infra::tcp_ssl::{
+use libmochi_net::env;
+use libmochi_net::env::{add_user_agent_header, Env, Svr3Env};
+use libmochi_net::infra::connection_manager::MultiRouteConnectionManager;
+use libmochi_net::infra::dns::DnsResolver;
+use libmochi_net::infra::tcp_ssl::{
     DirectConnector as TcpSslDirectConnector, ProxyConnector as TcpSslProxyConnector,
     TcpSslConnector, TcpSslConnectorStream,
 };
-use libsignal_net::infra::{make_ws_config, EndpointConnection};
-use libsignal_net::svr::{self, SvrConnection};
-use libsignal_net::timeouts::ONE_ROUTE_CONNECTION_TIMEOUT;
+use libmochi_net::infra::{make_ws_config, EndpointConnection};
+use libmochi_net::svr::{self, SvrConnection};
+use libmochi_net::timeouts::ONE_ROUTE_CONNECTION_TIMEOUT;
 
 use crate::*;
 
@@ -42,8 +42,8 @@ pub enum Environment {
 impl Environment {
     fn env<'a>(self) -> Env<'a, Svr3Env<'a>> {
         match self {
-            Self::Staging => libsignal_net::env::STAGING,
-            Self::Prod => libsignal_net::env::PROD,
+            Self::Staging => libmochi_net::env::STAGING,
+            Self::Prod => libmochi_net::env::PROD,
         }
     }
 }

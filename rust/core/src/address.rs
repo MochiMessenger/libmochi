@@ -1,11 +1,11 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 #![warn(missing_docs)]
 
-//! Types for identifying an individual Signal client instance.
+//! Types for identifying an individual Mochi client instance.
 
 use uuid::Uuid;
 
@@ -68,7 +68,7 @@ where
     ServiceId: From<Self>,
     Self: TryFrom<ServiceId>,
 {
-    /// The standard variable-width binary representation for a Signal service ID.
+    /// The standard variable-width binary representation for a Mochi service ID.
     ///
     /// This format is not self-delimiting; the length is needed to decode it.
     #[inline]
@@ -76,13 +76,13 @@ where
         ServiceId::from(*self).service_id_binary()
     }
 
-    /// The standard fixed-width binary representation for a Signal service ID.
+    /// The standard fixed-width binary representation for a Mochi service ID.
     #[inline]
     pub fn service_id_fixed_width_binary(&self) -> ServiceIdFixedWidthBinaryBytes {
         ServiceId::from(*self).service_id_fixed_width_binary()
     }
 
-    /// The standard string representation for a Signal service ID.
+    /// The standard string representation for a Mochi service ID.
     pub fn service_id_string(&self) -> String {
         ServiceId::from(*self).service_id_string()
     }
@@ -153,10 +153,10 @@ pub type Pni = SpecificServiceId<{ ServiceIdKind::Pni as u8 }>;
 /// Rarely used. The variable-width format that privileges ACIs is preferred.
 pub type ServiceIdFixedWidthBinaryBytes = [u8; 17];
 
-/// A Signal service ID, which can be one of various types.
+/// A Mochi service ID, which can be one of various types.
 ///
 /// Conceptually this is a UUID in a particular "namespace" representing a particular way to reach a
-/// user on the Signal service.
+/// user on the Mochi service.
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ServiceId {
     /// An ACI
@@ -175,7 +175,7 @@ impl ServiceId {
         }
     }
 
-    /// The standard variable-width binary representation for a Signal service ID.
+    /// The standard variable-width binary representation for a Mochi service ID.
     ///
     /// This format is not self-delimiting; the length is needed to decode it.
     #[inline]
@@ -187,7 +187,7 @@ impl ServiceId {
         }
     }
 
-    /// The standard fixed-width binary representation for a Signal service ID.
+    /// The standard fixed-width binary representation for a Mochi service ID.
     #[inline]
     pub fn service_id_fixed_width_binary(&self) -> ServiceIdFixedWidthBinaryBytes {
         let mut result = [0; 17];
@@ -196,7 +196,7 @@ impl ServiceId {
         result
     }
 
-    /// The standard string representation for a Signal service ID.
+    /// The standard string representation for a Mochi service ID.
     pub fn service_id_string(&self) -> String {
         if let Self::Aci(aci) = self {
             aci.0.to_string()
@@ -659,7 +659,7 @@ mod service_id_tests {
     }
 }
 
-/// The type used in memory to represent a *device*, i.e. a particular Signal client instance which
+/// The type used in memory to represent a *device*, i.e. a particular Mochi client instance which
 /// represents some user.
 ///
 /// Used in [ProtocolAddress].
@@ -684,7 +684,7 @@ impl fmt::Display for DeviceId {
     }
 }
 
-/// Represents a unique Signal client instance as `(<user ID>, <device ID>)` pair.
+/// Represents a unique Mochi client instance as `(<user ID>, <device ID>)` pair.
 #[derive(Clone, Debug, Hash, Eq, PartialEq, PartialOrd, Ord)]
 pub struct ProtocolAddress {
     name: String,
@@ -696,11 +696,11 @@ impl ProtocolAddress {
     ///
     /// - `name` defines a user's public identity, and therefore must be globally unique to that
     ///   user.
-    /// - Each Signal client instance then has its own `device_id`, which must be unique among
+    /// - Each Mochi client instance then has its own `device_id`, which must be unique among
     ///   all clients for that user.
     ///
     ///```
-    /// use libsignal_core::{DeviceId, ProtocolAddress};
+    /// use libmochi_core::{DeviceId, ProtocolAddress};
     ///
     /// // This is a unique id for some user, typically a UUID.
     /// let user_id: String = "04899A85-4C9E-44CC-8428-A02AB69335F1".to_string();
@@ -721,9 +721,9 @@ impl ProtocolAddress {
         &self.name
     }
 
-    /// An identifier representing a particular Signal client instance to send to.
+    /// An identifier representing a particular Mochi client instance to send to.
     ///
-    /// For example, if a user has set up Signal on both their phone and laptop, a particular
+    /// For example, if a user has set up Mochi on both their phone and laptop, a particular
     /// message sent to the user will still only go to a single device. So when a user sends a
     /// message to another user at all, they're actually sending a message to *every* device.
     #[inline]

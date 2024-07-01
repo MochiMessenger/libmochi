@@ -1,11 +1,11 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use crate::{kem, IdentityKey, IdentityKeyPair, KeyPair, PublicKey};
 
-pub struct AliceSignalProtocolParameters {
+pub struct AliceMochiProtocolParameters {
     our_identity_key_pair: IdentityKeyPair,
     our_base_key_pair: KeyPair,
 
@@ -16,7 +16,7 @@ pub struct AliceSignalProtocolParameters {
     their_kyber_pre_key: Option<kem::PublicKey>,
 }
 
-impl AliceSignalProtocolParameters {
+impl AliceMochiProtocolParameters {
     pub fn new(
         our_identity_key_pair: IdentityKeyPair,
         our_base_key_pair: KeyPair,
@@ -89,7 +89,7 @@ impl AliceSignalProtocolParameters {
     }
 }
 
-pub struct BobSignalProtocolParameters<'a> {
+pub struct BobMochiProtocolParameters<'a> {
     our_identity_key_pair: IdentityKeyPair,
     our_signed_pre_key_pair: KeyPair,
     our_one_time_pre_key_pair: Option<KeyPair>,
@@ -102,7 +102,7 @@ pub struct BobSignalProtocolParameters<'a> {
     their_kyber_ciphertext: Option<&'a kem::SerializedCiphertext>,
 }
 
-impl<'a> BobSignalProtocolParameters<'a> {
+impl<'a> BobMochiProtocolParameters<'a> {
     pub fn new(
         our_identity_key_pair: IdentityKeyPair,
         our_signed_pre_key_pair: KeyPair,

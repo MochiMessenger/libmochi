@@ -1,11 +1,11 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use ::attest::hsm_enclave;
-use libsignal_bridge_macros::*;
-use libsignal_bridge_types::hsm_enclave::HsmEnclaveClient;
+use libmochi_bridge_macros::*;
+use libmochi_bridge_types::hsm_enclave::HsmEnclaveClient;
 
 use self::hsm_enclave::Result;
 use crate::support::*;

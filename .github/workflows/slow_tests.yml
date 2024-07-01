@@ -1,7 +1,7 @@
 name: Slow Tests
 
 env:
-  LIBSIGNAL_TESTING_ENCLAVE_SECRET: ${{secrets.SVR_ENCLAVE_SECRET}}
+  LIBMOCHI_TESTING_ENCLAVE_SECRET: ${{secrets.SVR_ENCLAVE_SECRET}}
 
 on:
   schedule:
@@ -17,7 +17,7 @@ jobs:
   check-up-to-date:
     name: Already up to date?
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'schedule' && github.repository_owner == 'signalapp' && endsWith(github.repository, '-private') }}
+    if: ${{ github.event_name == 'schedule' && github.repository_owner == 'mochimessenger' && endsWith(github.repository, '-private') }}
     outputs:
       has-changes: ${{ steps.check.outputs.has-changes }}
     steps:
@@ -284,8 +284,8 @@ jobs:
     - name: Build bins and examples
       run: cargo +stable build --workspace  --bins --examples --all-features --verbose --keep-going
 
-    - name: Run libsignal-net smoke tests
-      run: cargo +stable run --example chat_smoke_test -p libsignal-net -- --try-all-routes staging
+    - name: Run libmochi-net smoke tests
+      run: cargo +stable run --example chat_smoke_test -p libmochi-net -- --try-all-routes staging
       env:
         RUST_LOG: debug
 
@@ -295,24 +295,24 @@ jobs:
       run: cargo +stable clean
 
     - name: Run tests (32-bit)
-      # Exclude signal-neon-futures because those tests run Node
-      run: cargo +stable test --workspace --all-features --verbose --target i686-unknown-linux-gnu --exclude signal-neon-futures --no-fail-fast -- --include-ignored
+      # Exclude mochi-neon-futures because those tests run Node
+      run: cargo +stable test --workspace --all-features --verbose --target i686-unknown-linux-gnu --exclude mochi-neon-futures --no-fail-fast -- --include-ignored
 
     - name: cargo clean again (reclaim disk space)
       # Clean the contents of the target directory to avoid running out of disk space during the
       # following steps.
       run: cargo +stable clean
 
-    - name: Run libsignal-protocol cross-version tests
+    - name: Run libmochi-protocol cross-version tests
       run: cargo +stable test --no-fail-fast
       working-directory: rust/protocol/cross-version-testing
 
-    - name: Run libsignal-protocol cross-version tests (32-bit)
+    - name: Run libmochi-protocol cross-version tests (32-bit)
       run: cargo +stable test --target i686-unknown-linux-gnu --no-fail-fast
       working-directory: rust/protocol/cross-version-testing
 
     # We don't run Clippy because GitHub silently updates `stable` and that can introduce new lints,
-    # and we don't have a guarantee that any particular pinned nightly can build older libsignals.
+    # and we don't have a guarantee that any particular pinned nightly can build older libmochis.
 
   report_failures:
     name: Report Failures

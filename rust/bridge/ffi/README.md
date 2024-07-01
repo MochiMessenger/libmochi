@@ -1,6 +1,6 @@
 # Overview
 
-libsignal-ffi is a C ABI library which exposes Signal protocol logic
+libmochi-ffi is a C ABI library which exposes Mochi protocol logic
 to languages which can consume a C ABI, such as Swift.
 
 # Legal things
@@ -19,7 +19,7 @@ Administration Regulations, Section 740.13) for both object code and source code
 
 ## License
 
-Copyright 2020 Signal Messenger, LLC.
+Copyright 2020 Mochi Messenger, LLC.
 
 Licensed under the AGPLv3: http://www.gnu.org/licenses/agpl-3.0.html
 

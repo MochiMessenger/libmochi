@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -268,7 +268,7 @@ export function HttpRequest_add_header(request: Wrapper<HttpRequest>, name: stri
 export function HttpRequest_new(method: string, path: string, bodyAsSlice: Buffer | null): HttpRequest;
 export function IdentityKeyPair_Deserialize(buffer: Buffer): {publicKey:PublicKey,privateKey:PrivateKey};
 export function IdentityKeyPair_Serialize(publicKey: Wrapper<PublicKey>, privateKey: Wrapper<PrivateKey>): Buffer;
-export function IdentityKeyPair_SignAlternateIdentity(publicKey: Wrapper<PublicKey>, privateKey: Wrapper<PrivateKey>, otherIdentity: Wrapper<PublicKey>): Buffer;
+export function IdentityKeyPair_MochiternateIdentity(publicKey: Wrapper<PublicKey>, privateKey: Wrapper<PrivateKey>, otherIdentity: Wrapper<PublicKey>): Buffer;
 export function IdentityKey_VerifyAlternateIdentity(publicKey: Wrapper<PublicKey>, otherIdentity: Wrapper<PublicKey>, signature: Buffer): boolean;
 export function IncrementalMac_CalculateChunkSize(dataSize: number): number;
 export function IncrementalMac_Finalize(mac: Wrapper<IncrementalMac>): Buffer;
@@ -323,13 +323,13 @@ export function PreKeyRecord_GetPrivateKey(obj: Wrapper<PreKeyRecord>): PrivateK
 export function PreKeyRecord_GetPublicKey(obj: Wrapper<PreKeyRecord>): PublicKey;
 export function PreKeyRecord_New(id: number, pubKey: Wrapper<PublicKey>, privKey: Wrapper<PrivateKey>): PreKeyRecord;
 export function PreKeyRecord_Serialize(obj: Wrapper<PreKeyRecord>): Buffer;
-export function PreKeySignalMessage_Deserialize(data: Buffer): PreKeySignalMessage;
-export function PreKeySignalMessage_GetPreKeyId(obj: Wrapper<PreKeySignalMessage>): number | null;
-export function PreKeySignalMessage_GetRegistrationId(obj: Wrapper<PreKeySignalMessage>): number;
-export function PreKeySignalMessage_GetSignedPreKeyId(obj: Wrapper<PreKeySignalMessage>): number;
-export function PreKeySignalMessage_GetVersion(obj: Wrapper<PreKeySignalMessage>): number;
-export function PreKeySignalMessage_New(messageVersion: number, registrationId: number, preKeyId: number | null, signedPreKeyId: number, baseKey: Wrapper<PublicKey>, identityKey: Wrapper<PublicKey>, signalMessage: Wrapper<SignalMessage>): PreKeySignalMessage;
-export function PreKeySignalMessage_Serialize(obj: Wrapper<PreKeySignalMessage>): Buffer;
+export function PreKeyMochiMessage_Deserialize(data: Buffer): PreKeyMochiMessage;
+export function PreKeyMochiMessage_GetPreKeyId(obj: Wrapper<PreKeyMochiMessage>): number | null;
+export function PreKeyMochiMessage_GetRegistrationId(obj: Wrapper<PreKeyMochiMessage>): number;
+export function PreKeyMochiMessage_GetSignedPreKeyId(obj: Wrapper<PreKeyMochiMessage>): number;
+export function PreKeyMochiMessage_GetVersion(obj: Wrapper<PreKeyMochiMessage>): number;
+export function PreKeyMochiMessage_New(messageVersion: number, registrationId: number, preKeyId: number | null, signedPreKeyId: number, baseKey: Wrapper<PublicKey>, identityKey: Wrapper<PublicKey>, mochiMessage: Wrapper<MochiMessage>): PreKeyMochiMessage;
+export function PreKeyMochiMessage_Serialize(obj: Wrapper<PreKeyMochiMessage>): Buffer;
 export function PrivateKey_Agree(privateKey: Wrapper<PrivateKey>, publicKey: Wrapper<PublicKey>): Buffer;
 export function PrivateKey_Deserialize(data: Buffer): PrivateKey;
 export function PrivateKey_Generate(): PrivateKey;
@@ -450,8 +450,8 @@ export function ServiceId_ServiceIdBinary(value: Buffer): Buffer;
 export function ServiceId_ServiceIdLog(value: Buffer): string;
 export function ServiceId_ServiceIdString(value: Buffer): string;
 export function SessionBuilder_ProcessPreKeyBundle(bundle: Wrapper<PreKeyBundle>, protocolAddress: Wrapper<ProtocolAddress>, sessionStore: SessionStore, identityKeyStore: IdentityKeyStore, now: Timestamp): Promise<void>;
-export function SessionCipher_DecryptPreKeySignalMessage(message: Wrapper<PreKeySignalMessage>, protocolAddress: Wrapper<ProtocolAddress>, sessionStore: SessionStore, identityKeyStore: IdentityKeyStore, prekeyStore: PreKeyStore, signedPrekeyStore: SignedPreKeyStore, kyberPrekeyStore: KyberPreKeyStore): Promise<Buffer>;
-export function SessionCipher_DecryptSignalMessage(message: Wrapper<SignalMessage>, protocolAddress: Wrapper<ProtocolAddress>, sessionStore: SessionStore, identityKeyStore: IdentityKeyStore): Promise<Buffer>;
+export function SessionCipher_DecryptPreKeyMochiMessage(message: Wrapper<PreKeyMochiMessage>, protocolAddress: Wrapper<ProtocolAddress>, sessionStore: SessionStore, identityKeyStore: IdentityKeyStore, prekeyStore: PreKeyStore, signedPrekeyStore: SignedPreKeyStore, kyberPrekeyStore: KyberPreKeyStore): Promise<Buffer>;
+export function SessionCipher_DecryptMochiMessage(message: Wrapper<MochiMessage>, protocolAddress: Wrapper<ProtocolAddress>, sessionStore: SessionStore, identityKeyStore: IdentityKeyStore): Promise<Buffer>;
 export function SessionCipher_EncryptMessage(ptext: Buffer, protocolAddress: Wrapper<ProtocolAddress>, sessionStore: SessionStore, identityKeyStore: IdentityKeyStore, now: Timestamp): Promise<CiphertextMessage>;
 export function SessionRecord_ArchiveCurrentState(sessionRecord: Wrapper<SessionRecord>): void;
 export function SessionRecord_CurrentRatchetKeyMatches(s: Wrapper<SessionRecord>, key: Wrapper<PublicKey>): boolean;
@@ -464,14 +464,14 @@ export function SgxClientState_CompleteHandshake(cli: Wrapper<SgxClientState>, h
 export function SgxClientState_EstablishedRecv(cli: Wrapper<SgxClientState>, receivedCiphertext: Buffer): Buffer;
 export function SgxClientState_EstablishedSend(cli: Wrapper<SgxClientState>, plaintextToSend: Buffer): Buffer;
 export function SgxClientState_InitialRequest(obj: Wrapper<SgxClientState>): Buffer;
-export function SignalMedia_CheckAvailable(): void;
-export function SignalMessage_Deserialize(data: Buffer): SignalMessage;
-export function SignalMessage_GetBody(obj: Wrapper<SignalMessage>): Buffer;
-export function SignalMessage_GetCounter(obj: Wrapper<SignalMessage>): number;
-export function SignalMessage_GetMessageVersion(obj: Wrapper<SignalMessage>): number;
-export function SignalMessage_GetSerialized(obj: Wrapper<SignalMessage>): Buffer;
-export function SignalMessage_New(messageVersion: number, macKey: Buffer, senderRatchetKey: Wrapper<PublicKey>, counter: number, previousCounter: number, ciphertext: Buffer, senderIdentityKey: Wrapper<PublicKey>, receiverIdentityKey: Wrapper<PublicKey>): SignalMessage;
-export function SignalMessage_VerifyMac(msg: Wrapper<SignalMessage>, senderIdentityKey: Wrapper<PublicKey>, receiverIdentityKey: Wrapper<PublicKey>, macKey: Buffer): boolean;
+export function MochiMedia_CheckAvailable(): void;
+export function MochiMessage_Deserialize(data: Buffer): MochiMessage;
+export function MochiMessage_GetBody(obj: Wrapper<MochiMessage>): Buffer;
+export function MochiMessage_GetCounter(obj: Wrapper<MochiMessage>): number;
+export function MochiMessage_GetMessageVersion(obj: Wrapper<MochiMessage>): number;
+export function MochiMessage_GetSerialized(obj: Wrapper<MochiMessage>): Buffer;
+export function MochiMessage_New(messageVersion: number, macKey: Buffer, senderRatchetKey: Wrapper<PublicKey>, counter: number, previousCounter: number, ciphertext: Buffer, senderIdentityKey: Wrapper<PublicKey>, receiverIdentityKey: Wrapper<PublicKey>): MochiMessage;
+export function MochiMessage_VerifyMac(msg: Wrapper<MochiMessage>, senderIdentityKey: Wrapper<PublicKey>, receiverIdentityKey: Wrapper<PublicKey>, macKey: Buffer): boolean;
 export function SignedPreKeyRecord_Deserialize(data: Buffer): SignedPreKeyRecord;
 export function SignedPreKeyRecord_GetId(obj: Wrapper<SignedPreKeyRecord>): number;
 export function SignedPreKeyRecord_GetPrivateKey(obj: Wrapper<SignedPreKeyRecord>): PrivateKey;
@@ -573,7 +573,7 @@ interface OtherTestingHandleType { readonly __type: unique symbol; }
 interface PlaintextContent { readonly __type: unique symbol; }
 interface PreKeyBundle { readonly __type: unique symbol; }
 interface PreKeyRecord { readonly __type: unique symbol; }
-interface PreKeySignalMessage { readonly __type: unique symbol; }
+interface PreKeyMochiMessage { readonly __type: unique symbol; }
 interface PrivateKey { readonly __type: unique symbol; }
 interface ProfileKey { readonly __type: unique symbol; }
 interface ProfileKeyCiphertext { readonly __type: unique symbol; }
@@ -599,7 +599,7 @@ interface ServerPublicParams { readonly __type: unique symbol; }
 interface ServerSecretParams { readonly __type: unique symbol; }
 interface SessionRecord { readonly __type: unique symbol; }
 interface SgxClientState { readonly __type: unique symbol; }
-interface SignalMessage { readonly __type: unique symbol; }
+interface MochiMessage { readonly __type: unique symbol; }
 interface SignedPreKeyRecord { readonly __type: unique symbol; }
 interface TestingHandleType { readonly __type: unique symbol; }
 interface TokioAsyncContext { readonly __type: unique symbol; }

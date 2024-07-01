@@ -1,12 +1,12 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 mod support;
 
 use futures_util::FutureExt;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use rand::rngs::OsRng;
 use rand::seq::SliceRandom;
 use rand::Rng;
@@ -16,7 +16,7 @@ use support::*;
 use uuid::Uuid;
 
 #[test]
-fn group_no_send_session() -> Result<(), SignalProtocolError> {
+fn group_no_send_session() -> Result<(), MochiProtocolError> {
     let mut csprng = OsRng;
 
     let sender_address = ProtocolAddress::new("+14159999111".to_owned(), 1.into());
@@ -39,7 +39,7 @@ fn group_no_send_session() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_no_recv_session() -> Result<(), SignalProtocolError> {
+fn group_no_recv_session() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -86,7 +86,7 @@ fn group_no_recv_session() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_basic_encrypt_decrypt() -> Result<(), SignalProtocolError> {
+fn group_basic_encrypt_decrypt() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -142,7 +142,7 @@ fn group_basic_encrypt_decrypt() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_sealed_sender() -> Result<(), SignalProtocolError> {
+fn group_sealed_sender() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -345,7 +345,7 @@ fn group_sealed_sender() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_sealed_sender_multiple_devices() -> Result<(), SignalProtocolError> {
+fn group_sealed_sender_multiple_devices() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -577,7 +577,7 @@ fn group_sealed_sender_multiple_devices() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_sealed_sender_multiple_devices_and_excluded_recipients() -> Result<(), SignalProtocolError>
+fn group_sealed_sender_multiple_devices_and_excluded_recipients() -> Result<(), MochiProtocolError>
 {
     async {
         let mut csprng = OsRng;
@@ -844,7 +844,7 @@ fn group_sealed_sender_multiple_devices_and_excluded_recipients() -> Result<(), 
 }
 
 #[test]
-fn group_large_messages() -> Result<(), SignalProtocolError> {
+fn group_large_messages() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -902,7 +902,7 @@ fn group_large_messages() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_basic_ratchet() -> Result<(), SignalProtocolError> {
+fn group_basic_ratchet() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -973,7 +973,7 @@ fn group_basic_ratchet() -> Result<(), SignalProtocolError> {
                 &sender_address,
             )
             .await,
-            Err(SignalProtocolError::DuplicatedMessage(1, 0))
+            Err(MochiProtocolError::DuplicatedMessage(1, 0))
         ));
 
         let bob_plaintext3 = group_decrypt(
@@ -1005,7 +1005,7 @@ fn group_basic_ratchet() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_late_join() -> Result<(), SignalProtocolError> {
+fn group_late_join() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -1072,7 +1072,7 @@ fn group_late_join() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_out_of_order() -> Result<(), SignalProtocolError> {
+fn group_out_of_order() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -1142,7 +1142,7 @@ fn group_out_of_order() -> Result<(), SignalProtocolError> {
 
 #[test]
 #[ignore = "slow to run locally"]
-fn group_too_far_in_the_future() -> Result<(), SignalProtocolError> {
+fn group_too_far_in_the_future() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 
@@ -1205,7 +1205,7 @@ fn group_too_far_in_the_future() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn group_message_key_limit() -> Result<(), SignalProtocolError> {
+fn group_message_key_limit() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 

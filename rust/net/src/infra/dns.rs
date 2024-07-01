@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -243,12 +243,12 @@ mod test {
     const IPV4: Ipv4Addr = ip_addr!(v4, "1.1.1.1");
     const IPV6: Ipv6Addr = ip_addr!(v6, "::1");
 
-    const CUSTOM_DOMAIN: &str = "custom.signal.org";
-    const IPV4_ONLY_DOMAIN: &str = "ipv4.signal.org";
-    const IPV6_ONLY_DOMAIN: &str = "ipv6.signal.org";
-    const DUAL_STACK_DOMAIN: &str = "dual.signal.org";
-    const TIMING_OUT_DOMAIN: &str = "time.signal.org";
-    const FALLBACK_ONLY_DOMAIN: &str = "fallback.signal.org";
+    const CUSTOM_DOMAIN: &str = "custom.mochi.org";
+    const IPV4_ONLY_DOMAIN: &str = "ipv4.mochi.org";
+    const IPV6_ONLY_DOMAIN: &str = "ipv6.mochi.org";
+    const DUAL_STACK_DOMAIN: &str = "dual.mochi.org";
+    const TIMING_OUT_DOMAIN: &str = "time.mochi.org";
+    const FALLBACK_ONLY_DOMAIN: &str = "fallback.mochi.org";
 
     const ATTEMPT_TIMEOUT: Duration = Duration::from_secs(1);
 

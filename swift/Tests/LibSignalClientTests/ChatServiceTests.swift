@@ -1,11 +1,11 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import Foundation
-@testable import LibSignalClient
-import SignalFfi
+@testable import LibMochiClient
+import MochiFfi
 import XCTest
 
 extension ChatService {
@@ -16,14 +16,14 @@ extension ChatService {
     func injectServerRequest(_ requestBytes: Data) {
         withNativeHandle { handle in
             requestBytes.withUnsafeBorrowedBuffer { requestBytes in
-                failOnError(signal_testing_chat_service_inject_raw_server_request(handle, requestBytes))
+                failOnError(mochi_testing_chat_service_inject_raw_server_request(handle, requestBytes))
             }
         }
     }
 
     func injectConnectionInterrupted() {
         withNativeHandle { handle in
-            failOnError(signal_testing_chat_service_inject_connection_interrupted(handle))
+            failOnError(mochi_testing_chat_service_inject_connection_interrupted(handle))
         }
     }
 }
@@ -41,8 +41,8 @@ final class ChatServiceTests: TestCaseBase {
     func testConvertResponse() throws {
         do {
             // Empty body
-            var rawResponse = SignalFfiChatResponse()
-            try checkError(signal_testing_chat_service_response_convert(&rawResponse, false))
+            var rawResponse = MochiFfiChatResponse()
+            try checkError(mochi_testing_chat_service_response_convert(&rawResponse, false))
             let response = try ChatService.Response(consuming: rawResponse)
             XCTAssertEqual(Self.expectedStatus, response.status)
             XCTAssertEqual(Self.expectedMessage, response.message)
@@ -52,8 +52,8 @@ final class ChatServiceTests: TestCaseBase {
 
         do {
             // Present body
-            var rawResponse = SignalFfiChatResponse()
-            try checkError(signal_testing_chat_service_response_convert(&rawResponse, true))
+            var rawResponse = MochiFfiChatResponse()
+            try checkError(mochi_testing_chat_service_response_convert(&rawResponse, true))
             let response = try ChatService.Response(consuming: rawResponse)
             XCTAssertEqual(Self.expectedStatus, response.status)
             XCTAssertEqual(Self.expectedMessage, response.message)
@@ -63,8 +63,8 @@ final class ChatServiceTests: TestCaseBase {
     }
 
     func testConvertDebugInfo() throws {
-        var rawDebugInfo = SignalFfiChatServiceDebugInfo()
-        try checkError(signal_testing_chat_service_debug_info_convert(&rawDebugInfo))
+        var rawDebugInfo = MochiFfiChatServiceDebugInfo()
+        try checkError(mochi_testing_chat_service_debug_info_convert(&rawDebugInfo))
         let debugInfo = ChatService.DebugInfo(consuming: rawDebugInfo)
         XCTAssertEqual(2, debugInfo.reconnectCount)
         XCTAssertEqual(.ipv4, debugInfo.ipType)
@@ -73,8 +73,8 @@ final class ChatServiceTests: TestCaseBase {
     }
 
     func testConvertResponseAndDebugInfo() throws {
-        var rawResponseAndDebugInfo = SignalFfiResponseAndDebugInfo()
-        try checkError(signal_testing_chat_service_response_and_debug_info_convert(&rawResponseAndDebugInfo))
+        var rawResponseAndDebugInfo = MochiFfiResponseAndDebugInfo()
+        try checkError(mochi_testing_chat_service_response_and_debug_info_convert(&rawResponseAndDebugInfo))
 
         let response = try ChatService.Response(consuming: rawResponseAndDebugInfo.response)
         XCTAssertEqual(Self.expectedStatus, response.status)
@@ -91,44 +91,44 @@ final class ChatServiceTests: TestCaseBase {
 
     func testConvertError() throws {
         let failWithError = {
-            try checkError(signal_testing_chat_service_error_convert($0))
+            try checkError(mochi_testing_chat_service_error_convert($0))
             XCTFail("should have failed")
         }
         do {
             try failWithError("AppExpired")
-        } catch SignalError.appExpired(_) {}
+        } catch MochiError.appExpired(_) {}
         do {
             try failWithError("DeviceDeregistered")
-        } catch SignalError.deviceDeregistered(_) {}
+        } catch MochiError.deviceDeregistered(_) {}
         do {
             try failWithError("ServiceInactive")
-        } catch SignalError.chatServiceInactive(_) {}
+        } catch MochiError.chatServiceInactive(_) {}
 
         do {
             try failWithError("WebSocket")
-        } catch SignalError.webSocketError(_) {}
+        } catch MochiError.webSocketError(_) {}
         do {
             try failWithError("UnexpectedFrameReceived")
-        } catch SignalError.networkProtocolError(_) {}
+        } catch MochiError.networkProtocolError(_) {}
         do {
             try failWithError("ServerRequestMissingId")
-        } catch SignalError.networkProtocolError(_) {}
+        } catch MochiError.networkProtocolError(_) {}
         do {
             try failWithError("IncomingDataInvalid")
-        } catch SignalError.networkProtocolError(_) {}
+        } catch MochiError.networkProtocolError(_) {}
         do {
             try failWithError("Timeout")
-        } catch SignalError.connectionTimeoutError(_) {}
+        } catch MochiError.connectionTimeoutError(_) {}
         do {
             try failWithError("TimeoutEstablishingConnection")
-        } catch SignalError.connectionTimeoutError(_) {}
+        } catch MochiError.connectionTimeoutError(_) {}
 
         do {
             try failWithError("FailedToPassMessageToIncomingChannel")
-        } catch SignalError.internalError(_) {}
+        } catch MochiError.internalError(_) {}
         do {
             try failWithError("RequestHasInvalidHeader")
-        } catch SignalError.internalError(_) {}
+        } catch MochiError.internalError(_) {}
     }
 
     func testConstructRequest() throws {
@@ -139,17 +139,17 @@ final class ChatServiceTests: TestCaseBase {
         let internalRequest = try ChatService.InternalRequest(request)
         try internalRequest.withNativeHandle { internalRequest in
             XCTAssertEqual(expectedMethod, try invokeFnReturningString {
-                signal_testing_chat_request_get_method($0, internalRequest)
+                mochi_testing_chat_request_get_method($0, internalRequest)
             })
             XCTAssertEqual(expectedPathAndQuery, try invokeFnReturningString {
-                signal_testing_chat_request_get_path($0, internalRequest)
+                mochi_testing_chat_request_get_path($0, internalRequest)
             })
             XCTAssertEqual(Self.expectedContent, try invokeFnReturningData {
-                signal_testing_chat_request_get_body($0, internalRequest)
+                mochi_testing_chat_request_get_body($0, internalRequest)
             })
             for (k, v) in Self.expectedHeaders {
                 XCTAssertEqual(v, try invokeFnReturningString {
-                    signal_testing_chat_request_get_header_value($0, internalRequest, k)
+                    mochi_testing_chat_request_get_header_value($0, internalRequest, k)
                 })
             }
         }
@@ -212,18 +212,18 @@ final class ChatServiceTests: TestCaseBase {
 
         // The following payloads were generated via protoscope.
         // % protoscope -s | base64
-        // The fields are described by chat_websocket.proto in the libsignal-net crate.
+        // The fields are described by chat_websocket.proto in the libmochi-net crate.
 
         // 1: {"PUT"}
         // 2: {"/api/v1/message"}
         // 3: {1000i64}
-        // 5: {"x-signal-timestamp:1000"}
+        // 5: {"x-mochi-timestamp:1000"}
         // 4: 1
         chat.injectServerRequest(base64: "CgNQVVQSDy9hcGkvdjEvbWVzc2FnZRoI6AMAAAAAAAAqF3gtc2lnbmFsLXRpbWVzdGFtcDoxMDAwIAE=")
         // 1: {"PUT"}
         // 2: {"/api/v1/message"}
         // 3: {2000i64}
-        // 5: {"x-signal-timestamp:2000"}
+        // 5: {"x-mochi-timestamp:2000"}
         // 4: 2
         chat.injectServerRequest(base64: "CgNQVVQSDy9hcGkvdjEvbWVzc2FnZRoI0AcAAAAAAAAqF3gtc2lnbmFsLXRpbWVzdGFtcDoyMDAwIAI=")
 
@@ -289,7 +289,7 @@ final class ChatServiceTests: TestCaseBase {
 
     func testConnectUnauth() async throws {
         // Use the presence of the proxy server environment setting to know whether we should make network requests in our tests.
-        guard ProcessInfo.processInfo.environment["LIBSIGNAL_TESTING_PROXY_SERVER"] != nil else {
+        guard ProcessInfo.processInfo.environment["LIBMOCHI_TESTING_PROXY_SERVER"] != nil else {
             throw XCTSkip()
         }
 
@@ -301,7 +301,7 @@ final class ChatServiceTests: TestCaseBase {
     }
 
     func testConnectUnauthThroughProxy() async throws {
-        guard let PROXY_SERVER = ProcessInfo.processInfo.environment["LIBSIGNAL_TESTING_PROXY_SERVER"] else {
+        guard let PROXY_SERVER = ProcessInfo.processInfo.environment["LIBMOCHI_TESTING_PROXY_SERVER"] else {
             throw XCTSkip()
         }
 
@@ -328,9 +328,9 @@ final class ChatServiceTests: TestCaseBase {
         // The default TLS proxy config doesn't support staging, so we connect to production.
         let net = Net(env: .production, userAgent: Self.userAgent)
         do {
-            try net.setProxy(host: "signalfoundation.org", port: 0)
+            try net.setProxy(host: "mochifoundation.org", port: 0)
             XCTFail("should not allow setting invalid proxy")
-        } catch SignalError.ioError {
+        } catch MochiError.ioError {
             // Okay
         }
     }

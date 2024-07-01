@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use std::ops::Range;
@@ -51,9 +51,9 @@ pub(crate) const CANDIDATES_PER_RANGE: [usize; 8] = [4, 3, 3, 2, 2, 2, 2, 2];
 
 pub const USERNAME_LINK_ENTROPY_SIZE: usize = 32;
 
-pub(crate) const USERNAME_LINK_LABEL_ENCRYPTION_KEY: &[u8] = b"Signal Username Link Encryption Key";
+pub(crate) const USERNAME_LINK_LABEL_ENCRYPTION_KEY: &[u8] = b"Mochi Username Link Encryption Key";
 pub(crate) const USERNAME_LINK_LABEL_AUTHENTICATION_KEY: &[u8] =
-    b"Signal Username Link Authentication Key";
+    b"Mochi Username Link Authentication Key";
 pub(crate) const USERNAME_LINK_HMAC_LEN: usize = 32;
 pub(crate) const USERNAME_LINK_KEY_SIZE: usize = 32;
 pub(crate) const USERNAME_LINK_IV_SIZE: usize = 16;
@@ -66,7 +66,7 @@ mod test {
 
     #[test]
     fn generate_points() {
-        let mut sho = Sho::new(b"Signal_Username_20230130_Constant_Points_Generate", b"");
+        let mut sho = Sho::new(b"Mochi_Username_20230130_Constant_Points_Generate", b"");
         for p in BASE_POINTS.iter() {
             assert_eq!(&sho.get_point(), p);
         }

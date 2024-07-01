@@ -1,13 +1,13 @@
 //
-// Copyright 2021-2022 Signal Messenger, LLC.
+// Copyright 2021-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_bridge_macros::*;
+use libmochi_bridge_macros::*;
 #[cfg(feature = "jni")]
-use libsignal_bridge_types::jni;
-use libsignal_protocol::error::Result;
-use libsignal_protocol::*;
+use libmochi_bridge_types::jni;
+use libmochi_protocol::error::Result;
+use libmochi_protocol::*;
 use static_assertions::const_assert_eq;
 use uuid::Uuid;
 
@@ -25,7 +25,7 @@ pub type KyberKeyPair = kem::KeyPair;
 pub type KyberPublicKey = kem::PublicKey;
 pub type KyberSecretKey = kem::SecretKey;
 
-pub(crate) use libsignal_protocol::Timestamp;
+pub(crate) use libmochi_protocol::Timestamp;
 
 bridge_handle_fns!(CiphertextMessage, clone = false, jni = false);
 bridge_handle_fns!(DecryptionErrorMessage);
@@ -33,7 +33,7 @@ bridge_handle_fns!(Fingerprint, jni = NumericFingerprintGenerator);
 bridge_handle_fns!(PlaintextContent);
 bridge_handle_fns!(PreKeyBundle);
 bridge_handle_fns!(PreKeyRecord);
-bridge_handle_fns!(PreKeySignalMessage);
+bridge_handle_fns!(PreKeyMochiMessage);
 bridge_handle_fns!(PrivateKey, ffi = privatekey, jni = ECPrivateKey);
 bridge_handle_fns!(ProtocolAddress, ffi = address);
 bridge_handle_fns!(PublicKey, ffi = publickey, jni = ECPublicKey);
@@ -43,7 +43,7 @@ bridge_handle_fns!(SenderKeyMessage);
 bridge_handle_fns!(SenderKeyRecord);
 bridge_handle_fns!(ServerCertificate);
 bridge_handle_fns!(SessionRecord);
-bridge_handle_fns!(SignalMessage, ffi = message);
+bridge_handle_fns!(MochiMessage, ffi = message);
 bridge_handle_fns!(SignedPreKeyRecord);
 bridge_handle_fns!(KyberPreKeyRecord);
 bridge_handle_fns!(UnidentifiedSenderMessageContent, clone = false);
@@ -64,7 +64,7 @@ fn HKDF_DeriveSecrets(
     hkdf::Hkdf::<sha2::Sha256>::new(salt, ikm)
         .expand(label, &mut buffer)
         .map_err(|_| {
-            SignalProtocolError::InvalidArgument(format!("output too long ({})", output_length))
+            MochiProtocolError::InvalidArgument(format!("output too long ({})", output_length))
         })?;
     Ok(buffer)
 }
@@ -75,7 +75,7 @@ fn HKDF_Derive(output: &mut [u8], ikm: &[u8], label: &[u8], salt: &[u8]) -> Resu
     hkdf::Hkdf::<sha2::Sha256>::new(Some(salt), ikm)
         .expand(label, output)
         .map_err(|_| {
-            SignalProtocolError::InvalidArgument(format!("output too long ({})", output.len()))
+            MochiProtocolError::InvalidArgument(format!("output too long ({})", output.len()))
         })?;
     Ok(())
 }
@@ -100,7 +100,7 @@ fn ServiceId_ServiceIdLog(value: ServiceId) -> String {
 #[bridge_fn]
 fn ServiceId_ParseFromServiceIdBinary(input: &[u8]) -> Result<ServiceId> {
     ServiceId::parse_from_service_id_binary(input).ok_or_else(|| {
-        SignalProtocolError::InvalidArgument("invalid Service-Id-Binary".to_string())
+        MochiProtocolError::InvalidArgument("invalid Service-Id-Binary".to_string())
     })
 }
 
@@ -108,7 +108,7 @@ fn ServiceId_ParseFromServiceIdBinary(input: &[u8]) -> Result<ServiceId> {
 #[bridge_fn]
 fn ServiceId_ParseFromServiceIdString(input: String) -> Result<ServiceId> {
     ServiceId::parse_from_service_id_string(&input).ok_or_else(|| {
-        SignalProtocolError::InvalidArgument("invalid Service-Id-String".to_string())
+        MochiProtocolError::InvalidArgument("invalid Service-Id-String".to_string())
     })
 }
 
@@ -256,7 +256,7 @@ fn IdentityKeyPair_Serialize(public_key: &PublicKey, private_key: &PrivateKey) -
 }
 
 #[bridge_fn(ffi = "identitykeypair_sign_alternate_identity")]
-fn IdentityKeyPair_SignAlternateIdentity(
+fn IdentityKeyPair_MochiternateIdentity(
     public_key: &PublicKey,
     private_key: &PrivateKey,
     other_identity: &PublicKey,
@@ -338,17 +338,17 @@ fn ScannableFingerprint_Compare(fprint1: &[u8], fprint2: &[u8]) -> Result<bool> 
 }
 
 #[bridge_fn(ffi = "message_deserialize")]
-fn SignalMessage_Deserialize(data: &[u8]) -> Result<SignalMessage> {
-    SignalMessage::try_from(data)
+fn MochiMessage_Deserialize(data: &[u8]) -> Result<MochiMessage> {
+    MochiMessage::try_from(data)
 }
 
-bridge_get!(SignalMessage::body -> &[u8], ffi = "message_get_body");
-bridge_get!(SignalMessage::serialized -> &[u8], ffi = "message_get_serialized");
-bridge_get!(SignalMessage::counter -> u32, ffi = "message_get_counter");
-bridge_get!(SignalMessage::message_version -> u32, ffi = "message_get_message_version");
+bridge_get!(MochiMessage::body -> &[u8], ffi = "message_get_body");
+bridge_get!(MochiMessage::serialized -> &[u8], ffi = "message_get_serialized");
+bridge_get!(MochiMessage::counter -> u32, ffi = "message_get_counter");
+bridge_get!(MochiMessage::message_version -> u32, ffi = "message_get_message_version");
 
 #[bridge_fn(ffi = "message_new")]
-fn SignalMessage_New(
+fn MochiMessage_New(
     message_version: u8,
     mac_key: &[u8],
     sender_ratchet_key: &PublicKey,
@@ -357,8 +357,8 @@ fn SignalMessage_New(
     ciphertext: &[u8],
     sender_identity_key: &PublicKey,
     receiver_identity_key: &PublicKey,
-) -> Result<SignalMessage> {
-    SignalMessage::new(
+) -> Result<MochiMessage> {
+    MochiMessage::new(
         message_version,
         mac_key,
         *sender_ratchet_key,
@@ -371,8 +371,8 @@ fn SignalMessage_New(
 }
 
 #[bridge_fn(ffi = "message_verify_mac")]
-fn SignalMessage_VerifyMac(
-    msg: &SignalMessage,
+fn MochiMessage_VerifyMac(
+    msg: &MochiMessage,
     sender_identity_key: &PublicKey,
     receiver_identity_key: &PublicKey,
     mac_key: &[u8],
@@ -385,21 +385,21 @@ fn SignalMessage_VerifyMac(
 }
 
 #[bridge_fn(ffi = "message_get_sender_ratchet_key", node = false)]
-fn SignalMessage_GetSenderRatchetKey(m: &SignalMessage) -> PublicKey {
+fn MochiMessage_GetSenderRatchetKey(m: &MochiMessage) -> PublicKey {
     *m.sender_ratchet_key()
 }
 
 #[bridge_fn]
-fn PreKeySignalMessage_New(
+fn PreKeyMochiMessage_New(
     message_version: u8,
     registration_id: u32,
     pre_key_id: Option<u32>,
     signed_pre_key_id: u32,
     base_key: &PublicKey,
     identity_key: &PublicKey,
-    signal_message: &SignalMessage,
-) -> Result<PreKeySignalMessage> {
-    PreKeySignalMessage::new(
+    mochi_message: &MochiMessage,
+) -> Result<PreKeyMochiMessage> {
+    PreKeyMochiMessage::new(
         message_version,
         registration_id,
         pre_key_id.map(|id| id.into()),
@@ -407,35 +407,35 @@ fn PreKeySignalMessage_New(
         None, // TODO: accept kyber payload
         *base_key,
         IdentityKey::new(*identity_key),
-        signal_message.clone(),
+        mochi_message.clone(),
     )
 }
 
 #[bridge_fn(node = false)]
-fn PreKeySignalMessage_GetBaseKey(m: &PreKeySignalMessage) -> PublicKey {
+fn PreKeyMochiMessage_GetBaseKey(m: &PreKeyMochiMessage) -> PublicKey {
     *m.base_key()
 }
 
 #[bridge_fn(node = false)]
-fn PreKeySignalMessage_GetIdentityKey(m: &PreKeySignalMessage) -> PublicKey {
+fn PreKeyMochiMessage_GetIdentityKey(m: &PreKeyMochiMessage) -> PublicKey {
     *m.identity_key().public_key()
 }
 
 #[bridge_fn(node = false)]
-fn PreKeySignalMessage_GetSignalMessage(m: &PreKeySignalMessage) -> SignalMessage {
+fn PreKeyMochiMessage_GetMochiMessage(m: &PreKeyMochiMessage) -> MochiMessage {
     m.message().clone()
 }
 
-bridge_deserialize!(PreKeySignalMessage::try_from);
+bridge_deserialize!(PreKeyMochiMessage::try_from);
 bridge_get!(
-    PreKeySignalMessage::serialized as Serialize -> &[u8],
-    jni = "PreKeySignalMessage_1GetSerialized"
+    PreKeyMochiMessage::serialized as Serialize -> &[u8],
+    jni = "PreKeyMochiMessage_1GetSerialized"
 );
 
-bridge_get!(PreKeySignalMessage::registration_id -> u32);
-bridge_get!(PreKeySignalMessage::signed_pre_key_id -> u32);
-bridge_get!(PreKeySignalMessage::pre_key_id -> Option<u32>);
-bridge_get!(PreKeySignalMessage::message_version as GetVersion -> u32);
+bridge_get!(PreKeyMochiMessage::registration_id -> u32);
+bridge_get!(PreKeyMochiMessage::signed_pre_key_id -> u32);
+bridge_get!(PreKeyMochiMessage::pre_key_id -> Option<u32>);
+bridge_get!(PreKeyMochiMessage::message_version as GetVersion -> u32);
 
 bridge_deserialize!(SenderKeyMessage::try_from);
 bridge_get!(SenderKeyMessage::ciphertext as GetCipherText -> &[u8]);
@@ -533,7 +533,7 @@ fn DecryptionErrorMessage_ForOriginalMessage(
     original_sender_device_id: u32,
 ) -> Result<DecryptionErrorMessage> {
     let original_type = CiphertextMessageType::try_from(original_type).map_err(|_| {
-        SignalProtocolError::InvalidArgument(format!("unknown message type {}", original_type))
+        MochiProtocolError::InvalidArgument(format!("unknown message type {}", original_type))
     })?;
     DecryptionErrorMessage::for_original(
         original_bytes,
@@ -591,7 +591,7 @@ fn PreKeyBundle_New(
         (None, None) => None,
         (Some(k), Some(id)) => Some((id.into(), *k)),
         _ => {
-            return Err(SignalProtocolError::InvalidArgument(
+            return Err(MochiProtocolError::InvalidArgument(
                 "Must supply both or neither of prekey and prekey_id".to_owned(),
             ));
         }
@@ -611,7 +611,7 @@ fn PreKeyBundle_New(
             Ok(bundle.with_kyber_pre_key(id.into(), public.clone(), signature.to_vec()))
         }
         (None, None, &[]) => Ok(bundle),
-        _ => Err(SignalProtocolError::InvalidArgument(
+        _ => Err(MochiProtocolError::InvalidArgument(
             "All or none Kyber pre key arguments must be set".to_owned(),
         )),
     }
@@ -936,7 +936,7 @@ fn SessionRecord_NewFresh() -> SessionRecord {
 fn SessionRecord_GetSessionVersion(s: &SessionRecord) -> Result<u32> {
     match s.session_version() {
         Ok(v) => Ok(v),
-        Err(SignalProtocolError::InvalidState(_, _)) => Ok(0),
+        Err(MochiProtocolError::InvalidState(_, _)) => Ok(0),
         Err(e) => Err(e),
     }
 }
@@ -1019,7 +1019,7 @@ fn SessionRecord_InitializeAliceSession(
 
     let mut csprng = rand::rngs::OsRng;
 
-    let parameters = AliceSignalProtocolParameters::new(
+    let parameters = AliceMochiProtocolParameters::new(
         our_identity_key_pair,
         our_base_key_pair,
         their_identity_key,
@@ -1052,7 +1052,7 @@ fn SessionRecord_InitializeBobSession(
 
     let their_identity_key = IdentityKey::new(*their_identity_key);
 
-    let parameters = BobSignalProtocolParameters::new(
+    let parameters = BobMochiProtocolParameters::new(
         our_identity_key_pair,
         our_signed_pre_key_pair,
         None,
@@ -1107,14 +1107,14 @@ async fn SessionCipher_EncryptMessage(
 }
 
 #[bridge_fn(ffi = "decrypt_message")]
-async fn SessionCipher_DecryptSignalMessage(
-    message: &SignalMessage,
+async fn SessionCipher_DecryptMochiMessage(
+    message: &MochiMessage,
     protocol_address: &ProtocolAddress,
     session_store: &mut dyn SessionStore,
     identity_key_store: &mut dyn IdentityKeyStore,
 ) -> Result<Vec<u8>> {
     let mut csprng = rand::rngs::OsRng;
-    message_decrypt_signal(
+    message_decrypt_mochi(
         message,
         protocol_address,
         session_store,
@@ -1125,8 +1125,8 @@ async fn SessionCipher_DecryptSignalMessage(
 }
 
 #[bridge_fn(ffi = "decrypt_pre_key_message")]
-async fn SessionCipher_DecryptPreKeySignalMessage(
-    message: &PreKeySignalMessage,
+async fn SessionCipher_DecryptPreKeyMochiMessage(
+    message: &PreKeyMochiMessage,
     protocol_address: &ProtocolAddress,
     session_store: &mut dyn SessionStore,
     identity_key_store: &mut dyn IdentityKeyStore,
@@ -1205,7 +1205,7 @@ fn SealedSender_MultiRecipientMessageForSingleRecipient(
 ) -> Result<Vec<u8>> {
     let messages = SealedSenderV2SentMessage::parse(encoded_multi_recipient_message)?;
     if messages.recipients.len() != 1 {
-        return Err(SignalProtocolError::InvalidArgument(
+        return Err(MochiProtocolError::InvalidArgument(
             "only supports messages with exactly one recipient".to_owned(),
         ));
     }

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package signal.backup;
+package mochi.backup;
 
 option java_package = "org.thoughtcrime.securesms.backup.v2.proto";
 
@@ -536,7 +536,7 @@ message LinkPreview {
 // A FilePointer on a message that has additional
 // metadata that applies only to message attachments.
 message MessageAttachment {
-  // Similar to SignalService.AttachmentPointer.Flags,
+  // Similar to MochiService.AttachmentPointer.Flags,
   // but explicitly mutually exclusive. Note the different raw values
   // (non-zero starting values are not supported in proto3.)
   enum Flag {
@@ -732,7 +732,7 @@ message GroupCall {
 message SimpleChatUpdate {
   enum Type {
     UNKNOWN = 0;
-    JOINED_SIGNAL = 1;
+    JOINED_MOCHI = 1;
     IDENTITY_UPDATE = 2;
     IDENTITY_VERIFIED = 3;
     IDENTITY_DEFAULT = 4; // marking as unverified

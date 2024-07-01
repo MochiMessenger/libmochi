@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package org.signal.cdsi;
+package org.mochi.cdsi;
 
 message ClientRequest {
   // Each ACI/UAK pair is a 32-byte buffer, containing the 16-byte ACI followed

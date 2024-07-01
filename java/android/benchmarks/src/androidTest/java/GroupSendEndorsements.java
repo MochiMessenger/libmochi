@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -15,16 +15,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.signal.libsignal.protocol.ServiceId;
-import org.signal.libsignal.zkgroup.ServerPublicParams;
-import org.signal.libsignal.zkgroup.ServerSecretParams;
-import org.signal.libsignal.zkgroup.VerificationFailedException;
-import org.signal.libsignal.zkgroup.groups.ClientZkGroupCipher;
-import org.signal.libsignal.zkgroup.groups.GroupSecretParams;
-import org.signal.libsignal.zkgroup.groups.UuidCiphertext;
-import org.signal.libsignal.zkgroup.groupsend.GroupSendDerivedKeyPair;
-import org.signal.libsignal.zkgroup.groupsend.GroupSendEndorsement;
-import org.signal.libsignal.zkgroup.groupsend.GroupSendEndorsementsResponse;
+import org.mochi.libmochi.protocol.ServiceId;
+import org.mochi.libmochi.zkgroup.ServerPublicParams;
+import org.mochi.libmochi.zkgroup.ServerSecretParams;
+import org.mochi.libmochi.zkgroup.VerificationFailedException;
+import org.mochi.libmochi.zkgroup.groups.ClientZkGroupCipher;
+import org.mochi.libmochi.zkgroup.groups.GroupSecretParams;
+import org.mochi.libmochi.zkgroup.groups.UuidCiphertext;
+import org.mochi.libmochi.zkgroup.groupsend.GroupSendDerivedKeyPair;
+import org.mochi.libmochi.zkgroup.groupsend.GroupSendEndorsement;
+import org.mochi.libmochi.zkgroup.groupsend.GroupSendEndorsementsResponse;
 
 @RunWith(Parameterized.class)
 public class GroupSendEndorsements {

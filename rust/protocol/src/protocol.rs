@@ -1,11 +1,11 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use crate::state::{KyberPreKeyId, PreKeyId, SignedPreKeyId};
 use crate::{
-    kem, proto, IdentityKey, PrivateKey, PublicKey, Result, SignalProtocolError, Timestamp,
+    kem, proto, IdentityKey, PrivateKey, PublicKey, Result, MochiProtocolError, Timestamp,
 };
 
 use hmac::{Hmac, Mac};
@@ -22,8 +22,8 @@ pub(crate) const SENDERKEY_MESSAGE_CURRENT_VERSION: u8 = 3;
 
 #[derive(Debug)]
 pub enum CiphertextMessage {
-    SignalMessage(SignalMessage),
-    PreKeySignalMessage(PreKeySignalMessage),
+    MochiMessage(MochiMessage),
+    PreKeyMochiMessage(PreKeyMochiMessage),
     SenderKeyMessage(SenderKeyMessage),
     PlaintextContent(PlaintextContent),
 }
@@ -40,8 +40,8 @@ pub enum CiphertextMessageType {
 impl CiphertextMessage {
     pub fn message_type(&self) -> CiphertextMessageType {
         match self {
-            CiphertextMessage::SignalMessage(_) => CiphertextMessageType::Whisper,
-            CiphertextMessage::PreKeySignalMessage(_) => CiphertextMessageType::PreKey,
+            CiphertextMessage::MochiMessage(_) => CiphertextMessageType::Whisper,
+            CiphertextMessage::PreKeyMochiMessage(_) => CiphertextMessageType::PreKey,
             CiphertextMessage::SenderKeyMessage(_) => CiphertextMessageType::SenderKey,
             CiphertextMessage::PlaintextContent(_) => CiphertextMessageType::Plaintext,
         }
@@ -49,8 +49,8 @@ impl CiphertextMessage {
 
     pub fn serialize(&self) -> &[u8] {
         match self {
-            CiphertextMessage::SignalMessage(x) => x.serialized(),
-            CiphertextMessage::PreKeySignalMessage(x) => x.serialized(),
+            CiphertextMessage::MochiMessage(x) => x.serialized(),
+            CiphertextMessage::PreKeyMochiMessage(x) => x.serialized(),
             CiphertextMessage::SenderKeyMessage(x) => x.serialized(),
             CiphertextMessage::PlaintextContent(x) => x.serialized(),
         }
@@ -58,7 +58,7 @@ impl CiphertextMessage {
 }
 
 #[derive(Debug, Clone)]
-pub struct SignalMessage {
+pub struct MochiMessage {
     message_version: u8,
     sender_ratchet_key: PublicKey,
     counter: u32,
@@ -68,7 +68,7 @@ pub struct SignalMessage {
     serialized: Box<[u8]>,
 }
 
-impl SignalMessage {
+impl MochiMessage {
     const MAC_LENGTH: usize = 8;
 
     pub fn new(
@@ -81,7 +81,7 @@ impl SignalMessage {
         sender_identity_key: &IdentityKey,
         receiver_identity_key: &IdentityKey,
     ) -> Result<Self> {
-        let message = proto::wire::SignalMessage {
+        let message = proto::wire::MochiMessage {
             ratchet_key: Some(sender_ratchet_key.serialize().into_vec()),
             counter: Some(counter),
             previous_counter: Some(previous_counter),
@@ -167,7 +167,7 @@ impl SignalMessage {
         message: &[u8],
     ) -> Result<[u8; Self::MAC_LENGTH]> {
         if mac_key.len() != 32 {
-            return Err(SignalProtocolError::InvalidMacKeyLength(mac_key.len()));
+            return Err(MochiProtocolError::InvalidMacKeyLength(mac_key.len()));
         }
         let mut mac = Hmac::<Sha256>::new_from_slice(mac_key)
             .expect("HMAC-SHA256 should accept any size key");
@@ -181,49 +181,49 @@ impl SignalMessage {
     }
 }
 
-impl AsRef<[u8]> for SignalMessage {
+impl AsRef<[u8]> for MochiMessage {
     fn as_ref(&self) -> &[u8] {
         &self.serialized
     }
 }
 
-impl TryFrom<&[u8]> for SignalMessage {
-    type Error = SignalProtocolError;
+impl TryFrom<&[u8]> for MochiMessage {
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
-        if value.len() < SignalMessage::MAC_LENGTH + 1 {
-            return Err(SignalProtocolError::CiphertextMessageTooShort(value.len()));
+        if value.len() < MochiMessage::MAC_LENGTH + 1 {
+            return Err(MochiProtocolError::CiphertextMessageTooShort(value.len()));
         }
         let message_version = value[0] >> 4;
         if message_version < CIPHERTEXT_MESSAGE_PRE_KYBER_VERSION {
-            return Err(SignalProtocolError::LegacyCiphertextVersion(
+            return Err(MochiProtocolError::LegacyCiphertextVersion(
                 message_version,
             ));
         }
         if message_version > CIPHERTEXT_MESSAGE_CURRENT_VERSION {
-            return Err(SignalProtocolError::UnrecognizedCiphertextVersion(
+            return Err(MochiProtocolError::UnrecognizedCiphertextVersion(
                 message_version,
             ));
         }
 
         let proto_structure =
-            proto::wire::SignalMessage::decode(&value[1..value.len() - SignalMessage::MAC_LENGTH])
-                .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+            proto::wire::MochiMessage::decode(&value[1..value.len() - MochiMessage::MAC_LENGTH])
+                .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
         let sender_ratchet_key = proto_structure
             .ratchet_key
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let sender_ratchet_key = PublicKey::deserialize(&sender_ratchet_key)?;
         let counter = proto_structure
             .counter
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let previous_counter = proto_structure.previous_counter.unwrap_or(0);
         let ciphertext = proto_structure
             .ciphertext
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?
             .into_boxed_slice();
 
-        Ok(SignalMessage {
+        Ok(MochiMessage {
             message_version,
             sender_ratchet_key,
             counter,
@@ -250,7 +250,7 @@ impl KyberPayload {
 }
 
 #[derive(Debug, Clone)]
-pub struct PreKeySignalMessage {
+pub struct PreKeyMochiMessage {
     message_version: u8,
     registration_id: u32,
     pre_key_id: Option<PreKeyId>,
@@ -258,11 +258,11 @@ pub struct PreKeySignalMessage {
     kyber_payload: Option<KyberPayload>,
     base_key: PublicKey,
     identity_key: IdentityKey,
-    message: SignalMessage,
+    message: MochiMessage,
     serialized: Box<[u8]>,
 }
 
-impl PreKeySignalMessage {
+impl PreKeyMochiMessage {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         message_version: u8,
@@ -272,9 +272,9 @@ impl PreKeySignalMessage {
         kyber_payload: Option<KyberPayload>,
         base_key: PublicKey,
         identity_key: IdentityKey,
-        message: SignalMessage,
+        message: MochiMessage,
     ) -> Result<Self> {
-        let proto_message = proto::wire::PreKeySignalMessage {
+        let proto_message = proto::wire::PreKeyMochiMessage {
             registration_id: Some(registration_id),
             pre_key_id: pre_key_id.map(|id| id.into()),
             signed_pre_key_id: Some(signed_pre_key_id.into()),
@@ -345,7 +345,7 @@ impl PreKeySignalMessage {
     }
 
     #[inline]
-    pub fn message(&self) -> &SignalMessage {
+    pub fn message(&self) -> &MochiMessage {
         &self.message
     }
 
@@ -355,47 +355,47 @@ impl PreKeySignalMessage {
     }
 }
 
-impl AsRef<[u8]> for PreKeySignalMessage {
+impl AsRef<[u8]> for PreKeyMochiMessage {
     fn as_ref(&self) -> &[u8] {
         &self.serialized
     }
 }
 
-impl TryFrom<&[u8]> for PreKeySignalMessage {
-    type Error = SignalProtocolError;
+impl TryFrom<&[u8]> for PreKeyMochiMessage {
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         if value.is_empty() {
-            return Err(SignalProtocolError::CiphertextMessageTooShort(value.len()));
+            return Err(MochiProtocolError::CiphertextMessageTooShort(value.len()));
         }
 
         let message_version = value[0] >> 4;
         if message_version < CIPHERTEXT_MESSAGE_PRE_KYBER_VERSION {
-            return Err(SignalProtocolError::LegacyCiphertextVersion(
+            return Err(MochiProtocolError::LegacyCiphertextVersion(
                 message_version,
             ));
         }
         if message_version > CIPHERTEXT_MESSAGE_CURRENT_VERSION {
-            return Err(SignalProtocolError::UnrecognizedCiphertextVersion(
+            return Err(MochiProtocolError::UnrecognizedCiphertextVersion(
                 message_version,
             ));
         }
 
-        let proto_structure = proto::wire::PreKeySignalMessage::decode(&value[1..])
-            .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+        let proto_structure = proto::wire::PreKeyMochiMessage::decode(&value[1..])
+            .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
         let base_key = proto_structure
             .base_key
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let identity_key = proto_structure
             .identity_key
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let message = proto_structure
             .message
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let signed_pre_key_id = proto_structure
             .signed_pre_key_id
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
 
         let base_key = PublicKey::deserialize(base_key.as_ref())?;
 
@@ -406,20 +406,20 @@ impl TryFrom<&[u8]> for PreKeySignalMessage {
             (Some(id), Some(ct)) => Some(KyberPayload::new(id.into(), ct.into_boxed_slice())),
             (None, None) if message_version <= CIPHERTEXT_MESSAGE_PRE_KYBER_VERSION => None,
             (None, None) => {
-                return Err(SignalProtocolError::InvalidMessage(
+                return Err(MochiProtocolError::InvalidMessage(
                     CiphertextMessageType::PreKey,
                     "Kyber pre key must be present for this session version",
                 ));
             }
             _ => {
-                return Err(SignalProtocolError::InvalidMessage(
+                return Err(MochiProtocolError::InvalidMessage(
                     CiphertextMessageType::PreKey,
                     "Both or neither kyber pre_key_id and kyber_ciphertext can be present",
                 ));
             }
         };
 
-        Ok(PreKeySignalMessage {
+        Ok(PreKeyMochiMessage {
             message_version,
             registration_id: proto_structure.registration_id.unwrap_or(0),
             pre_key_id: proto_structure.pre_key_id.map(|id| id.into()),
@@ -427,7 +427,7 @@ impl TryFrom<&[u8]> for PreKeySignalMessage {
             kyber_payload,
             base_key,
             identity_key: IdentityKey::try_from(identity_key.as_ref())?,
-            message: SignalMessage::try_from(message.as_ref())?,
+            message: MochiMessage::try_from(message.as_ref())?,
             serialized: Box::from(value),
         })
     }
@@ -526,40 +526,40 @@ impl AsRef<[u8]> for SenderKeyMessage {
 }
 
 impl TryFrom<&[u8]> for SenderKeyMessage {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         if value.len() < 1 + Self::SIGNATURE_LEN {
-            return Err(SignalProtocolError::CiphertextMessageTooShort(value.len()));
+            return Err(MochiProtocolError::CiphertextMessageTooShort(value.len()));
         }
         let message_version = value[0] >> 4;
         if message_version < SENDERKEY_MESSAGE_CURRENT_VERSION {
-            return Err(SignalProtocolError::LegacyCiphertextVersion(
+            return Err(MochiProtocolError::LegacyCiphertextVersion(
                 message_version,
             ));
         }
         if message_version > SENDERKEY_MESSAGE_CURRENT_VERSION {
-            return Err(SignalProtocolError::UnrecognizedCiphertextVersion(
+            return Err(MochiProtocolError::UnrecognizedCiphertextVersion(
                 message_version,
             ));
         }
         let proto_structure =
             proto::wire::SenderKeyMessage::decode(&value[1..value.len() - Self::SIGNATURE_LEN])
-                .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+                .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
         let distribution_id = proto_structure
             .distribution_uuid
             .and_then(|bytes| Uuid::from_slice(bytes.as_slice()).ok())
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let chain_id = proto_structure
             .chain_id
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let iteration = proto_structure
             .iteration
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let ciphertext = proto_structure
             .ciphertext
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?
             .into_boxed_slice();
 
         Ok(SenderKeyMessage {
@@ -660,49 +660,49 @@ impl AsRef<[u8]> for SenderKeyDistributionMessage {
 }
 
 impl TryFrom<&[u8]> for SenderKeyDistributionMessage {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         // The message contains at least a X25519 key and a chain key
         if value.len() < 1 + 32 + 32 {
-            return Err(SignalProtocolError::CiphertextMessageTooShort(value.len()));
+            return Err(MochiProtocolError::CiphertextMessageTooShort(value.len()));
         }
 
         let message_version = value[0] >> 4;
 
         if message_version < SENDERKEY_MESSAGE_CURRENT_VERSION {
-            return Err(SignalProtocolError::LegacyCiphertextVersion(
+            return Err(MochiProtocolError::LegacyCiphertextVersion(
                 message_version,
             ));
         }
         if message_version > SENDERKEY_MESSAGE_CURRENT_VERSION {
-            return Err(SignalProtocolError::UnrecognizedCiphertextVersion(
+            return Err(MochiProtocolError::UnrecognizedCiphertextVersion(
                 message_version,
             ));
         }
 
         let proto_structure = proto::wire::SenderKeyDistributionMessage::decode(&value[1..])
-            .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+            .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
         let distribution_id = proto_structure
             .distribution_uuid
             .and_then(|bytes| Uuid::from_slice(bytes.as_slice()).ok())
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let chain_id = proto_structure
             .chain_id
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let iteration = proto_structure
             .iteration
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let chain_key = proto_structure
             .chain_key
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let signing_key = proto_structure
             .signing_key
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
 
         if chain_key.len() != 32 || signing_key.len() != 33 {
-            return Err(SignalProtocolError::InvalidProtobufEncoding);
+            return Err(MochiProtocolError::InvalidProtobufEncoding);
         }
 
         let signing_key = PublicKey::deserialize(&signing_key)?;
@@ -766,14 +766,14 @@ impl From<DecryptionErrorMessage> for PlaintextContent {
 }
 
 impl TryFrom<&[u8]> for PlaintextContent {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         if value.is_empty() {
-            return Err(SignalProtocolError::CiphertextMessageTooShort(0));
+            return Err(MochiProtocolError::CiphertextMessageTooShort(0));
         }
         if value[0] != Self::PLAINTEXT_CONTEXT_IDENTIFIER_BYTE {
-            return Err(SignalProtocolError::UnrecognizedMessageVersion(
+            return Err(MochiProtocolError::UnrecognizedMessageVersion(
                 value[0] as u32,
             ));
         }
@@ -800,16 +800,16 @@ impl DecryptionErrorMessage {
     ) -> Result<Self> {
         let ratchet_key = match original_type {
             CiphertextMessageType::Whisper => {
-                Some(*SignalMessage::try_from(original_bytes)?.sender_ratchet_key())
+                Some(*MochiMessage::try_from(original_bytes)?.sender_ratchet_key())
             }
             CiphertextMessageType::PreKey => Some(
-                *PreKeySignalMessage::try_from(original_bytes)?
+                *PreKeyMochiMessage::try_from(original_bytes)?
                     .message()
                     .sender_ratchet_key(),
             ),
             CiphertextMessageType::SenderKey => None,
             CiphertextMessageType::Plaintext => {
-                return Err(SignalProtocolError::InvalidArgument(
+                return Err(MochiProtocolError::InvalidArgument(
                     "cannot create a DecryptionErrorMessage for plaintext content; it is not encrypted".to_string()
                 ));
             }
@@ -852,15 +852,15 @@ impl DecryptionErrorMessage {
 }
 
 impl TryFrom<&[u8]> for DecryptionErrorMessage {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         let proto_structure = proto::service::DecryptionErrorMessage::decode(value)
-            .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+            .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
         let timestamp = proto_structure
             .timestamp
             .map(Timestamp::from_epoch_millis)
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let ratchet_key = proto_structure
             .ratchet_key
             .map(|k| PublicKey::deserialize(&k))
@@ -880,15 +880,15 @@ pub fn extract_decryption_error_message_from_serialized_content(
     bytes: &[u8],
 ) -> Result<DecryptionErrorMessage> {
     if bytes.last() != Some(&PlaintextContent::PADDING_BOUNDARY_BYTE) {
-        return Err(SignalProtocolError::InvalidProtobufEncoding);
+        return Err(MochiProtocolError::InvalidProtobufEncoding);
     }
     let content = proto::service::Content::decode(bytes.split_last().expect("checked above").1)
-        .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+        .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
     content
         .decryption_error_message
         .as_deref()
         .ok_or_else(|| {
-            SignalProtocolError::InvalidArgument(
+            MochiProtocolError::InvalidArgument(
                 "Content does not contain DecryptionErrorMessage".to_owned(),
             )
         })
@@ -903,7 +903,7 @@ mod tests {
     use rand::rngs::OsRng;
     use rand::{CryptoRng, Rng};
 
-    fn create_signal_message<T>(csprng: &mut T) -> Result<SignalMessage>
+    fn create_mochi_message<T>(csprng: &mut T) -> Result<MochiMessage>
     where
         T: Rng + CryptoRng,
     {
@@ -919,7 +919,7 @@ mod tests {
         let sender_identity_key_pair = KeyPair::generate(csprng);
         let receiver_identity_key_pair = KeyPair::generate(csprng);
 
-        SignalMessage::new(
+        MochiMessage::new(
             4,
             &mac_key,
             sender_ratchet_key_pair.public_key,
@@ -931,7 +931,7 @@ mod tests {
         )
     }
 
-    fn assert_signal_message_equals(m1: &SignalMessage, m2: &SignalMessage) {
+    fn assert_mochi_message_equals(m1: &MochiMessage, m2: &MochiMessage) {
         assert_eq!(m1.message_version, m2.message_version);
         assert_eq!(m1.sender_ratchet_key, m2.sender_ratchet_key);
         assert_eq!(m1.counter, m2.counter);
@@ -941,22 +941,22 @@ mod tests {
     }
 
     #[test]
-    fn test_signal_message_serialize_deserialize() -> Result<()> {
+    fn test_mochi_message_serialize_deserialize() -> Result<()> {
         let mut csprng = OsRng;
-        let message = create_signal_message(&mut csprng)?;
+        let message = create_mochi_message(&mut csprng)?;
         let deser_message =
-            SignalMessage::try_from(message.as_ref()).expect("should deserialize without error");
-        assert_signal_message_equals(&message, &deser_message);
+            MochiMessage::try_from(message.as_ref()).expect("should deserialize without error");
+        assert_mochi_message_equals(&message, &deser_message);
         Ok(())
     }
 
     #[test]
-    fn test_pre_key_signal_message_serialize_deserialize() -> Result<()> {
+    fn test_pre_key_mochi_message_serialize_deserialize() -> Result<()> {
         let mut csprng = OsRng;
         let identity_key_pair = KeyPair::generate(&mut csprng);
         let base_key_pair = KeyPair::generate(&mut csprng);
-        let message = create_signal_message(&mut csprng)?;
-        let pre_key_signal_message = PreKeySignalMessage::new(
+        let message = create_mochi_message(&mut csprng)?;
+        let pre_key_mochi_message = PreKeyMochiMessage::new(
             3,
             365,
             None,
@@ -966,40 +966,40 @@ mod tests {
             identity_key_pair.public_key.into(),
             message,
         )?;
-        let deser_pre_key_signal_message =
-            PreKeySignalMessage::try_from(pre_key_signal_message.as_ref())
+        let deser_pre_key_mochi_message =
+            PreKeyMochiMessage::try_from(pre_key_mochi_message.as_ref())
                 .expect("should deserialize without error");
         assert_eq!(
-            pre_key_signal_message.message_version,
-            deser_pre_key_signal_message.message_version
+            pre_key_mochi_message.message_version,
+            deser_pre_key_mochi_message.message_version
         );
         assert_eq!(
-            pre_key_signal_message.registration_id,
-            deser_pre_key_signal_message.registration_id
+            pre_key_mochi_message.registration_id,
+            deser_pre_key_mochi_message.registration_id
         );
         assert_eq!(
-            pre_key_signal_message.pre_key_id,
-            deser_pre_key_signal_message.pre_key_id
+            pre_key_mochi_message.pre_key_id,
+            deser_pre_key_mochi_message.pre_key_id
         );
         assert_eq!(
-            pre_key_signal_message.signed_pre_key_id,
-            deser_pre_key_signal_message.signed_pre_key_id
+            pre_key_mochi_message.signed_pre_key_id,
+            deser_pre_key_mochi_message.signed_pre_key_id
         );
         assert_eq!(
-            pre_key_signal_message.base_key,
-            deser_pre_key_signal_message.base_key
+            pre_key_mochi_message.base_key,
+            deser_pre_key_mochi_message.base_key
         );
         assert_eq!(
-            pre_key_signal_message.identity_key.public_key(),
-            deser_pre_key_signal_message.identity_key.public_key()
+            pre_key_mochi_message.identity_key.public_key(),
+            deser_pre_key_mochi_message.identity_key.public_key()
         );
-        assert_signal_message_equals(
-            &pre_key_signal_message.message,
-            &deser_pre_key_signal_message.message,
+        assert_mochi_message_equals(
+            &pre_key_mochi_message.message,
+            &deser_pre_key_mochi_message.message,
         );
         assert_eq!(
-            pre_key_signal_message.serialized,
-            deser_pre_key_signal_message.serialized
+            pre_key_mochi_message.serialized,
+            deser_pre_key_mochi_message.serialized
         );
         Ok(())
     }
@@ -1047,7 +1047,7 @@ mod tests {
         let mut csprng = OsRng;
         let identity_key_pair = KeyPair::generate(&mut csprng);
         let base_key_pair = KeyPair::generate(&mut csprng);
-        let message = create_signal_message(&mut csprng)?;
+        let message = create_mochi_message(&mut csprng)?;
         let timestamp: Timestamp = Timestamp::from_epoch_millis(0x2_0000_0001);
         let device_id = 0x8086_2021;
 
@@ -1067,7 +1067,7 @@ mod tests {
             assert_eq!(error_message.device_id(), device_id);
         }
 
-        let pre_key_signal_message = PreKeySignalMessage::new(
+        let pre_key_mochi_message = PreKeyMochiMessage::new(
             3,
             365,
             None,
@@ -1080,7 +1080,7 @@ mod tests {
 
         {
             let error_message = DecryptionErrorMessage::for_original(
-                pre_key_signal_message.serialized(),
+                pre_key_mochi_message.serialized(),
                 CiphertextMessageType::PreKey,
                 timestamp,
                 device_id,
@@ -1088,7 +1088,7 @@ mod tests {
             let error_message = DecryptionErrorMessage::try_from(error_message.serialized())?;
             assert_eq!(
                 error_message.ratchet_key(),
-                Some(pre_key_signal_message.message().sender_ratchet_key())
+                Some(pre_key_mochi_message.message().sender_ratchet_key())
             );
             assert_eq!(error_message.timestamp(), timestamp);
             assert_eq!(error_message.device_id(), device_id);
@@ -1129,7 +1129,7 @@ mod tests {
                 Timestamp::from_epoch_millis(5),
                 7
             ),
-            Err(SignalProtocolError::InvalidArgument(_))
+            Err(MochiProtocolError::InvalidArgument(_))
         ));
     }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -9,7 +9,7 @@ use super::*;
 
 use async_trait::async_trait;
 use futures_util::TryFutureExt;
-use signal_neon_futures::*;
+use mochi_neon_futures::*;
 use std::cell::Cell;
 use std::io::{Error as IoError, ErrorKind as IoErrorKind, Result as IoResult};
 use std::sync::Arc;

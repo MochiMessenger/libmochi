@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -19,12 +19,12 @@ pub struct FutureCompleter<T> {
 
 /// [`ResultReporter`] that drops values after reporting an outcome.
 pub struct FutureResultReporter<T, U> {
-    result: SignalJniResult<T>,
+    result: MochiJniResult<T>,
     to_drop: U,
 }
 
 impl<T, U> FutureResultReporter<T, U> {
-    pub fn new(result: SignalJniResult<T>, to_drop: U) -> Self {
+    pub fn new(result: MochiJniResult<T>, to_drop: U) -> Self {
         Self { result, to_drop }
     }
 }
@@ -71,8 +71,8 @@ impl<T: for<'a> ResultTypeInfo<'a> + std::panic::UnwindSafe, U> ResultReporter
 
         // Catch panics while converting successful results to Java values.
         // (We have no *expected* panics, but we don't want to bring down the process for a
-        // libsignal-internal bug if we can help it.)
-        let maybe_error: SignalJniResult<()> = result.and_then(|result| {
+        // libmochi-internal bug if we can help it.)
+        let maybe_error: MochiJniResult<()> = result.and_then(|result| {
             // This AssertUnwindSafe isn't totally justified, but if we get a panic talking to the
             // JVM, we have bigger problems.
             let env_for_catch_unwind = std::panic::AssertUnwindSafe(&mut env);
@@ -98,7 +98,7 @@ impl<T: for<'a> ResultTypeInfo<'a> + std::panic::UnwindSafe, U> ResultReporter
             .unwrap_or_else(|panic| Err(BridgeLayerError::UnexpectedPanic(panic).into()))
         });
 
-        // From this point on we can't catch panics, because SignalJniError isn't UnwindSafe. This
+        // From this point on we can't catch panics, because MochiJniError isn't UnwindSafe. This
         // is consistent with the synchronous implementation in run_ffi_safe, which doesn't catch
         // panics when converting errors to exceptions either.
         let future_for_convert = &future;
@@ -141,9 +141,9 @@ impl<T: for<'a> ResultTypeInfo<'a> + std::panic::UnwindSafe, U> ResultReporter
 ///
 /// ```no_run
 /// # use jni::JNIEnv;
-/// # use libsignal_bridge_types::jni::*;
-/// # use libsignal_bridge_types::support::NoOpAsyncRuntime;
-/// # fn test(env: &mut JNIEnv, async_runtime: &NoOpAsyncRuntime) -> SignalJniResult<()> {
+/// # use libmochi_bridge_types::jni::*;
+/// # use libmochi_bridge_types::support::NoOpAsyncRuntime;
+/// # fn test(env: &mut JNIEnv, async_runtime: &NoOpAsyncRuntime) -> MochiJniResult<()> {
 /// let java_future = run_future_on_runtime(env, async_runtime, |_cancel| async {
 ///     let result: i32 = 1 + 2;
 ///     // Do some complicated awaiting here.
@@ -155,7 +155,7 @@ pub fn run_future_on_runtime<'local, R, F, O>(
     env: &mut JNIEnv<'local>,
     runtime: &R,
     future: impl FnOnce(R::Cancellation) -> F,
-) -> SignalJniResult<JavaCompletableFuture<'local, <O as ResultTypeInfo<'local>>::ResultType>>
+) -> MochiJniResult<JavaCompletableFuture<'local, <O as ResultTypeInfo<'local>>::ResultType>>
 where
     R: AsyncRuntime<F>,
     F: Future + std::panic::UnwindSafe + 'static,
@@ -164,7 +164,7 @@ where
 {
     let java_future = new_instance(
         env,
-        ClassName("org.signal.libsignal.internal.CompletableFuture"),
+        ClassName("org.mochi.libmochi.internal.CompletableFuture"),
         jni_args!(() -> void),
     )?;
     let completer = FutureCompleter::new(env, &java_future)?;
@@ -172,10 +172,10 @@ where
     Ok(java_future.into())
 }
 
-/// Catches panics that occur in `future` and converts them to [`SignalJniError::UnexpectedPanic`].
+/// Catches panics that occur in `future` and converts them to [`MochiJniError::UnexpectedPanic`].
 pub fn catch_unwind<'a, O>(
-    future: impl Future<Output = SignalJniResult<O>> + Send + std::panic::UnwindSafe + 'a,
-) -> impl Future<Output = SignalJniResult<O>> + Send + std::panic::UnwindSafe + 'a {
+    future: impl Future<Output = MochiJniResult<O>> + Send + std::panic::UnwindSafe + 'a,
+) -> impl Future<Output = MochiJniResult<O>> + Send + std::panic::UnwindSafe + 'a {
     future
         .catch_unwind()
         .unwrap_or_else(|panic| Err(BridgeLayerError::UnexpectedPanic(panic).into()))

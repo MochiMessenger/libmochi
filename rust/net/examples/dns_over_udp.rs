@@ -1,12 +1,12 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use clap::Parser;
 use futures_util::StreamExt;
-use libsignal_net::infra::dns::custom_resolver::DnsTransport;
-use libsignal_net::infra::dns::dns_lookup::DnsLookupRequest;
-use libsignal_net::infra::dns::dns_transport_udp::UdpTransport;
+use libmochi_net::infra::dns::custom_resolver::DnsTransport;
+use libmochi_net::infra::dns::dns_lookup::DnsLookupRequest;
+use libmochi_net::infra::dns::dns_transport_udp::UdpTransport;
 use std::net::IpAddr;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -17,7 +17,7 @@ struct Args {
     #[arg(long, default_value = "false")]
     no_ipv6: bool,
     /// domain to lookup
-    #[arg(long, default_value = "chat.signal.org")]
+    #[arg(long, default_value = "chat.mochi.org")]
     domain: String,
     /// address of the name server
     #[arg(long, default_value = "1.1.1.1")]

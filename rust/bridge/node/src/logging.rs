@@ -1,9 +1,9 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_bridge::node::SimpleArgTypeInfo;
+use libmochi_bridge::node::SimpleArgTypeInfo;
 use neon::prelude::*;
 
 /// ts: export const enum LogLevel { Error = 1, Warn, Info, Debug, Trace }
@@ -60,11 +60,11 @@ impl NodeLogger {
     }
 }
 
-const GLOBAL_LOG_FN_KEY: &str = "__libsignal_log_fn";
+const GLOBAL_LOG_FN_KEY: &str = "__libmochi_log_fn";
 
 impl log::Log for NodeLogger {
     fn enabled(&self, metadata: &log::Metadata) -> bool {
-        libsignal_bridge::logging::log_enabled_in_apps(metadata)
+        libmochi_bridge::logging::log_enabled_in_apps(metadata)
     }
 
     fn log(&self, record: &log::Record) {
@@ -134,13 +134,13 @@ pub(crate) fn init_logger(mut cx: FunctionContext) -> JsResult<JsUndefined> {
         Ok(_) => {
             set_max_level_from_js_level(max_level);
             log::info!(
-                "Initializing libsignal version:{}",
+                "Initializing libmochi version:{}",
                 env!("CARGO_PKG_VERSION")
             );
             log_panics::init();
         }
         Err(_) => {
-            log::warn!("logging already initialized for libsignal; ignoring later call");
+            log::warn!("logging already initialized for libmochi; ignoring later call");
         }
     }
 

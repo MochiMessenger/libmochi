@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020 Signal Messenger, LLC.
+# Copyright (C) 2020 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -21,12 +21,12 @@ rename_args = "camelCase"
 [parse]
 parse_deps = true
 include = []
-extra_bindings = ["libsignal-bridge"]
+extra_bindings = ["libmochi-bridge"]
 
 [parse.expand]
-crates = ["libsignal-jni", "libsignal-bridge"]
+crates = ["libmochi-jni", "libmochi-bridge"]
 features = [
-    "libsignal-bridge/jni",
-    "libsignal-bridge/signal-media",
-    "libsignal-bridge/testing-fns",
+    "libmochi-bridge/jni",
+    "libmochi-bridge/mochi-media",
+    "libmochi-bridge/testing-fns",
 ]

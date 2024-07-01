@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -278,7 +278,7 @@ impl ServerRootKeyPair {
     /// Derives a root key by hashing `randomness`.
     pub fn generate(randomness: [u8; RANDOMNESS_LEN]) -> Self {
         let mut sho = poksho::ShoHmacSha256::new(
-            b"Signal_ZKCredential_Endorsements_ServerRootKeyPair_generate_20240207",
+            b"Mochi_ZKCredential_Endorsements_ServerRootKeyPair_generate_20240207",
         );
         sho.absorb_and_ratchet(&randomness);
         Self::from_raw(sho.get_scalar())
@@ -406,7 +406,7 @@ impl EndorsementResponse {
         debug_assert_eq!(E.len(), R.len());
 
         let mut gen = poksho::ShoHmacSha256::new(
-            b"Signal_ZKCredential_Endorsements_EndorsementResponse_ProofWeights_20240207",
+            b"Mochi_ZKCredential_Endorsements_EndorsementResponse_ProofWeights_20240207",
         );
 
         // Here and in the following steps we only need to absorb, since (1) all

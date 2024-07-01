@@ -1,0 +1,13 @@
+//
+// Copyright 2022 Mochi Messenger, LLC.
+// SPDX-License-Identifier: AGPL-3.0-only
+//
+
+import Foundation
+import MochiFfi
+
+public class AuthCredentialWithPni: ByteArray {
+    public required init(contents: [UInt8]) throws {
+        try super.init(contents, checkValid: mochi_auth_credential_with_pni_check_valid_contents)
+    }
+}

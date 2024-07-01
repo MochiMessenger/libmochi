@@ -1,5 +1,5 @@
 [package]
-name = "libsignal-protocol-fuzz"
+name = "libmochi-protocol-fuzz"
 version = "0.0.0"
 authors = ["Automatically generated"]
 publish = false
@@ -9,7 +9,7 @@ edition = "2021"
 cargo-fuzz = true
 
 [dependencies]
-libsignal-protocol = { path = ".." }
+libmochi-protocol = { path = ".." }
 
 env_logger = "0.10.0"
 futures-util = "0.3.7"
@@ -36,4 +36,4 @@ doc = false
 
 [patch.crates-io]
 # Use our fork of curve25519-dalek for zkgroup support.
-curve25519-dalek = { git = 'https://github.com/signalapp/curve25519-dalek', tag = 'signal-curve25519-4.0.0' }
+curve25519-dalek = { git = 'https://github.com/mochimessenger/curve25519-dalek', tag = 'mochi-curve25519-4.0.0' }

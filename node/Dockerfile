@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Signal Messenger, LLC.
+# Copyright 2022 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -16,22 +16,22 @@ ARG UID
 ARG GID
 
 # Create a user to map the host user to.
-RUN groupadd -o -g "${GID}" libsignal \
-    && useradd -m -o -u "${UID}" -g "${GID}" -s /bin/bash libsignal
+RUN groupadd -o -g "${GID}" libmochi \
+    && useradd -m -o -u "${UID}" -g "${GID}" -s /bin/bash libmochi
 
-USER libsignal
-ENV HOME /home/libsignal
-ENV USER libsignal
+USER libmochi
+ENV HOME /home/libmochi
+ENV USER libmochi
 ENV SHELL /bin/bash
 
-WORKDIR /home/libsignal
+WORKDIR /home/libmochi
 
 # Rust setup
 COPY rust-toolchain rust-toolchain
-ENV PATH="/home/libsignal/.cargo/bin:${PATH}"
+ENV PATH="/home/libmochi/.cargo/bin:${PATH}"
 ARG RUSTUP_SHA=ad1f8b5199b3b9e231472ed7aa08d2e5d1d539198a15c5b1e53c746aad81d27b
 
-ADD --chown=libsignal --chmod=755 --checksum=sha256:${RUSTUP_SHA} \
+ADD --chown=libmochi --chmod=755 --checksum=sha256:${RUSTUP_SHA} \
     https://static.rust-lang.org/rustup/archive/1.21.1/x86_64-unknown-linux-gnu/rustup-init /tmp/rustup-init
 
 RUN    /tmp/rustup-init -y --profile minimal --default-toolchain "$(cat rust-toolchain)" \
@@ -43,18 +43,18 @@ RUN rustup target add aarch64-unknown-linux-gnu
 
 ARG NODE_VERSION
 
-ADD --chown=libsignal https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz node.tar.xz
+ADD --chown=libmochi https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz node.tar.xz
 
 RUN tar -xf node.tar.xz \
     && mv node-v* node \
     && rm -f node.tar.xz
 
-ENV PATH="/home/libsignal/node/bin:${PATH}"
+ENV PATH="/home/libmochi/node/bin:${PATH}"
 
 # And finally any bonus packages we're going to need
 # Note that we jump back to root for this.
 USER root
 RUN apt-get install -y clang cmake crossbuild-essential-arm64 git python3 protobuf-compiler
-USER libsignal
+USER libmochi
 
 CMD [ "/bin/bash" ]

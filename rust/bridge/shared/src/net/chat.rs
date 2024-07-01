@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,12 +8,12 @@ use std::time::Duration;
 
 use http::uri::InvalidUri;
 use http::{HeaderName, HeaderValue, StatusCode};
-use libsignal_bridge_macros::{bridge_fn, bridge_io};
-use libsignal_bridge_types::net::chat::*;
-use libsignal_bridge_types::net::{ConnectionManager, TokioAsyncContext};
-use libsignal_bridge_types::support::AsType;
-use libsignal_net::auth::Auth;
-use libsignal_net::chat::{
+use libmochi_bridge_macros::{bridge_fn, bridge_io};
+use libmochi_bridge_types::net::chat::*;
+use libmochi_bridge_types::net::{ConnectionManager, TokioAsyncContext};
+use libmochi_bridge_types::support::AsType;
+use libmochi_net::auth::Auth;
+use libmochi_net::chat::{
     self, ChatServiceError, DebugInfo as ChatServiceDebugInfo, Request, Response as ChatResponse,
 };
 
@@ -228,7 +228,7 @@ mod test {
     use super::*;
     use crate::net::{ConnectionManager, ConnectionManager_set_proxy, Environment};
     use assert_matches::assert_matches;
-    use libsignal_net::chat::ChatServiceError;
+    use libmochi_net::chat::ChatServiceError;
 
     // Normally we would write this test in the app languages, but it depends on timeouts.
     // Using a paused tokio runtime auto-advances time when there's no other work to be done.
@@ -237,16 +237,16 @@ mod test {
         let cm = ConnectionManager::new(Environment::Staging, "test-user-agent".to_string());
 
         assert_matches!(
-            ConnectionManager_set_proxy(&cm, "signalfoundation.org".to_string(), 0),
+            ConnectionManager_set_proxy(&cm, "mochifoundation.org".to_string(), 0),
             Err(_)
         );
         assert_matches!(
-            ConnectionManager_set_proxy(&cm, "signalfoundation.org".to_string(), 100_000),
+            ConnectionManager_set_proxy(&cm, "mochifoundation.org".to_string(), 100_000),
             Err(_)
         );
 
         assert_matches!(
-            ConnectionManager_set_proxy(&cm, "signalfoundation.org".to_string(), -1),
+            ConnectionManager_set_proxy(&cm, "mochifoundation.org".to_string(), -1),
             Err(_)
         );
 

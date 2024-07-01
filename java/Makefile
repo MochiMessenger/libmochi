@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020 Signal Messenger, LLC.
+# Copyright (C) 2020 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -9,7 +9,7 @@ DOCKER ?= docker
 
 default: java_build
 
-DOCKER_IMAGE := libsignal-builder
+DOCKER_IMAGE := libmochi-builder
 DOCKER_TTY_FLAG := $$(test -t 0 && echo -it)
 
 docker_image:
@@ -18,14 +18,14 @@ docker_image:
 java_build: DOCKER_EXTRA=$(shell [ -L build ] && P=$$(readlink build) && echo -v $$P/:$$P )
 java_build: docker_image
 	$(DOCKER) run $(DOCKER_TTY_FLAG) --init --rm --user $$(id -u):$$(id -g) \
-        --env LIBSIGNAL_TESTING_ENCLAVE_SECRET \
-        -v `cd .. && pwd`/:/home/libsignal/src $(DOCKER_EXTRA) $(DOCKER_IMAGE) \
+        --env LIBMOCHI_TESTING_ENCLAVE_SECRET \
+        -v `cd .. && pwd`/:/home/libmochi/src $(DOCKER_EXTRA) $(DOCKER_IMAGE) \
         sh -c "cd src/java; ./gradlew build"
 
 publish_java: DOCKER_EXTRA = $(shell [ -L build ] && P=$$(readlink build) && echo -v $$P/:$$P )
 publish_java: docker_image
 	$(DOCKER) run --rm --user $$(id -u):$$(id -g) \
-		-v `cd .. && pwd`/:/home/libsignal/src $(DOCKER_EXTRA) \
+		-v `cd .. && pwd`/:/home/libmochi/src $(DOCKER_EXTRA) \
 		-e ORG_GRADLE_PROJECT_sonatypeUsername \
 		-e ORG_GRADLE_PROJECT_sonatypePassword \
 		-e ORG_GRADLE_PROJECT_signingKeyId \

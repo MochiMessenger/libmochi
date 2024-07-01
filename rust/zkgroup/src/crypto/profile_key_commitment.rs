@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -46,7 +46,7 @@ pub struct Commitment {
 impl SystemParams {
     pub fn generate() -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Constant_ProfileKeyCommitment_SystemParams_Generate",
+            b"Mochi_ZKGroup_20200424_Constant_ProfileKeyCommitment_SystemParams_Generate",
             b"",
         );
         let G_j1 = sho.get_point();
@@ -98,7 +98,7 @@ impl CommitmentWithSecretNonce {
         combined_array[..PROFILE_KEY_LEN].copy_from_slice(&profile_key_bytes);
         combined_array[PROFILE_KEY_LEN..].copy_from_slice(&uid_bytes);
         Sho::new(
-            b"Signal_ZKGroup_20200424_ProfileKeyAndUid_ProfileKeyCommitment_Calcj3",
+            b"Mochi_ZKGroup_20200424_ProfileKeyAndUid_ProfileKeyCommitment_Calcj3",
             &combined_array,
         )
         .get_scalar()

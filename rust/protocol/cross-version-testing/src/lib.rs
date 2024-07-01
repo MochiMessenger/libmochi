@@ -1,13 +1,13 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 #![allow(clippy::new_without_default)]
 
-pub use libsignal_protocol_current::{CiphertextMessageType, PreKeyBundle};
+pub use libmochi_protocol_current::{CiphertextMessageType, PreKeyBundle};
 
-pub trait LibSignalProtocolStore {
+pub trait LibMochiProtocolStore {
     fn version(&self) -> &'static str;
     fn create_pre_key_bundle(&mut self) -> PreKeyBundle;
     fn process_pre_key_bundle(&mut self, remote: &str, pre_key_bundle: PreKeyBundle);
@@ -16,10 +16,10 @@ pub trait LibSignalProtocolStore {
 }
 
 mod current;
-pub use current::LibSignalProtocolCurrent;
+pub use current::LibMochiProtocolCurrent;
 
 mod v21;
-pub use v21::LibSignalProtocolV21;
+pub use v21::LibMochiProtocolV21;
 
 mod v12;
-pub use v12::LibSignalProtocolV12;
+pub use v12::LibMochiProtocolV12;

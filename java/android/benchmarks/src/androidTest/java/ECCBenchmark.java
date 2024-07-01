@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Signal Messenger, LLC.
+// Copyright 2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,7 +7,7 @@ import androidx.benchmark.BenchmarkState;
 import androidx.benchmark.junit4.BenchmarkRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.signal.libsignal.protocol.ecc.*;
+import org.mochi.libmochi.protocol.ecc.*;
 
 public class ECCBenchmark {
   @Rule public final BenchmarkRule benchmarkRule = new BenchmarkRule();

@@ -1,13 +1,13 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import * as SignalClient from '../index';
+import * as MochiClient from '../index';
 
-export function initLogger(logLevel?: SignalClient.LogLevel): void {
-  SignalClient.initLogger(
-    logLevel ?? SignalClient.LogLevel.Trace,
+export function initLogger(logLevel?: MochiClient.LogLevel): void {
+  MochiClient.initLogger(
+    logLevel ?? MochiClient.LogLevel.Trace,
     (_level, target, fileOrNull, lineOrNull, message) => {
       const targetPrefix = target ? `[${target}] ` : '';
       const file = fileOrNull ?? '<unknown>';

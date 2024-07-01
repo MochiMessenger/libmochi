@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -646,11 +646,11 @@ mod test {
     fn example_connection_params() -> ConnectionParams {
         ConnectionParams::new(
             RouteType::Test,
-            "chat.signal.org",
-            "chat.signal.org",
+            "chat.mochi.org",
+            "chat.mochi.org",
             nonzero!(443u16),
             HttpRequestDecoratorSeq::default(),
-            RootCertificates::Signal,
+            RootCertificates::Mochi,
         )
     }
 

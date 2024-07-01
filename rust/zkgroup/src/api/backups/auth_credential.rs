@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -33,7 +33,7 @@ struct BackupIdPoint(RistrettoPoint);
 
 impl BackupIdPoint {
     fn new(backup_id: &[u8; 16]) -> Self {
-        Self(Sho::new(b"20231003_Signal_BackupId", backup_id).get_point())
+        Self(Sho::new(b"20231003_Mochi_BackupId", backup_id).get_point())
     }
 }
 
@@ -43,7 +43,7 @@ impl zkcredential::attributes::RevealedAttribute for BackupIdPoint {
     }
 }
 
-const CREDENTIAL_LABEL: &[u8] = b"20231003_Signal_BackupAuthCredential";
+const CREDENTIAL_LABEL: &[u8] = b"20231003_Mochi_BackupAuthCredential";
 
 // We make sure we serialize BackupLevel with plenty of room to expand to other
 // u64 values later. But since it fits in a byte today, we stick to just a u8
@@ -101,10 +101,10 @@ impl BackupAuthCredentialRequestContext {
         // derive the backup-id (blinded in the issuance request, revealed at verification)
         let mut backup_id = [0u8; 16];
         Hkdf::<Sha256>::new(Some(uuid_bytes), backup_key)
-            .expand(b"20231003_Signal_Backups_GenerateBackupId", &mut backup_id)
+            .expand(b"20231003_Mochi_Backups_GenerateBackupId", &mut backup_id)
             .expect("should expand");
 
-        let mut sho = poksho::ShoHmacSha256::new(b"20231003_Signal_BackupAuthCredentialRequest");
+        let mut sho = poksho::ShoHmacSha256::new(b"20231003_Mochi_BackupAuthCredentialRequest");
         sho.absorb_and_ratchet(uuid_bytes);
         sho.absorb_and_ratchet(backup_key);
 

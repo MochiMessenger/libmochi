@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -12,7 +12,7 @@ mod traits;
 
 pub use inmem::{
     InMemIdentityKeyStore, InMemKyberPreKeyStore, InMemPreKeyStore, InMemSenderKeyStore,
-    InMemSessionStore, InMemSignalProtocolStore, InMemSignedPreKeyStore,
+    InMemSessionStore, InMemMochiProtocolStore, InMemSignedPreKeyStore,
 };
 pub use traits::{
     Direction, IdentityKeyStore, KyberPreKeyStore, PreKeyStore, ProtocolStore, SenderKeyStore,

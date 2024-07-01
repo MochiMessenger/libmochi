@@ -1,18 +1,18 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_net::auth::Auth;
-use libsignal_net::cdsi::{self, CdsiConnection, ClientResponseCollector, Token};
-use libsignal_net::infra::tcp_ssl::TcpSslConnectorStream;
+use libmochi_net::auth::Auth;
+use libmochi_net::cdsi::{self, CdsiConnection, ClientResponseCollector, Token};
+use libmochi_net::infra::tcp_ssl::TcpSslConnectorStream;
 
 use crate::net::ConnectionManager;
 
 use crate::*;
 
 #[cfg(feature = "jni")]
-/// CDSI-protocol-specific subset of [`libsignal_net::cdsi::LookupError`] cases.
+/// CDSI-protocol-specific subset of [`libmochi_net::cdsi::LookupError`] cases.
 ///
 /// Contains cases for errors that aren't covered by other error types.
 #[derive(Debug, displaydoc::Display)]

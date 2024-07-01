@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -57,7 +57,7 @@ impl<T> TransformHelper<Option<T>> {
 }
 
 pub trait TransformHelperImpl: Sized {
-    fn ok_if_needed(self) -> Result<Self, libsignal_protocol::SignalProtocolError> {
+    fn ok_if_needed(self) -> Result<Self, libmochi_protocol::MochiProtocolError> {
         Ok(self)
     }
     fn some_if_needed(self) -> Option<Self> {

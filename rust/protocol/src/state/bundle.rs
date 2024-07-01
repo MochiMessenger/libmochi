@@ -1,10 +1,10 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use crate::state::{PreKeyId, SignedPreKeyId};
-use crate::{kem, DeviceId, IdentityKey, KyberPreKeyId, PublicKey, Result, SignalProtocolError};
+use crate::{kem, DeviceId, IdentityKey, KyberPreKeyId, PublicKey, Result, MochiProtocolError};
 use std::clone::Clone;
 
 #[derive(Clone)]
@@ -84,34 +84,34 @@ impl From<PreKeyBundle> for PreKeyBundleContent {
 }
 
 impl TryFrom<PreKeyBundleContent> for PreKeyBundle {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(content: PreKeyBundleContent) -> Result<Self> {
         let mut bundle = PreKeyBundle::new(
             content.registration_id.ok_or_else(|| {
-                SignalProtocolError::InvalidArgument("registration_id is required".to_string())
+                MochiProtocolError::InvalidArgument("registration_id is required".to_string())
             })?,
             content.device_id.ok_or_else(|| {
-                SignalProtocolError::InvalidArgument("device_id is required".to_string())
+                MochiProtocolError::InvalidArgument("device_id is required".to_string())
             })?,
             content
                 .pre_key_id
                 .and_then(|id| content.pre_key_public.map(|public| (id, public))),
             content.ec_pre_key_id.ok_or_else(|| {
-                SignalProtocolError::InvalidArgument("signed_pre_key_id is required".to_string())
+                MochiProtocolError::InvalidArgument("signed_pre_key_id is required".to_string())
             })?,
             content.ec_pre_key_public.ok_or_else(|| {
-                SignalProtocolError::InvalidArgument(
+                MochiProtocolError::InvalidArgument(
                     "signed_pre_key_public is required".to_string(),
                 )
             })?,
             content.ec_pre_key_signature.ok_or_else(|| {
-                SignalProtocolError::InvalidArgument(
+                MochiProtocolError::InvalidArgument(
                     "signed_pre_key_signature is required".to_string(),
                 )
             })?,
             content.identity_key.ok_or_else(|| {
-                SignalProtocolError::InvalidArgument("identity_key is required".to_string())
+                MochiProtocolError::InvalidArgument("identity_key is required".to_string())
             })?,
         )?;
 

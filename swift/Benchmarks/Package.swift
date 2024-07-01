@@ -1,7 +1,7 @@
 // swift-tools-version:5.2
 
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -27,7 +27,7 @@ let package = Package(
             name: "Benchmarks",
             dependencies: [
                 .product(name: "Benchmark", package: "swift-benchmark"),
-                .product(name: "LibSignalClient", package: "swift" /* the folder name, sigh */ ),
+                .product(name: "LibMochiClient", package: "swift" /* the folder name, sigh */ ),
             ],
             linkerSettings: [
                 .unsafeFlags(["-L\(rustReleaseBuildDir)"], .when(configuration: .release)),

@@ -1,10 +1,10 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_bridge_macros::bridge_fn;
-use libsignal_bridge_types::net::tokio::TokioAsyncContext;
+use libmochi_bridge_macros::bridge_fn;
+use libmochi_bridge_types::net::tokio::TokioAsyncContext;
 
 use crate::support::*;
 use crate::*;

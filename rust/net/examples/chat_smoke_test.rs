@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,13 +8,13 @@ use std::time::Duration;
 
 use clap::{Args, Parser, ValueEnum};
 use http::uri::PathAndQuery;
-use libsignal_net::auth::Auth;
-use libsignal_net::chat::{chat_service, ChatServiceError};
-use libsignal_net::env::constants::WEB_SOCKET_PATH;
-use libsignal_net::env::Svr3Env;
-use libsignal_net::infra::dns::DnsResolver;
-use libsignal_net::infra::tcp_ssl::DirectConnector;
-use libsignal_net::infra::{make_ws_config, ConnectionParams, EndpointConnection, RouteType};
+use libmochi_net::auth::Auth;
+use libmochi_net::chat::{chat_service, ChatServiceError};
+use libmochi_net::env::constants::WEB_SOCKET_PATH;
+use libmochi_net::env::Svr3Env;
+use libmochi_net::infra::dns::DnsResolver;
+use libmochi_net::infra::tcp_ssl::DirectConnector;
+use libmochi_net::infra::{make_ws_config, ConnectionParams, EndpointConnection, RouteType};
 use tokio::sync::mpsc;
 
 #[derive(Parser)]
@@ -51,8 +51,8 @@ async fn main() -> ExitCode {
 
     let config = Config::parse();
     let env = match config.env {
-        Environment::Staging => libsignal_net::env::STAGING,
-        Environment::Production => libsignal_net::env::PROD,
+        Environment::Staging => libmochi_net::env::STAGING,
+        Environment::Production => libmochi_net::env::PROD,
     };
 
     let mut connection_params = env.chat_domain_config.connection_params_with_fallback();
@@ -97,7 +97,7 @@ async fn main() -> ExitCode {
 }
 
 async fn test_connection(
-    env: &libsignal_net::env::Env<'static, Svr3Env<'static>>,
+    env: &libmochi_net::env::Env<'static, Svr3Env<'static>>,
     connection_params: Vec<ConnectionParams>,
 ) -> Result<(), ChatServiceError> {
     let one_route_connect_timeout = Duration::from_secs(5);

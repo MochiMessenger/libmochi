@@ -1,11 +1,11 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_bridge_macros::*;
-use signal_media::sanitize::mp4::SanitizedMetadata;
-use signal_media::sanitize::{mp4, webp};
+use libmochi_bridge_macros::*;
+use mochi_media::sanitize::mp4::SanitizedMetadata;
+use mochi_media::sanitize::{mp4, webp};
 
 use crate::io::{AsyncInput, InputStream, SyncInput, SyncInputStream};
 
@@ -20,10 +20,10 @@ use futures_util::FutureExt;
 
 bridge_handle_fns!(SanitizedMetadata);
 
-/// Exposed so that we have an easy method to invoke from Java to test whether libsignal was
-/// compiled with signal-media.
+/// Exposed so that we have an easy method to invoke from Java to test whether libmochi was
+/// compiled with mochi-media.
 #[bridge_fn]
-fn SignalMedia_CheckAvailable() {}
+fn MochiMedia_CheckAvailable() {}
 
 #[bridge_fn]
 async fn Mp4Sanitizer_Sanitize(

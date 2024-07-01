@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -55,7 +55,7 @@ struct WycheproofTestSet {
     test_groups: Vec<WycheproofTestGroup>,
 }
 
-fn test_kat(kat: WycheproofTest) -> Result<(), signal_crypto::Error> {
+fn test_kat(kat: WycheproofTest) -> Result<(), mochi_crypto::Error> {
     let mut rng = rand::rngs::OsRng;
 
     let key = hex::decode(kat.key).expect("valid hex");
@@ -71,13 +71,13 @@ fn test_kat(kat: WycheproofTest) -> Result<(), signal_crypto::Error> {
         wut => panic!("unknown result field {}", wut),
     };
 
-    let mut gcm_enc = signal_crypto::Aes256GcmEncryption::new(&key, &nonce, &aad)?;
+    let mut gcm_enc = mochi_crypto::Aes256GcmEncryption::new(&key, &nonce, &aad)?;
 
     let mut buf = pt.clone();
     gcm_enc.encrypt(&mut buf);
     let generated_tag = gcm_enc.compute_tag();
 
-    let mut gcm_dec = signal_crypto::Aes256GcmDecryption::new(&key, &nonce, &aad)?;
+    let mut gcm_dec = mochi_crypto::Aes256GcmDecryption::new(&key, &nonce, &aad)?;
 
     if valid {
         assert_eq!(hex::encode(generated_tag), hex::encode(&tag));
@@ -90,8 +90,8 @@ fn test_kat(kat: WycheproofTest) -> Result<(), signal_crypto::Error> {
         for i in 2..32 {
             println!("Test {}", i);
             // Do it again but with split inputs:
-            let mut gcm_enc = signal_crypto::Aes256GcmEncryption::new(&key, &nonce, &aad)?;
-            let mut gcm_dec = signal_crypto::Aes256GcmDecryption::new(&key, &nonce, &aad)?;
+            let mut gcm_enc = mochi_crypto::Aes256GcmEncryption::new(&key, &nonce, &aad)?;
+            let mut gcm_dec = mochi_crypto::Aes256GcmDecryption::new(&key, &nonce, &aad)?;
 
             let mut enc_buf = pt.clone();
             let mut dec_buf = ct.clone();
@@ -123,7 +123,7 @@ fn test_kat(kat: WycheproofTest) -> Result<(), signal_crypto::Error> {
 
         assert!(matches!(
             gcm_dec.verify_tag(&tag),
-            Err(signal_crypto::Error::InvalidTag)
+            Err(mochi_crypto::Error::InvalidTag)
         ));
     }
 
@@ -131,7 +131,7 @@ fn test_kat(kat: WycheproofTest) -> Result<(), signal_crypto::Error> {
 }
 
 #[test]
-fn aes_gcm_wycheproof_kats() -> Result<(), signal_crypto::Error> {
+fn aes_gcm_wycheproof_kats() -> Result<(), mochi_crypto::Error> {
     let kat_data = include_bytes!("data/aes_gcm_test.json");
     let kats: WycheproofTestSet = serde_json::from_slice(kat_data).expect("Valid JSON");
 
@@ -149,14 +149,14 @@ fn aes_gcm_wycheproof_kats() -> Result<(), signal_crypto::Error> {
 }
 
 #[test]
-fn aes_gcm_smoke_test() -> Result<(), signal_crypto::Error> {
+fn aes_gcm_smoke_test() -> Result<(), mochi_crypto::Error> {
     let key = hex!("feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308");
     let nonce = hex!("cafebabefacedbaddecaf888");
     let input = hex!("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39");
     let ad = hex!("feedfacedeadbeeffeedfacedeadbeefabaddad2");
     let output = hex!("522dc1f099567d07f47f37a32a84427d643a8cdcbfe5c0c97598a2bd2555d1aa8cb08e48590dbb3da7b08b1056828838c5f61e6393ba7a0abcc9f66276fc6ece0f4e1768cddf8853bb2d551b");
 
-    let mut aes_gcm = signal_crypto::Aes256GcmEncryption::new(&key, &nonce, &ad)?;
+    let mut aes_gcm = mochi_crypto::Aes256GcmEncryption::new(&key, &nonce, &ad)?;
 
     let mut buf = input.to_vec();
     aes_gcm.encrypt(&mut buf);

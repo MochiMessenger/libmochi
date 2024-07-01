@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,7 +7,7 @@ use std::ffi::{c_int, c_void};
 use std::io;
 
 use async_trait::async_trait;
-use libsignal_protocol::SignalProtocolError;
+use libmochi_protocol::MochiProtocolError;
 
 use crate::io::{InputStream, InputStreamRead, SyncInputStream};
 
@@ -32,7 +32,7 @@ impl FfiInputStreamStruct {
         let mut amount_read = 0;
         let result = (self.read)(self.ctx, buf.as_mut_ptr(), buf.len(), &mut amount_read);
         CallbackError::check(result).map_err(|e| {
-            let err = SignalProtocolError::for_application_callback("read")(e);
+            let err = MochiProtocolError::for_application_callback("read")(e);
             io::Error::new(io::ErrorKind::Other, err)
         })?;
         Ok(amount_read)
@@ -41,7 +41,7 @@ impl FfiInputStreamStruct {
     fn do_skip(&self, amount: u64) -> io::Result<()> {
         let result = (self.skip)(self.ctx, amount);
         CallbackError::check(result).map_err(|e| {
-            let err = SignalProtocolError::for_application_callback("skip")(e);
+            let err = MochiProtocolError::for_application_callback("skip")(e);
             io::Error::new(io::ErrorKind::Other, err)
         })
     }

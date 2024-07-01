@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -430,7 +430,7 @@ impl ExpiringProfileKeyCredentialIssuanceProof {
         credential_expiration_time: Timestamp,
     ) -> Result<(), ZkGroupVerificationFailure> {
         let credentials_system = credentials::SystemParams::get_hardcoded();
-        let aci = libsignal_core::Aci::from_uuid_bytes(aci_bytes);
+        let aci = libmochi_core::Aci::from_uuid_bytes(aci_bytes);
         let uid = uid_struct::UidStruct::from_service_id(aci.into());
 
         let m5 = TimestampStruct::calc_m_from(credential_expiration_time);
@@ -838,7 +838,7 @@ impl ExpiringProfileKeyCredentialPresentationProof {
         let credentials_system = credentials::SystemParams::get_hardcoded();
         let uid_system = uid_encryption::SystemParams::get_hardcoded();
         let profile_key_system = profile_key_encryption::SystemParams::get_hardcoded();
-        let aci = libsignal_core::Aci::from_uuid_bytes(aci_bytes);
+        let aci = libmochi_core::Aci::from_uuid_bytes(aci_bytes);
         let uid = uid_struct::UidStruct::from_service_id(aci.into());
         let profile_key = profile_key_struct::ProfileKeyStruct::new(profile_key_bytes, aci_bytes);
 

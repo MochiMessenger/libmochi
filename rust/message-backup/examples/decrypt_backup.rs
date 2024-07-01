@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -9,10 +9,10 @@ use std::io::Read as _;
 use clap::builder::TypedValueParser;
 use clap::Parser;
 use clap_stdin::FileOrStdin;
-use libsignal_message_backup::args::{parse_aci, parse_hex_bytes};
-use libsignal_message_backup::frame::{CursorFactory, FramesReader};
-use libsignal_message_backup::key::{BackupKey, MessageBackupKey};
-use libsignal_protocol::Aci;
+use libmochi_message_backup::args::{parse_aci, parse_hex_bytes};
+use libmochi_message_backup::frame::{CursorFactory, FramesReader};
+use libmochi_message_backup::key::{BackupKey, MessageBackupKey};
+use libmochi_protocol::Aci;
 
 const DEFAULT_ACI: Aci = Aci::from_uuid_bytes([0x11; 16]);
 const DEFAULT_MASTER_KEY: [u8; 32] = [b'M'; 32];
@@ -60,7 +60,7 @@ fn main() {
         let reader = FramesReader::new(&key, CursorFactory::new(&contents))
             .await
             .unwrap();
-        libsignal_message_backup::backup::convert_to_json(reader)
+        libmochi_message_backup::backup::convert_to_json(reader)
             .await
             .unwrap()
     });

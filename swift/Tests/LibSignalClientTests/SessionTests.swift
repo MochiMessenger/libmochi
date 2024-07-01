@@ -1,14 +1,14 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import LibSignalClient
+import LibMochiClient
 import XCTest
 
 typealias InitSession = (
-    _ aliceStore: InMemorySignalProtocolStore,
-    _ bobStore: InMemorySignalProtocolStore,
+    _ aliceStore: InMemoryMochiProtocolStore,
+    _ bobStore: InMemoryMochiProtocolStore,
     _ bobAddress: ProtocolAddress
 ) -> Void
 
@@ -21,15 +21,15 @@ class SessionTests: TestCaseBase {
             let alice_address = try! ProtocolAddress(name: "+14151111111", deviceId: 1)
             let bob_address = try! ProtocolAddress(name: "+14151111112", deviceId: 1)
 
-            let alice_store = InMemorySignalProtocolStore()
-            let bob_store = InMemorySignalProtocolStore()
+            let alice_store = InMemoryMochiProtocolStore()
+            let bob_store = InMemoryMochiProtocolStore()
 
             initSessions(alice_store, bob_store, bob_address)
 
             // Alice sends a message:
             let ptext_a: [UInt8] = [8, 6, 7, 5, 3, 0, 9]
 
-            let ctext_a = try! signalEncrypt(
+            let ctext_a = try! mochiEncrypt(
                 message: ptext_a,
                 for: bob_address,
                 sessionStore: alice_store,
@@ -39,9 +39,9 @@ class SessionTests: TestCaseBase {
 
             XCTAssertEqual(ctext_a.messageType, .preKey)
 
-            let ctext_b = try! PreKeySignalMessage(bytes: ctext_a.serialize())
+            let ctext_b = try! PreKeyMochiMessage(bytes: ctext_a.serialize())
 
-            let ptext_b = try! signalDecryptPreKey(
+            let ptext_b = try! mochiDecryptPreKey(
                 message: ctext_b,
                 from: alice_address,
                 sessionStore: bob_store,
@@ -57,7 +57,7 @@ class SessionTests: TestCaseBase {
             // Bob replies
             let ptext2_b: [UInt8] = [23]
 
-            let ctext2_b = try! signalEncrypt(
+            let ctext2_b = try! mochiEncrypt(
                 message: ptext2_b,
                 for: alice_address,
                 sessionStore: bob_store,
@@ -67,9 +67,9 @@ class SessionTests: TestCaseBase {
 
             XCTAssertEqual(ctext2_b.messageType, .whisper)
 
-            let ctext2_a = try! SignalMessage(bytes: ctext2_b.serialize())
+            let ctext2_a = try! MochiMessage(bytes: ctext2_b.serialize())
 
-            let ptext2_a = try! signalDecrypt(
+            let ptext2_a = try! mochiDecrypt(
                 message: ctext2_a,
                 from: bob_address,
                 sessionStore: alice_store,
@@ -89,7 +89,7 @@ class SessionTests: TestCaseBase {
             let alice_address = try! ProtocolAddress(name: "+14151111111", deviceId: 1)
             let bob_address = try! ProtocolAddress(name: "+14151111112", deviceId: 1)
 
-            let alice_store = InMemorySignalProtocolStore()
+            let alice_store = InMemoryMochiProtocolStore()
             let bob_store = BadStore()
 
             initializeSessionsV3(alice_store: alice_store, bob_store: bob_store, bob_address: bob_address)
@@ -97,7 +97,7 @@ class SessionTests: TestCaseBase {
             // Alice sends a message:
             let ptext_a: [UInt8] = [8, 6, 7, 5, 3, 0, 9]
 
-            let ctext_a = try! signalEncrypt(
+            let ctext_a = try! mochiEncrypt(
                 message: ptext_a,
                 for: bob_address,
                 sessionStore: alice_store,
@@ -107,10 +107,10 @@ class SessionTests: TestCaseBase {
 
             XCTAssertEqual(ctext_a.messageType, .preKey)
 
-            let ctext_b = try! PreKeySignalMessage(bytes: ctext_a.serialize())
+            let ctext_b = try! PreKeyMochiMessage(bytes: ctext_a.serialize())
 
             XCTAssertThrowsError(
-                try signalDecryptPreKey(
+                try mochiDecryptPreKey(
                     message: ctext_b,
                     from: alice_address,
                     sessionStore: bob_store,
@@ -133,8 +133,8 @@ class SessionTests: TestCaseBase {
     func testExpiresUnacknowledgedSessions() {
         let bob_address = try! ProtocolAddress(name: "+14151111112", deviceId: 1)
 
-        let alice_store = InMemorySignalProtocolStore()
-        let bob_store = InMemorySignalProtocolStore()
+        let alice_store = InMemoryMochiProtocolStore()
+        let bob_store = InMemoryMochiProtocolStore()
 
         let bob_pre_key = PrivateKey.generate()
         let bob_signed_pre_key = PrivateKey.generate()
@@ -175,7 +175,7 @@ class SessionTests: TestCaseBase {
         // Alice sends a message:
         let ptext_a: [UInt8] = [8, 6, 7, 5, 3, 0, 9]
 
-        let ctext_a = try! signalEncrypt(
+        let ctext_a = try! mochiEncrypt(
             message: ptext_a,
             for: bob_address,
             sessionStore: alice_store,
@@ -190,7 +190,7 @@ class SessionTests: TestCaseBase {
         XCTAssertTrue(updated_session.hasCurrentState(now: Date(timeIntervalSinceReferenceDate: 0)))
         XCTAssertFalse(updated_session.hasCurrentState(now: Date(timeIntervalSinceReferenceDate: 60 * 60 * 24 * 90)))
 
-        XCTAssertThrowsError(try signalEncrypt(
+        XCTAssertThrowsError(try mochiEncrypt(
             message: ptext_a,
             for: bob_address,
             sessionStore: alice_store,
@@ -204,8 +204,8 @@ class SessionTests: TestCaseBase {
         let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
-        let alice_store = InMemorySignalProtocolStore()
-        let bob_store = InMemorySignalProtocolStore()
+        let alice_store = InMemoryMochiProtocolStore()
+        let bob_store = InMemoryMochiProtocolStore()
 
         initializeSessionsV3(alice_store: alice_store, bob_store: bob_store, bob_address: bob_address)
 
@@ -252,7 +252,7 @@ class SessionTests: TestCaseBase {
         XCTAssertEqual(plaintext.sender, sender_addr)
         XCTAssertEqual(plaintext.sender.senderAci, alice_address.serviceId)
 
-        let innerMessage = try signalEncrypt(
+        let innerMessage = try mochiEncrypt(
             message: [],
             for: bob_address,
             sessionStore: alice_store,
@@ -286,8 +286,8 @@ class SessionTests: TestCaseBase {
     func testArchiveSession() throws {
         let bob_address = try! ProtocolAddress(name: "+14151111112", deviceId: 1)
 
-        let alice_store = InMemorySignalProtocolStore()
-        let bob_store = InMemorySignalProtocolStore()
+        let alice_store = InMemoryMochiProtocolStore()
+        let bob_store = InMemoryMochiProtocolStore()
 
         initializeSessionsV3(alice_store: alice_store, bob_store: bob_store, bob_address: bob_address)
 
@@ -307,8 +307,8 @@ class SessionTests: TestCaseBase {
         let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
-        let alice_store = InMemorySignalProtocolStore()
-        let bob_store = InMemorySignalProtocolStore()
+        let alice_store = InMemoryMochiProtocolStore()
+        let bob_store = InMemoryMochiProtocolStore()
 
         initializeSessionsV3(alice_store: alice_store, bob_store: bob_store, bob_address: bob_address)
 
@@ -410,8 +410,8 @@ class SessionTests: TestCaseBase {
         let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
-        let alice_store = InMemorySignalProtocolStore()
-        let bob_store = InMemorySignalProtocolStore(identity: IdentityKeyPair.generate(), registrationId: 0x4000)
+        let alice_store = InMemoryMochiProtocolStore()
+        let bob_store = InMemoryMochiProtocolStore(identity: IdentityKeyPair.generate(), registrationId: 0x4000)
 
         initializeSessionsV3(alice_store: alice_store, bob_store: bob_store, bob_address: bob_address)
 
@@ -464,7 +464,7 @@ class SessionTests: TestCaseBase {
                 context: NullContext()
             )
             XCTFail("should have thrown")
-        } catch SignalError.invalidRegistrationId(address: let address, message: _) {
+        } catch MochiError.invalidRegistrationId(address: let address, message: _) {
             XCTAssertEqual(address, bob_address)
         }
     }
@@ -476,8 +476,8 @@ class SessionTests: TestCaseBase {
         let eve_service_id = try! ServiceId.parseFrom(serviceIdString: "3f0f4734-e331-4434-bd4f-6d8f6ea6dcc7")
         let mallory_service_id = try! ServiceId.parseFrom(serviceIdString: "5d088142-6fd7-4dbd-af00-fdda1b3ce988")
 
-        let alice_store = InMemorySignalProtocolStore()
-        let bob_store = InMemorySignalProtocolStore(identity: IdentityKeyPair.generate(), registrationId: 0x2000)
+        let alice_store = InMemoryMochiProtocolStore()
+        let bob_store = InMemoryMochiProtocolStore(identity: IdentityKeyPair.generate(), registrationId: 0x2000)
 
         initializeSessionsV3(alice_store: alice_store, bob_store: bob_store, bob_address: bob_address)
 
@@ -543,21 +543,21 @@ class SessionTests: TestCaseBase {
         let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
-        let alice_store = InMemorySignalProtocolStore()
-        let bob_store = InMemorySignalProtocolStore()
+        let alice_store = InMemoryMochiProtocolStore()
+        let bob_store = InMemoryMochiProtocolStore()
 
         // Notice the reverse initialization. Bob will send the first message to Alice in this example.
         initializeSessionsV3(alice_store: bob_store, bob_store: alice_store, bob_address: alice_address)
 
-        let bob_first_message = try signalEncrypt(
+        let bob_first_message = try mochiEncrypt(
             message: Array("swim camp".utf8),
             for: alice_address,
             sessionStore: bob_store,
             identityStore: bob_store,
             context: NullContext()
         ).serialize()
-        _ = try signalDecryptPreKey(
-            message: PreKeySignalMessage(bytes: bob_first_message),
+        _ = try mochiDecryptPreKey(
+            message: PreKeyMochiMessage(bytes: bob_first_message),
             from: bob_address,
             sessionStore: alice_store,
             identityStore: alice_store,
@@ -567,7 +567,7 @@ class SessionTests: TestCaseBase {
             context: NullContext()
         )
 
-        let bob_message = try signalEncrypt(
+        let bob_message = try mochiEncrypt(
             message: Array("space camp".utf8),
             for: alice_address,
             sessionStore: bob_store,
@@ -627,8 +627,8 @@ class SessionTests: TestCaseBase {
 }
 
 private func initializeSessionsV3(
-    alice_store: InMemorySignalProtocolStore,
-    bob_store: InMemorySignalProtocolStore,
+    alice_store: InMemoryMochiProtocolStore,
+    bob_store: InMemoryMochiProtocolStore,
     bob_address: ProtocolAddress
 ) {
     let bob_pre_key = PrivateKey.generate()
@@ -688,8 +688,8 @@ private func initializeSessionsV3(
 }
 
 private func initializeSessionsV4(
-    alice_store: InMemorySignalProtocolStore,
-    bob_store: InMemorySignalProtocolStore,
+    alice_store: InMemoryMochiProtocolStore,
+    bob_store: InMemoryMochiProtocolStore,
     bob_address: ProtocolAddress
 ) {
     let bob_pre_key = PrivateKey.generate()

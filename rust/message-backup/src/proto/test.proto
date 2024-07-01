@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package signal.backup.test;
+package mochi.backup.test;
 
 option java_package = "org.thoughtcrime.securesms.backup.v2.proto.test";
 

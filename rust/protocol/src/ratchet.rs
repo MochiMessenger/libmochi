@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,7 +7,7 @@ mod keys;
 mod params;
 
 pub(crate) use self::keys::{ChainKey, MessageKeys, RootKey};
-pub use self::params::{AliceSignalProtocolParameters, BobSignalProtocolParameters};
+pub use self::params::{AliceMochiProtocolParameters, BobMochiProtocolParameters};
 use crate::protocol::{CIPHERTEXT_MESSAGE_CURRENT_VERSION, CIPHERTEXT_MESSAGE_PRE_KYBER_VERSION};
 use crate::state::SessionState;
 use crate::{KeyPair, Result, SessionRecord};
@@ -44,7 +44,7 @@ fn derive_keys_with_label(label: &[u8], secret_input: &[u8]) -> (RootKey, ChainK
 }
 
 pub(crate) fn initialize_alice_session<R: Rng + CryptoRng>(
-    parameters: &AliceSignalProtocolParameters,
+    parameters: &AliceMochiProtocolParameters,
     mut csprng: &mut R,
 ) -> Result<SessionState> {
     let local_identity = parameters.our_identity_key_pair().identity_key();
@@ -109,7 +109,7 @@ pub(crate) fn initialize_alice_session<R: Rng + CryptoRng>(
 }
 
 pub(crate) fn initialize_bob_session(
-    parameters: &BobSignalProtocolParameters,
+    parameters: &BobMochiProtocolParameters,
 ) -> Result<SessionState> {
     let local_identity = parameters.our_identity_key_pair().identity_key();
 
@@ -176,7 +176,7 @@ pub(crate) fn initialize_bob_session(
 }
 
 pub fn initialize_alice_session_record<R: Rng + CryptoRng>(
-    parameters: &AliceSignalProtocolParameters,
+    parameters: &AliceMochiProtocolParameters,
     csprng: &mut R,
 ) -> Result<SessionRecord> {
     Ok(SessionRecord::new(initialize_alice_session(
@@ -185,7 +185,7 @@ pub fn initialize_alice_session_record<R: Rng + CryptoRng>(
 }
 
 pub fn initialize_bob_session_record(
-    parameters: &BobSignalProtocolParameters,
+    parameters: &BobMochiProtocolParameters,
 ) -> Result<SessionRecord> {
     Ok(SessionRecord::new(initialize_bob_session(parameters)?))
 }

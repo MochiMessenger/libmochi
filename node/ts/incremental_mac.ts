@@ -1,11 +1,11 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import * as Native from '../Native';
 import * as stream from 'stream';
-import { LibSignalErrorBase } from './Errors';
+import { LibMochiErrorBase } from './Errors';
 
 export type ChunkSizeChoice =
   | { kind: 'everyN'; n: number }
@@ -124,8 +124,8 @@ export function chunkSizeInBytes(sizeChoice: ChunkSizeChoice): number {
   }
 }
 
-function makeVerificationError(message: string): LibSignalErrorBase {
-  return new LibSignalErrorBase(
+function makeVerificationError(message: string): LibMochiErrorBase {
+  return new LibMochiErrorBase(
     message,
     'VerificationFailed',
     'incremental_mac'

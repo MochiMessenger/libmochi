@@ -1,17 +1,17 @@
 #
-# Copyright (C) 2022 Signal Messenger, LLC.
+# Copyright (C) 2022 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
 [package]
 name = "attest"
 version = "0.1.0"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 edition = "2021"
 license = "AGPL-3.0-only"
 
 [dependencies]
-boring = { git = "https://github.com/signalapp/boring", tag = "signal-v4.6.0", default-features = false }
+boring = { git = "https://github.com/mochimessenger/boring", tag = "mochi-v4.6.0", default-features = false }
 
 asn1 = "0.16.1"
 base64 = "0.21"

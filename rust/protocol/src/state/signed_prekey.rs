@@ -1,10 +1,10 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use crate::proto::storage::SignedPreKeyRecordStructure;
-use crate::{kem, KeyPair, PrivateKey, PublicKey, Result, SignalProtocolError, Timestamp};
+use crate::{kem, KeyPair, PrivateKey, PublicKey, Result, MochiProtocolError, Timestamp};
 
 use prost::Message;
 
@@ -93,7 +93,7 @@ pub trait GenericSignedPreKey {
     {
         Ok(Self::from_storage(
             SignedPreKeyRecordStructure::decode(data)
-                .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?,
+                .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?,
         ))
     }
 

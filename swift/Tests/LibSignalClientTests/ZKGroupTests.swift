@@ -1,9 +1,9 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import LibSignalClient
+import LibMochiClient
 import XCTest
 
 private let SECONDS_PER_DAY: UInt64 = 24 * 60 * 60
@@ -268,7 +268,7 @@ class ZKGroupTests: TestCaseBase {
         do {
             try serverPublicParams.verifySignature(message: alteredMessage, notarySignature: signature)
             XCTAssert(false)
-        } catch SignalError.verificationFailed(_) {
+        } catch MochiError.verificationFailed(_) {
             // good
         }
     }
@@ -278,7 +278,7 @@ class ZKGroupTests: TestCaseBase {
         do {
             _ = try GroupSecretParams(contents: ckp)
             XCTFail("should have thrown")
-        } catch SignalError.invalidType(_) {
+        } catch MochiError.invalidType(_) {
             // good
         }
     }
@@ -288,7 +288,7 @@ class ZKGroupTests: TestCaseBase {
         do {
             _ = try GroupSecretParams(contents: ckp)
             XCTFail("should have thrown")
-        } catch SignalError.invalidType(_) {
+        } catch MochiError.invalidType(_) {
             // good
         }
     }

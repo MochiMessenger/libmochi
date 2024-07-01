@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -9,9 +9,9 @@ use crypto_common::KeyInit;
 use hmac::digest::typenum::Unsigned;
 use hmac::Hmac;
 
-use libsignal_bridge_macros::*;
-use libsignal_bridge_types::incremental_mac::*;
-use libsignal_protocol::incremental_mac::{calculate_chunk_size, Incremental};
+use libmochi_bridge_macros::*;
+use libmochi_bridge_types::incremental_mac::*;
+use libmochi_protocol::incremental_mac::{calculate_chunk_size, Incremental};
 
 use crate::support::*;
 use crate::*;

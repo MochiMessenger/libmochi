@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright 2020-2021 Signal Messenger, LLC.
+# Copyright 2020-2021 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -131,9 +131,9 @@ if [[ -z "${DEBUG_LEVEL_LOGS:-}" ]]; then
   FEATURES+=("log/release_max_level_info")
 fi
 
-echo_then_run cargo build -p libsignal-ffi ${RELEASE_BUILD:+--release} ${VERBOSE:+--verbose} ${CARGO_BUILD_TARGET:+--target $CARGO_BUILD_TARGET} ${FEATURES:+--features "${FEATURES[*]}"} ${BUILD_STD:+-Zbuild-std}
+echo_then_run cargo build -p libmochi-ffi ${RELEASE_BUILD:+--release} ${VERBOSE:+--verbose} ${CARGO_BUILD_TARGET:+--target $CARGO_BUILD_TARGET} ${FEATURES:+--features "${FEATURES[*]}"} ${BUILD_STD:+-Zbuild-std}
 
-FFI_HEADER_PATH=swift/Sources/SignalFfi/signal_ffi.h
+FFI_HEADER_PATH=swift/Sources/MochiFfi/mochi_ffi.h
 
 if [[ -n "${SHOULD_CBINDGEN}" ]]; then
   check_cbindgen
@@ -142,7 +142,7 @@ if [[ -n "${SHOULD_CBINDGEN}" ]]; then
     echo diff -u "${FFI_HEADER_PATH}" "<(cbindgen -q ${RELEASE_BUILD:+--profile release} rust/bridge/ffi)"
     if ! diff -u "${FFI_HEADER_PATH}"  <(cbindgen -q ${RELEASE_BUILD:+--profile release} rust/bridge/ffi); then
       echo
-      echo 'error: signal_ffi.h not up to date; run' "$0" '--generate-ffi' >&2
+      echo 'error: mochi_ffi.h not up to date; run' "$0" '--generate-ffi' >&2
       exit 1
     fi
   else

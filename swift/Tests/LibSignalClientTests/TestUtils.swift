@@ -1,12 +1,12 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-@testable import LibSignalClient
+@testable import LibMochiClient
 import XCTest
 
-class BadStore: InMemorySignalProtocolStore {
+class BadStore: InMemoryMochiProtocolStore {
     enum Error: Swift.Error {
         case badness
     }
@@ -18,7 +18,7 @@ class BadStore: InMemorySignalProtocolStore {
 
 // Wrapped here so that the test files don't need to use @testable import.
 func sealedSenderMultiRecipientMessageForSingleRecipient(_ message: [UInt8]) throws -> [UInt8] {
-    return try LibSignalClient.sealedSenderMultiRecipientMessageForSingleRecipient(message)
+    return try LibMochiClient.sealedSenderMultiRecipientMessageForSingleRecipient(message)
 }
 
 /// Always throws a ``XCTSkip`` error.

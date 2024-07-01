@@ -1,14 +1,14 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import Foundation
-import LibSignalClient
+import LibMochiClient
 
 internal struct TestIoError: Error {}
 
-public class ErrorInputStream: SignalInputStream {
+public class ErrorInputStream: MochiInputStream {
     public func read(into buffer: UnsafeMutableRawBufferPointer) throws -> Int {
         throw TestIoError()
     }
@@ -18,8 +18,8 @@ public class ErrorInputStream: SignalInputStream {
     }
 }
 
-public class ThrowsAfterInputStream: SignalInputStream {
-    public init(inner: SignalInputStream, readBeforeThrow: UInt64) {
+public class ThrowsAfterInputStream: MochiInputStream {
+    public init(inner: MochiInputStream, readBeforeThrow: UInt64) {
         self.inner = inner
         self.readBeforeThrow = readBeforeThrow
     }
@@ -51,7 +51,7 @@ public class ThrowsAfterInputStream: SignalInputStream {
         self.readBeforeThrow -= amount
     }
 
-    private var inner: SignalInputStream
+    private var inner: MochiInputStream
     private var readBeforeThrow: UInt64
 }
 

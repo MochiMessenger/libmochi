@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2021 Signal Messenger, LLC.
+# Copyright (C) 2021 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -64,10 +64,10 @@ def main(args=None):
     out_dir = options.out_dir.strip('"') or os.path.join('build', configuration_name)
 
     features = ['testing-fns']
-    if 'npm_config_libsignal_debug_level_logs' not in os.environ:
+    if 'npm_config_libmochi_debug_level_logs' not in os.environ:
         features.append('log/release_max_level_info')
 
-    cmdline = ['cargo', 'build', '--target', cargo_target, '-p', 'libsignal-node', '--features', ','.join(features)]
+    cmdline = ['cargo', 'build', '--target', cargo_target, '-p', 'libmochi-node', '--features', ','.join(features)]
     if configuration_name == 'Release':
         cmdline.append('--release')
     print("Running '%s'" % (' '.join(cmdline)))
@@ -102,7 +102,7 @@ def main(args=None):
             # but that also isn't accepted by all of Visual Studio's CLI tools.
             tmpdir = cargo_env['RUNNER_TEMP']
             if len(tmpdir) < len(abs_build_dir):
-                cargo_env['CARGO_BUILD_TARGET_DIR'] = os.path.join(tmpdir, "libsignal")
+                cargo_env['CARGO_BUILD_TARGET_DIR'] = os.path.join(tmpdir, "libmochi")
 
     elif node_os_name == 'darwin':
         # macOS has a nice place for us to stash our version number.
@@ -123,9 +123,9 @@ def main(args=None):
 
     found_a_lib = False
     for lib_format in ['%s.dll', 'lib%s.so', 'lib%s.dylib']:
-        src_path = os.path.join(libs_in, lib_format % 'signal_node')
+        src_path = os.path.join(libs_in, lib_format % 'mochi_node')
         if os.access(src_path, os.R_OK):
-            dst_path = os.path.join(out_dir, 'libsignal_client_%s_%s.node' % (node_os_name, node_arch))
+            dst_path = os.path.join(out_dir, 'libmochi_client_%s_%s.node' % (node_os_name, node_arch))
             print("Copying %s to %s" % (src_path, dst_path))
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)

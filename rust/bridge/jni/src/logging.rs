@@ -1,16 +1,16 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use jni::objects::{AutoLocal, GlobalRef, JClass, JObject, JValue};
 use jni::sys::jint;
 use jni::{JNIEnv, JavaVM};
-use libsignal_bridge::{describe_panic, jni_args};
+use libmochi_bridge::{describe_panic, jni_args};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::process::abort;
 
-// Keep this in sync with SignalProtocolLogger.java, as well as the list below.
+// Keep this in sync with MochiProtocolLogger.java, as well as the list below.
 #[derive(Clone, Copy)]
 enum JavaLogLevel {
     Verbose = 2,
@@ -82,7 +82,7 @@ impl JniLogger {
             record.args(),
         );
         let message = AutoLocal::new(env.new_string(message)?, &env);
-        let module = AutoLocal::new(env.new_string("libsignal")?, &env);
+        let module = AutoLocal::new(env.new_string("libmochi")?, &env);
         let args = jni_args!((
             level.into() => int,
             module => java.lang.String,
@@ -102,7 +102,7 @@ impl JniLogger {
 
 impl log::Log for JniLogger {
     fn enabled(&self, metadata: &log::Metadata) -> bool {
-        libsignal_bridge::logging::log_enabled_in_apps(metadata)
+        libmochi_bridge::logging::log_enabled_in_apps(metadata)
     }
 
     fn log(&self, record: &log::Record) {
@@ -129,7 +129,7 @@ fn abort_on_panic(f: impl FnOnce()) {
 }
 
 fn set_max_level_from_java_level(max_level: jint) {
-    // Keep this in sync with SignalProtocolLogger.java.
+    // Keep this in sync with MochiProtocolLogger.java.
     let level = match max_level {
         2 => JavaLogLevel::Verbose,
         3 => JavaLogLevel::Debug,
@@ -137,7 +137,7 @@ fn set_max_level_from_java_level(max_level: jint) {
         5 => JavaLogLevel::Warn,
         6 => JavaLogLevel::Error,
         7 => JavaLogLevel::Assert,
-        _ => panic!("invalid log level (see SignalProtocolLogger)"),
+        _ => panic!("invalid log level (see MochiProtocolLogger)"),
     };
     assert!(jint::from(level) == max_level);
 
@@ -145,7 +145,7 @@ fn set_max_level_from_java_level(max_level: jint) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_Logger_1Initialize(
+pub unsafe extern "C" fn Java_org_mochi_libmochi_internal_Native_Logger_1Initialize(
     env: JNIEnv,
     _class: JClass,
     max_level: jint,
@@ -158,7 +158,7 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_Logger_1Initi
             Ok(_) => {
                 set_max_level_from_java_level(max_level);
                 log::info!(
-                    "Initializing libsignal version:{}",
+                    "Initializing libmochi version:{}",
                     env!("CARGO_PKG_VERSION")
                 );
                 let backtrace_mode = {
@@ -175,14 +175,14 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_Logger_1Initi
                     .install_panic_hook();
             }
             Err(_) => {
-                log::warn!("logging already initialized for libsignal; ignoring later call");
+                log::warn!("logging already initialized for libmochi; ignoring later call");
             }
         }
     });
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_Logger_1SetMaxLevel(
+pub unsafe extern "C" fn Java_org_mochi_libmochi_internal_Native_Logger_1SetMaxLevel(
     _env: JNIEnv,
     _class: JClass,
     max_level: jint,

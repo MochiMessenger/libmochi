@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -64,7 +64,7 @@ pub struct ServerPublicParams {
 impl ServerSecretParams {
     pub fn generate(randomness: RandomnessBytes) -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Random_ServerSecretParams_Generate",
+            b"Mochi_ZKGroup_20200424_Random_ServerSecretParams_Generate",
             &randomness,
         );
 
@@ -118,7 +118,7 @@ impl ServerSecretParams {
 
     pub fn sign(&self, randomness: RandomnessBytes, message: &[u8]) -> NotarySignatureBytes {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Random_ServerSecretParams_Sign",
+            b"Mochi_ZKGroup_20200424_Random_ServerSecretParams_Sign",
             &randomness,
         );
         self.sig_key_pair.sign(message, &mut sho)
@@ -127,12 +127,12 @@ impl ServerSecretParams {
     pub fn issue_auth_credential_with_pni_as_service_id(
         &self,
         randomness: RandomnessBytes,
-        aci: libsignal_core::Aci,
-        pni: libsignal_core::Pni,
+        aci: libmochi_core::Aci,
+        pni: libmochi_core::Pni,
         redemption_time: Timestamp,
     ) -> api::auth::AuthCredentialWithPniResponse {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20220617_Random_ServerSecretParams_IssueAuthCredentialWithPni",
+            b"Mochi_ZKGroup_20220617_Random_ServerSecretParams_IssueAuthCredentialWithPni",
             &randomness,
         );
 
@@ -281,13 +281,13 @@ impl ServerSecretParams {
         &self,
         randomness: RandomnessBytes,
         request: &api::profiles::ProfileKeyCredentialRequest,
-        aci: libsignal_core::Aci,
+        aci: libmochi_core::Aci,
         commitment: api::profiles::ProfileKeyCommitment,
         credential_expiration_time: Timestamp,
     ) -> Result<api::profiles::ExpiringProfileKeyCredentialResponse, ZkGroupVerificationFailure>
     {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20220508_Random_ServerSecretParams_IssueExpiringProfileKeyCredential",
+            b"Mochi_ZKGroup_20220508_Random_ServerSecretParams_IssueExpiringProfileKeyCredential",
             &randomness,
         );
 
@@ -335,7 +335,7 @@ impl ServerSecretParams {
         receipt_level: ReceiptLevel,
     ) -> api::receipts::ReceiptCredentialResponse {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20210919_Random_ServerSecretParams_IssueReceiptCredential",
+            b"Mochi_ZKGroup_20210919_Random_ServerSecretParams_IssueReceiptCredential",
             &randomness,
         );
 
@@ -391,8 +391,8 @@ impl ServerPublicParams {
 
     pub fn receive_auth_credential_with_pni_as_service_id(
         &self,
-        aci: libsignal_core::Aci,
-        pni: libsignal_core::Pni,
+        aci: libmochi_core::Aci,
+        pni: libmochi_core::Pni,
         redemption_time: Timestamp,
         response: api::auth::AuthCredentialWithPniResponse,
     ) -> Result<api::auth::AuthCredentialWithPni, ZkGroupVerificationFailure> {
@@ -439,7 +439,7 @@ impl ServerPublicParams {
             api::auth::AuthCredentialWithPni::V0(auth_credential) => auth_credential,
         };
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20220617_Random_ServerPublicParams_CreateAuthCredentialWithPniPresentation",
+            b"Mochi_ZKGroup_20220617_Random_ServerPublicParams_CreateAuthCredentialWithPniPresentation",
             &randomness,
         );
 
@@ -471,11 +471,11 @@ impl ServerPublicParams {
     pub fn create_profile_key_credential_request_context(
         &self,
         randomness: RandomnessBytes,
-        aci: libsignal_core::Aci,
+        aci: libmochi_core::Aci,
         profile_key: api::profiles::ProfileKey,
     ) -> api::profiles::ProfileKeyCredentialRequestContext {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Random_ServerPublicParams_CreateProfileKeyCredentialRequestContext",
+            b"Mochi_ZKGroup_20200424_Random_ServerPublicParams_CreateProfileKeyCredentialRequestContext",
             &randomness,
         );
         let uid_bytes = uuid::Uuid::from(aci).into_bytes();
@@ -554,7 +554,7 @@ impl ServerPublicParams {
         expiring_profile_key_credential: api::profiles::ExpiringProfileKeyCredential,
     ) -> api::profiles::ExpiringProfileKeyCredentialPresentation {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20220508_Random_ServerPublicParams_CreateExpiringProfileKeyCredentialPresentation",
+            b"Mochi_ZKGroup_20220508_Random_ServerPublicParams_CreateExpiringProfileKeyCredentialPresentation",
             &randomness,
         );
 
@@ -594,7 +594,7 @@ impl ServerPublicParams {
         receipt_serial_bytes: ReceiptSerialBytes,
     ) -> api::receipts::ReceiptCredentialRequestContext {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20210919_Random_ServerPublicParams_CreateReceiptCredentialRequestContext",
+            b"Mochi_ZKGroup_20210919_Random_ServerPublicParams_CreateReceiptCredentialRequestContext",
             &randomness,
         );
 
@@ -644,7 +644,7 @@ impl ServerPublicParams {
         receipt_credential: &api::receipts::ReceiptCredential,
     ) -> api::receipts::ReceiptCredentialPresentation {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20210919_Random_ServerPublicParams_CreateReceiptCredentialPresentation",
+            b"Mochi_ZKGroup_20210919_Random_ServerPublicParams_CreateReceiptCredentialPresentation",
             &randomness,
         );
         let proof = crypto::proofs::ReceiptCredentialPresentationProof::new(

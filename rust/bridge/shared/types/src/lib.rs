@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -36,7 +36,7 @@ pub mod zkgroup;
 mod pin {
     use crate::*;
 
-    use ::signal_pin::PinHash;
+    use ::mochi_pin::PinHash;
 
     bridge_as_handle!(PinHash, node = false);
 }
@@ -46,9 +46,9 @@ pub mod message_backup;
 
 pub mod io;
 
-#[cfg(feature = "signal-media")]
+#[cfg(feature = "mochi-media")]
 mod media {
-    use signal_media::sanitize::mp4::SanitizedMetadata;
+    use mochi_media::sanitize::mp4::SanitizedMetadata;
 
     use crate::*;
 

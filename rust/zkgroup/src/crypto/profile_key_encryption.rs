@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -36,7 +36,7 @@ pub type Ciphertext = zkcredential::attributes::Ciphertext<ProfileKeyEncryptionD
 impl SystemParams {
     pub fn generate() -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Constant_ProfileKeyEncryption_SystemParams_Generate",
+            b"Mochi_ZKGroup_20200424_Constant_ProfileKeyEncryption_SystemParams_Generate",
             b"",
         );
         let G_b1 = sho.get_point();
@@ -61,7 +61,7 @@ pub struct ProfileKeyEncryptionDomain;
 impl zkcredential::attributes::Domain for ProfileKeyEncryptionDomain {
     type Attribute = profile_key_struct::ProfileKeyStruct;
 
-    const ID: &'static str = "Signal_ZKGroup_20231011_ProfileKeyEncryption";
+    const ID: &'static str = "Mochi_ZKGroup_20231011_ProfileKeyEncryption";
 
     fn G_a() -> [RistrettoPoint; 2] {
         let system = SystemParams::get_hardcoded();

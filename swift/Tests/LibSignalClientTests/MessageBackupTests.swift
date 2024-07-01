@@ -1,11 +1,11 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import XCTest
 
-@testable import LibSignalClient
+@testable import LibMochiClient
 
 class MessageBackupTests: TestCaseBase {
     func testValidInput() throws {
@@ -55,7 +55,7 @@ class MessageBackupTests: TestCaseBase {
 
     func testInputThrowsAfter() {
         let bytes = readResource(forName: "new_account.binproto.encrypted")
-        let makeStream = { ThrowsAfterInputStream(inner: SignalInputStreamAdapter(bytes), readBeforeThrow: UInt64(bytes.count) - 1) }
+        let makeStream = { ThrowsAfterInputStream(inner: MochiInputStreamAdapter(bytes), readBeforeThrow: UInt64(bytes.count) - 1) }
         XCTAssertThrowsError(
             try validateMessageBackup(key: MessageBackupKey.testKey(), purpose: .remoteBackup, length: UInt64(bytes.count), makeStream: makeStream)
         ) { error in
@@ -64,7 +64,7 @@ class MessageBackupTests: TestCaseBase {
     }
 
     static func validateBackup(bytes: some Collection<UInt8>) throws -> MessageBackupUnknownFields {
-        try validateMessageBackup(key: MessageBackupKey.testKey(), purpose: .remoteBackup, length: UInt64(bytes.count), makeStream: { SignalInputStreamAdapter(bytes) })
+        try validateMessageBackup(key: MessageBackupKey.testKey(), purpose: .remoteBackup, length: UInt64(bytes.count), makeStream: { MochiInputStreamAdapter(bytes) })
     }
 }
 

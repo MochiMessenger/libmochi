@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2024 Signal Messenger, LLC.
+// Copyright (C) 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,7 +7,7 @@ use std::num::NonZeroU64;
 
 use derive_where::derive_where;
 use itertools::Itertools as _;
-use libsignal_protocol::{Aci, Pni, ServiceIdKind};
+use libmochi_protocol::{Aci, Pni, ServiceIdKind};
 use uuid::Uuid;
 use zkgroup::{GroupMasterKeyBytes, ProfileKeyBytes};
 

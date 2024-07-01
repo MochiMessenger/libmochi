@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,7 +10,7 @@
 use crate::storage::traits;
 use crate::{
     IdentityKey, IdentityKeyPair, KyberPreKeyId, KyberPreKeyRecord, PreKeyId, PreKeyRecord,
-    ProtocolAddress, Result, SenderKeyRecord, SessionRecord, SignalProtocolError, SignedPreKeyId,
+    ProtocolAddress, Result, SenderKeyRecord, SessionRecord, MochiProtocolError, SignedPreKeyId,
     SignedPreKeyRecord,
 };
 
@@ -130,7 +130,7 @@ impl traits::PreKeyStore for InMemPreKeyStore {
         Ok(self
             .pre_keys
             .get(&id)
-            .ok_or(SignalProtocolError::InvalidPreKeyId)?
+            .ok_or(MochiProtocolError::InvalidPreKeyId)?
             .clone())
     }
 
@@ -179,7 +179,7 @@ impl traits::SignedPreKeyStore for InMemSignedPreKeyStore {
         Ok(self
             .signed_pre_keys
             .get(&id)
-            .ok_or(SignalProtocolError::InvalidSignedPreKeyId)?
+            .ok_or(MochiProtocolError::InvalidSignedPreKeyId)?
             .clone())
     }
 
@@ -226,7 +226,7 @@ impl traits::KyberPreKeyStore for InMemKyberPreKeyStore {
         Ok(self
             .kyber_pre_keys
             .get(&kyber_prekey_id)
-            .ok_or(SignalProtocolError::InvalidKyberPreKeyId)?
+            .ok_or(MochiProtocolError::InvalidKyberPreKeyId)?
             .clone())
     }
 
@@ -273,7 +273,7 @@ impl InMemSessionStore {
             .map(|&address| {
                 self.sessions
                     .get(address)
-                    .ok_or_else(|| SignalProtocolError::SessionNotFound(address.clone()))
+                    .ok_or_else(|| MochiProtocolError::SessionNotFound(address.clone()))
             })
             .collect()
     }
@@ -357,7 +357,7 @@ impl traits::SenderKeyStore for InMemSenderKeyStore {
 /// Reference implementation of [traits::ProtocolStore].
 #[allow(missing_docs)]
 #[derive(Clone)]
-pub struct InMemSignalProtocolStore {
+pub struct InMemMochiProtocolStore {
     pub session_store: InMemSessionStore,
     pub pre_key_store: InMemPreKeyStore,
     pub signed_pre_key_store: InMemSignedPreKeyStore,
@@ -366,7 +366,7 @@ pub struct InMemSignalProtocolStore {
     pub sender_key_store: InMemSenderKeyStore,
 }
 
-impl InMemSignalProtocolStore {
+impl InMemMochiProtocolStore {
     /// Create an object with the minimal implementation of [traits::ProtocolStore], representing
     /// the given identity `key_pair` along with the separate randomly chosen `registration_id`.
     pub fn new(key_pair: IdentityKeyPair, registration_id: u32) -> Result<Self> {
@@ -397,7 +397,7 @@ impl InMemSignalProtocolStore {
 }
 
 #[async_trait(?Send)]
-impl traits::IdentityKeyStore for InMemSignalProtocolStore {
+impl traits::IdentityKeyStore for InMemMochiProtocolStore {
     async fn get_identity_key_pair(&self) -> Result<IdentityKeyPair> {
         self.identity_store.get_identity_key_pair().await
     }
@@ -431,7 +431,7 @@ impl traits::IdentityKeyStore for InMemSignalProtocolStore {
 }
 
 #[async_trait(?Send)]
-impl traits::PreKeyStore for InMemSignalProtocolStore {
+impl traits::PreKeyStore for InMemMochiProtocolStore {
     async fn get_pre_key(&self, id: PreKeyId) -> Result<PreKeyRecord> {
         self.pre_key_store.get_pre_key(id).await
     }
@@ -446,7 +446,7 @@ impl traits::PreKeyStore for InMemSignalProtocolStore {
 }
 
 #[async_trait(?Send)]
-impl traits::SignedPreKeyStore for InMemSignalProtocolStore {
+impl traits::SignedPreKeyStore for InMemMochiProtocolStore {
     async fn get_signed_pre_key(&self, id: SignedPreKeyId) -> Result<SignedPreKeyRecord> {
         self.signed_pre_key_store.get_signed_pre_key(id).await
     }
@@ -463,7 +463,7 @@ impl traits::SignedPreKeyStore for InMemSignalProtocolStore {
 }
 
 #[async_trait(?Send)]
-impl traits::KyberPreKeyStore for InMemSignalProtocolStore {
+impl traits::KyberPreKeyStore for InMemMochiProtocolStore {
     async fn get_kyber_pre_key(&self, kyber_prekey_id: KyberPreKeyId) -> Result<KyberPreKeyRecord> {
         self.kyber_pre_key_store
             .get_kyber_pre_key(kyber_prekey_id)
@@ -488,7 +488,7 @@ impl traits::KyberPreKeyStore for InMemSignalProtocolStore {
 }
 
 #[async_trait(?Send)]
-impl traits::SessionStore for InMemSignalProtocolStore {
+impl traits::SessionStore for InMemMochiProtocolStore {
     async fn load_session(&self, address: &ProtocolAddress) -> Result<Option<SessionRecord>> {
         self.session_store.load_session(address).await
     }
@@ -503,7 +503,7 @@ impl traits::SessionStore for InMemSignalProtocolStore {
 }
 
 #[async_trait(?Send)]
-impl traits::SenderKeyStore for InMemSignalProtocolStore {
+impl traits::SenderKeyStore for InMemMochiProtocolStore {
     async fn store_sender_key(
         &mut self,
         sender: &ProtocolAddress,
@@ -526,4 +526,4 @@ impl traits::SenderKeyStore for InMemSignalProtocolStore {
     }
 }
 
-impl traits::ProtocolStore for InMemSignalProtocolStore {}
+impl traits::ProtocolStore for InMemMochiProtocolStore {}

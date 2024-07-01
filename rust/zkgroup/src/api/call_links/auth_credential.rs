@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -22,7 +22,7 @@ use crate::ZkGroupVerificationFailure;
 
 use super::{CallLinkPublicParams, CallLinkSecretParams};
 
-const CREDENTIAL_LABEL: &[u8] = b"20230421_Signal_CallLinkAuthCredential";
+const CREDENTIAL_LABEL: &[u8] = b"20230421_Mochi_CallLinkAuthCredential";
 
 #[derive(Serialize, Deserialize, PartialDefault)]
 pub struct CallLinkAuthCredentialResponse {
@@ -34,7 +34,7 @@ pub struct CallLinkAuthCredentialResponse {
 
 impl CallLinkAuthCredentialResponse {
     pub fn issue_credential(
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
         redemption_time: Timestamp,
         params: &GenericServerSecretParams,
         randomness: RandomnessBytes,
@@ -51,7 +51,7 @@ impl CallLinkAuthCredentialResponse {
 
     pub fn receive(
         self,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
         redemption_time: Timestamp,
         params: &GenericServerPublicParams,
     ) -> Result<CallLinkAuthCredential, ZkGroupVerificationFailure> {
@@ -82,7 +82,7 @@ pub struct CallLinkAuthCredential {
 impl CallLinkAuthCredential {
     pub fn present(
         &self,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
         redemption_time: Timestamp,
         server_params: &GenericServerPublicParams,
         call_link_params: &CallLinkSecretParams,

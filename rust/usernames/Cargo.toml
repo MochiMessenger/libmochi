@@ -1,11 +1,11 @@
 #
-# Copyright (C) 2023 Signal Messenger, LLC.
+# Copyright (C) 2023 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
 [package]
 name = "usernames"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 version = "0.1.0"
 edition = "2021"
 description = "A zero-knowledge usernames library"
@@ -13,7 +13,7 @@ license = "AGPL-3.0-only"
 
 [dependencies]
 poksho = { path = "../poksho" }
-signal-crypto = { path = "../crypto" }
+mochi-crypto = { path = "../crypto" }
 
 curve25519-dalek = { version = "4.0", features = ["digest"] }
 displaydoc = "0.2"

@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -9,7 +9,7 @@ use std::num::{NonZeroU64, ParseIntError};
 use std::str::FromStr;
 
 use http::StatusCode;
-use libsignal_core::{Aci, Pni};
+use libmochi_core::{Aci, Pni};
 use prost::Message as _;
 use thiserror::Error;
 use tokio::net::TcpStream;

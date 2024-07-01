@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,7 +10,7 @@ use prost::Message;
 
 use crate::crypto::hmac_sha256;
 use crate::proto::storage as storage_proto;
-use crate::{consts, PrivateKey, PublicKey, SignalProtocolError};
+use crate::{consts, PrivateKey, PublicKey, MochiProtocolError};
 
 /// A distinct error type to keep from accidentally propagating deserialization errors.
 #[derive(Debug)]
@@ -241,9 +241,9 @@ impl SenderKeyRecord {
         }
     }
 
-    pub fn deserialize(buf: &[u8]) -> Result<SenderKeyRecord, SignalProtocolError> {
+    pub fn deserialize(buf: &[u8]) -> Result<SenderKeyRecord, MochiProtocolError> {
         let skr = storage_proto::SenderKeyRecordStructure::decode(buf)
-            .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+            .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
         let mut states = VecDeque::with_capacity(skr.sender_key_states.len());
         for state in skr.sender_key_states {
@@ -352,7 +352,7 @@ impl SenderKeyRecord {
         }
     }
 
-    pub fn serialize(&self) -> Result<Vec<u8>, SignalProtocolError> {
+    pub fn serialize(&self) -> Result<Vec<u8>, MochiProtocolError> {
         Ok(self.as_protobuf().encode_to_vec())
     }
 }

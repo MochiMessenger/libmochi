@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,7 +7,7 @@
 
 const Benchmark = require('benchmark');
 
-const Native = require(process.env.SIGNAL_NEON_FUTURES_TEST_LIB);
+const Native = require(process.env.MOCHI_NEON_FUTURES_TEST_LIB);
 
 const suite = new Benchmark.Suite();
 suite

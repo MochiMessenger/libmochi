@@ -1,13 +1,13 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use crate::{
     message_encrypt, Aci, CiphertextMessageType, DeviceId, Direction, IdentityKey, IdentityKeyPair,
-    IdentityKeyStore, KeyPair, KyberPreKeyStore, PreKeySignalMessage, PreKeyStore, PrivateKey,
+    IdentityKeyStore, KeyPair, KyberPreKeyStore, PreKeyMochiMessage, PreKeyStore, PrivateKey,
     ProtocolAddress, PublicKey, Result, ServiceId, ServiceIdFixedWidthBinaryBytes, SessionRecord,
-    SessionStore, SignalMessage, SignalProtocolError, SignedPreKeyStore, Timestamp,
+    SessionStore, MochiMessage, MochiProtocolError, SignedPreKeyStore, Timestamp,
 };
 
 use crate::{crypto, curve, proto, session_cipher};
@@ -56,29 +56,29 @@ const MAX_VALID_DEVICE_ID: u32 = 127;
 impl ServerCertificate {
     pub fn deserialize(data: &[u8]) -> Result<Self> {
         let pb = proto::sealed_sender::ServerCertificate::decode(data)
-            .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+            .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
         if pb.certificate.is_none() || pb.signature.is_none() {
-            return Err(SignalProtocolError::InvalidProtobufEncoding);
+            return Err(MochiProtocolError::InvalidProtobufEncoding);
         }
 
         let certificate = pb
             .certificate
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let signature = pb
             .signature
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let certificate_data =
             proto::sealed_sender::server_certificate::Certificate::decode(certificate.as_ref())
-                .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+                .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
         let key = PublicKey::try_from(
             &certificate_data
                 .key
-                .ok_or(SignalProtocolError::InvalidProtobufEncoding)?[..],
+                .ok_or(MochiProtocolError::InvalidProtobufEncoding)?[..],
         )?;
         let key_id = certificate_data
             .id
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
 
         Ok(Self {
             serialized: data.to_vec(),
@@ -174,37 +174,37 @@ pub struct SenderCertificate {
 impl SenderCertificate {
     pub fn deserialize(data: &[u8]) -> Result<Self> {
         let pb = proto::sealed_sender::SenderCertificate::decode(data)
-            .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+            .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
         let certificate = pb
             .certificate
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let signature = pb
             .signature
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let certificate_data =
             proto::sealed_sender::sender_certificate::Certificate::decode(certificate.as_ref())
-                .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+                .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
         let sender_device_id: DeviceId = certificate_data
             .sender_device
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?
             .into();
         let expiration = certificate_data
             .expires
             .map(Timestamp::from_epoch_millis)
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let signer_pb = certificate_data
             .signer
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let sender_uuid = certificate_data
             .sender_uuid
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let sender_e164 = certificate_data.sender_e164;
 
         let key = PublicKey::try_from(
             &certificate_data
                 .identity_key
-                .ok_or(SignalProtocolError::InvalidProtobufEncoding)?[..],
+                .ok_or(MochiProtocolError::InvalidProtobufEncoding)?[..],
         )?;
 
         let signer_bits = signer_pb.encode_to_vec();
@@ -418,19 +418,19 @@ pub struct UnidentifiedSenderMessageContent {
 impl UnidentifiedSenderMessageContent {
     pub fn deserialize(data: &[u8]) -> Result<Self> {
         let pb = proto::sealed_sender::unidentified_sender_message::Message::decode(data)
-            .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+            .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
         let msg_type = pb
             .r#type
             .and_then(|t| ProtoMessageType::try_from(t).ok())
             .map(CiphertextMessageType::from)
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let sender = pb
             .sender_certificate
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let contents = pb
             .content
-            .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+            .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
         let content_hint = pb
             .content_hint
             .map(|raw| ContentHint::from(raw as u32))
@@ -540,7 +540,7 @@ const SEALED_SENDER_V2_SERVICE_ID_FULL_VERSION: u8 = 0x23;
 impl UnidentifiedSenderMessage {
     fn deserialize(data: &[u8]) -> Result<Self> {
         if data.is_empty() {
-            return Err(SignalProtocolError::InvalidSealedSenderMessage(
+            return Err(MochiProtocolError::InvalidSealedSenderMessage(
                 "Message was empty".to_owned(),
             ));
         }
@@ -554,17 +554,17 @@ impl UnidentifiedSenderMessage {
             0 | SEALED_SENDER_V1_MAJOR_VERSION => {
                 // XXX should we really be accepted version == 0 here?
                 let pb = proto::sealed_sender::UnidentifiedSenderMessage::decode(&data[1..])
-                    .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+                    .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
 
                 let ephemeral_public = pb
                     .ephemeral_public
-                    .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+                    .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
                 let encrypted_static = pb
                     .encrypted_static
-                    .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+                    .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
                 let encrypted_message = pb
                     .encrypted_message
-                    .ok_or(SignalProtocolError::InvalidProtobufEncoding)?;
+                    .ok_or(MochiProtocolError::InvalidProtobufEncoding)?;
 
                 let ephemeral_public = PublicKey::try_from(&ephemeral_public[..])?;
 
@@ -582,7 +582,7 @@ impl UnidentifiedSenderMessage {
                         + sealed_sender_v2::AUTH_TAG_LEN
                         + curve::curve25519::PUBLIC_KEY_LENGTH
                 {
-                    return Err(SignalProtocolError::InvalidProtobufEncoding);
+                    return Err(MochiProtocolError::InvalidProtobufEncoding);
                 }
                 let (encrypted_message_key, remaining) =
                     remaining.split_at(sealed_sender_v2::MESSAGE_KEY_LEN);
@@ -598,7 +598,7 @@ impl UnidentifiedSenderMessage {
                     encrypted_message: encrypted_message.into(),
                 })
             }
-            _ => Err(SignalProtocolError::UnknownSealedSenderVersion(version)),
+            _ => Err(MochiProtocolError::UnknownSealedSenderVersion(version)),
         }
     }
 }
@@ -808,11 +808,11 @@ pub async fn sealed_sender_encrypt<R: Rng + CryptoRng>(
     sealed_sender_encrypt_from_usmc(destination, &usmc, identity_store, rng).await
 }
 
-/// This method implements the single-key single-recipient [KEM] described in [this Signal blog
+/// This method implements the single-key single-recipient [KEM] described in [this Mochi blog
 /// post], a.k.a. Sealed Sender v1.
 ///
 /// [KEM]: https://en.wikipedia.org/wiki/Key_encapsulation
-/// [this Signal blog post]: https://signal.org/blog/sealed-sender/
+/// [this Mochi blog post]: https://mochi.org/blog/sealed-sender/
 ///
 /// [`sealed_sender_decrypt`] is used in the client to decrypt the Sealed Sender message produced by
 /// this method.
@@ -825,7 +825,7 @@ pub async fn sealed_sender_encrypt<R: Rng + CryptoRng>(
 /// which avoids this repeated work, but makes a few additional design tradeoffs.
 ///
 /// # High-level algorithmic overview
-/// The KEM scheme implemented by this method is described in [this Signal blog post]. The
+/// The KEM scheme implemented by this method is described in [this Mochi blog post]. The
 /// high-level steps of this process are listed below:
 /// 1. Generate a random key pair.
 /// 2. Derive a symmetric chain key, cipher key, and MAC key from the recipient's public key and the
@@ -868,7 +868,7 @@ pub async fn sealed_sender_encrypt_from_usmc<R: Rng + CryptoRng>(
     let their_identity = identity_store
         .get_identity(destination)
         .await?
-        .ok_or_else(|| SignalProtocolError::SessionNotFound(destination.clone()))?;
+        .ok_or_else(|| MochiProtocolError::SessionNotFound(destination.clone()))?;
 
     let ephemeral = KeyPair::generate(rng);
 
@@ -1114,7 +1114,7 @@ mod sealed_sender_v2 {
 /// 1. it requires a [`SessionRecord`] to exist already for the recipient, i.e. that a Double
 ///    Ratchet message chain has previously been established in the [`SessionStore`] via
 ///    [`process_prekey_bundle`][crate::process_prekey_bundle] after an initial
-///    [`PreKeySignalMessage`] is received.
+///    [`PreKeyMochiMessage`] is received.
 /// 2. it ferries a lot of additional information in its encoding which makes the resulting message
 ///    bulkier than the message produced by [Sealed Sender v1]. For sending, this will generally
 ///    still be more compact than sending the same message N times, but on the receiver side the
@@ -1213,7 +1213,7 @@ mod sealed_sender_v2 {
 /// }
 /// ```
 ///
-/// Each individual Sealed Sender message received from the server is decoded in the Signal client
+/// Each individual Sealed Sender message received from the server is decoded in the Mochi client
 /// by calling [`sealed_sender_decrypt`].
 ///
 /// ## Sent messages
@@ -1325,7 +1325,7 @@ where
     X::IntoIter: ExactSizeIterator,
 {
     if destinations.len() != destination_sessions.len() {
-        return Err(SignalProtocolError::InvalidArgument(
+        return Err(MochiProtocolError::InvalidArgument(
             "must have the same number of destination sessions as addresses".to_string(),
         ));
     }
@@ -1386,7 +1386,7 @@ where
                         // Returned as a SessionNotFound error because (a) we don't have an identity
                         // error that includes the address, and (b) re-establishing the session should
                         // re-fetch the identity.
-                        SignalProtocolError::SessionNotFound(destination.clone())
+                        MochiProtocolError::SessionNotFound(destination.clone())
                     })?;
             identity_keys_and_ranges.push((their_identity, i..i + count));
         }
@@ -1405,7 +1405,7 @@ where
      -> Result<()> {
         let their_service_id = ServiceId::parse_from_service_id_string(destinations[0].name())
             .ok_or_else(|| {
-                SignalProtocolError::InvalidArgument(format!(
+                MochiProtocolError::InvalidArgument(format!(
                     "multi-recipient sealed sender requires recipients' ServiceId (not {})",
                     destinations[0].name()
                 ))
@@ -1421,7 +1421,7 @@ where
         let mut destinations_and_sessions = destinations.iter().zip(sessions);
         while let Some((&destination, session)) = destinations_and_sessions.next() {
             let their_registration_id = session.remote_registration_id().map_err(|_| {
-                SignalProtocolError::InvalidState(
+                MochiProtocolError::InvalidState(
                     "sealed_sender_multi_recipient_encrypt",
                     format!(
                         concat!(
@@ -1435,7 +1435,7 @@ where
             if their_registration_id & u32::from(VALID_REGISTRATION_ID_MASK)
                 != their_registration_id
             {
-                return Err(SignalProtocolError::InvalidRegistrationId(
+                return Err(MochiProtocolError::InvalidRegistrationId(
                     destination.clone(),
                     their_registration_id,
                 ));
@@ -1448,7 +1448,7 @@ where
 
             let device_id: u32 = destination.device_id().into();
             if device_id == 0 || device_id > MAX_VALID_DEVICE_ID {
-                return Err(SignalProtocolError::InvalidState(
+                return Err(MochiProtocolError::InvalidState(
                     "sealed_sender_multi_recipient_encrypt",
                     format!("destination {destination} has invalid device ID"),
                 ));
@@ -1582,7 +1582,7 @@ impl<'a> SealedSenderV2SentMessage<'a> {
     /// Parses the message, or produces an error if the message is invalid.
     pub fn parse(data: &'a [u8]) -> Result<Self> {
         if data.is_empty() {
-            return Err(SignalProtocolError::InvalidSealedSenderMessage(
+            return Err(MochiProtocolError::InvalidSealedSenderMessage(
                 "Message was empty".to_owned(),
             ));
         }
@@ -1592,12 +1592,12 @@ impl<'a> SealedSenderV2SentMessage<'a> {
             version,
             SEALED_SENDER_V2_UUID_FULL_VERSION | SEALED_SENDER_V2_SERVICE_ID_FULL_VERSION
         ) {
-            return Err(SignalProtocolError::UnknownSealedSenderVersion(version));
+            return Err(MochiProtocolError::UnknownSealedSenderVersion(version));
         }
 
         fn advance<'a, const N: usize>(buf: &mut &'a [u8]) -> Result<&'a [u8; N]> {
             if N > buf.len() {
-                return Err(SignalProtocolError::InvalidProtobufEncoding);
+                return Err(MochiProtocolError::InvalidProtobufEncoding);
             }
             // TODO: Replace with split_array_ref or split_first_chunk when stabilized.
             let (prefix, remaining) = buf.split_at(N);
@@ -1606,11 +1606,11 @@ impl<'a> SealedSenderV2SentMessage<'a> {
         }
         fn decode_varint(buf: &mut &[u8]) -> Result<u32> {
             let result: usize = prost::decode_length_delimiter(*buf)
-                .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)?;
+                .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)?;
             *buf = &buf[prost::length_delimiter_len(result)..];
             result
                 .try_into()
-                .map_err(|_| SignalProtocolError::InvalidProtobufEncoding)
+                .map_err(|_| MochiProtocolError::InvalidProtobufEncoding)
         }
 
         let mut remaining = &data[1..];
@@ -1635,19 +1635,19 @@ impl<'a> SealedSenderV2SentMessage<'a> {
                 >(
                     &mut remaining
                 )?)
-                .ok_or(SignalProtocolError::InvalidProtobufEncoding)?
+                .ok_or(MochiProtocolError::InvalidProtobufEncoding)?
             };
             let mut devices = Vec::new();
             loop {
                 let device_id: u32 = advance::<1>(&mut remaining)?[0].into();
                 if device_id == 0 {
                     if !devices.is_empty() {
-                        return Err(SignalProtocolError::InvalidProtobufEncoding);
+                        return Err(MochiProtocolError::InvalidProtobufEncoding);
                     }
                     break;
                 }
                 if device_id > MAX_VALID_DEVICE_ID {
-                    return Err(SignalProtocolError::InvalidProtobufEncoding);
+                    return Err(MochiProtocolError::InvalidProtobufEncoding);
                 }
                 let registration_id_and_has_more =
                     u16::from_be_bytes(*advance::<2>(&mut remaining)?);
@@ -1672,7 +1672,7 @@ impl<'a> SealedSenderV2SentMessage<'a> {
             match recipients.entry(service_id) {
                 indexmap::map::Entry::Occupied(mut existing) => {
                     if existing.get().devices.is_empty() || devices.is_empty() {
-                        return Err(SignalProtocolError::InvalidSealedSenderMessage(
+                        return Err(MochiProtocolError::InvalidSealedSenderMessage(
                             "recipient redundantly encoded as empty".to_owned(),
                         ));
                     }
@@ -1690,7 +1690,7 @@ impl<'a> SealedSenderV2SentMessage<'a> {
         }
 
         if remaining.len() < curve::curve25519::PUBLIC_KEY_LENGTH {
-            return Err(SignalProtocolError::InvalidProtobufEncoding);
+            return Err(MochiProtocolError::InvalidProtobufEncoding);
         }
 
         Ok(Self {
@@ -1818,7 +1818,7 @@ pub async fn sealed_sender_decrypt_to_usmc(
                 }
                 Err(crypto::DecryptionError::BadCiphertext(msg)) => {
                     log::error!("failed to decrypt sealed sender v1 message key: {}", msg);
-                    return Err(SignalProtocolError::InvalidSealedSenderMessage(
+                    return Err(MochiProtocolError::InvalidSealedSenderMessage(
                         "failed to decrypt sealed sender v1 message key".to_owned(),
                     ));
                 }
@@ -1847,7 +1847,7 @@ pub async fn sealed_sender_decrypt_to_usmc(
                         "failed to decrypt sealed sender v1 message contents: {}",
                         msg
                     );
-                    return Err(SignalProtocolError::InvalidSealedSenderMessage(
+                    return Err(MochiProtocolError::InvalidSealedSenderMessage(
                         "failed to decrypt sealed sender v1 message contents".to_owned(),
                     ));
                 }
@@ -1856,7 +1856,7 @@ pub async fn sealed_sender_decrypt_to_usmc(
             let usmc = UnidentifiedSenderMessageContent::deserialize(&message_bytes)?;
 
             if !bool::from(message_key_bytes.ct_eq(&usmc.sender()?.key()?.serialize())) {
-                return Err(SignalProtocolError::InvalidSealedSenderMessage(
+                return Err(MochiProtocolError::InvalidSealedSenderMessage(
                     "sender certificate key does not match message key".to_string(),
                 ));
             }
@@ -1871,7 +1871,7 @@ pub async fn sealed_sender_decrypt_to_usmc(
         } => {
             let encrypted_message_key: [u8; sealed_sender_v2::MESSAGE_KEY_LEN] =
                 encrypted_message_key.as_ref().try_into().map_err(|_| {
-                    SignalProtocolError::InvalidSealedSenderMessage(format!(
+                    MochiProtocolError::InvalidSealedSenderMessage(format!(
                         "encrypted message key had incorrect length {} (should be {})",
                         encrypted_message_key.len(),
                         sealed_sender_v2::MESSAGE_KEY_LEN
@@ -1897,7 +1897,7 @@ pub async fn sealed_sender_decrypt_to_usmc(
             if !bool::from(derive_first_key(&keys).public_key.ct_eq(&ephemeral_public))
                 && !bool::from(derive_second_key(&keys).public_key.ct_eq(&ephemeral_public))
             {
-                return Err(SignalProtocolError::InvalidSealedSenderMessage(
+                return Err(MochiProtocolError::InvalidSealedSenderMessage(
                     "derived ephemeral key did not match key provided in message".to_string(),
                 ));
             }
@@ -1912,7 +1912,7 @@ pub async fn sealed_sender_decrypt_to_usmc(
                     &mut message_bytes,
                 )
                 .map_err(|err| {
-                    SignalProtocolError::InvalidSealedSenderMessage(format!(
+                    MochiProtocolError::InvalidSealedSenderMessage(format!(
                         "failed to decrypt inner message: {}",
                         err
                     ))
@@ -1928,7 +1928,7 @@ pub async fn sealed_sender_decrypt_to_usmc(
                 &encrypted_message_key,
             )?;
             if !bool::from(authentication_tag.ct_eq(&at)) {
-                return Err(SignalProtocolError::InvalidSealedSenderMessage(
+                return Err(MochiProtocolError::InvalidSealedSenderMessage(
                     "sender certificate key does not match authentication tag".to_string(),
                 ));
             }
@@ -1988,7 +1988,7 @@ pub async fn sealed_sender_decrypt(
     let usmc = sealed_sender_decrypt_to_usmc(ciphertext, identity_store).await?;
 
     if !usmc.sender()?.validate(trust_root, timestamp)? {
-        return Err(SignalProtocolError::InvalidSealedSenderMessage(
+        return Err(MochiProtocolError::InvalidSealedSenderMessage(
             "trust root validation failed".to_string(),
         ));
     }
@@ -2001,7 +2001,7 @@ pub async fn sealed_sender_decrypt(
     };
 
     if (is_local_e164 || is_local_uuid) && usmc.sender()?.sender_device_id()? == local_device_id {
-        return Err(SignalProtocolError::SealedSenderSelfSend);
+        return Err(MochiProtocolError::SealedSenderSelfSend);
     }
 
     let mut rng = rand::rngs::OsRng;
@@ -2013,8 +2013,8 @@ pub async fn sealed_sender_decrypt(
 
     let message = match usmc.msg_type()? {
         CiphertextMessageType::Whisper => {
-            let ctext = SignalMessage::try_from(usmc.contents()?)?;
-            session_cipher::message_decrypt_signal(
+            let ctext = MochiMessage::try_from(usmc.contents()?)?;
+            session_cipher::message_decrypt_mochi(
                 &ctext,
                 &remote_address,
                 session_store,
@@ -2024,7 +2024,7 @@ pub async fn sealed_sender_decrypt(
             .await?
         }
         CiphertextMessageType::PreKey => {
-            let ctext = PreKeySignalMessage::try_from(usmc.contents()?)?;
+            let ctext = PreKeyMochiMessage::try_from(usmc.contents()?)?;
             session_cipher::message_decrypt_prekey(
                 &ctext,
                 &remote_address,
@@ -2038,7 +2038,7 @@ pub async fn sealed_sender_decrypt(
             .await?
         }
         msg_type => {
-            return Err(SignalProtocolError::InvalidMessage(
+            return Err(MochiProtocolError::InvalidMessage(
                 msg_type,
                 "unexpected message type for sealed_sender_decrypt",
             ));

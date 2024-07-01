@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,8 +7,8 @@
 #if !os(iOS) || targetEnvironment(simulator)
 
 import Foundation
-@testable import LibSignalClient
-import SignalFfi
+@testable import LibMochiClient
+import MochiFfi
 import XCTest
 
 let userAgent: String = "test"
@@ -23,16 +23,16 @@ final class NetTests: XCTestCase {
 
         let asyncContext = TokioAsyncContext()
 
-        let output: SignalFfiCdsiLookupResponse = try await asyncContext.invokeAsyncFunction { promise, asyncContext in
-            signal_testing_cdsi_lookup_response_convert(promise, asyncContext)
+        let output: MochiFfiCdsiLookupResponse = try await asyncContext.invokeAsyncFunction { promise, asyncContext in
+            mochi_testing_cdsi_lookup_response_convert(promise, asyncContext)
         }
         XCTAssertEqual(output.debug_permits_used, 123)
 
         let entryList = LookupResponseEntryList(owned: output.entries)
-        let expected = [SignalFfiCdsiLookupResponseEntry(
+        let expected = [MochiFfiCdsiLookupResponseEntry(
             e164: 18_005_551_011,
             aci, pni
-        ), SignalFfiCdsiLookupResponseEntry(
+        ), MochiFfiCdsiLookupResponseEntry(
             e164: 18_005_551_012,
             nil,
             pni
@@ -43,62 +43,62 @@ final class NetTests: XCTestCase {
 
     func testCdsiLookupErrorConversion() async throws {
         let failWithError = {
-            try checkError(signal_testing_cdsi_lookup_error_convert($0))
+            try checkError(mochi_testing_cdsi_lookup_error_convert($0))
             XCTFail("should have failed")
         }
         do {
             try failWithError("Protocol")
-        } catch SignalError.networkProtocolError(let message) {
+        } catch MochiError.networkProtocolError(let message) {
             XCTAssertEqual(message, "Protocol error: protocol error after establishing a connection")
         }
         do {
             try failWithError("AttestationDataError")
-        } catch SignalError.invalidAttestationData(let message) {
+        } catch MochiError.invalidAttestationData(let message) {
             XCTAssertEqual(message, "SGX operation failed: attestation data invalid: fake reason")
         }
         do {
             try failWithError("InvalidResponse")
-        } catch SignalError.networkProtocolError(let message) {
+        } catch MochiError.networkProtocolError(let message) {
             XCTAssertEqual(message, "Protocol error: invalid response received from the server")
         }
         do {
             try failWithError("RetryAfter42Seconds")
-        } catch SignalError.rateLimitedError(retryAfter: 42, let message) {
+        } catch MochiError.rateLimitedError(retryAfter: 42, let message) {
             XCTAssertEqual(message, "Rate limited; try again after 42s")
         }
         do {
             try failWithError("InvalidToken")
-        } catch SignalError.cdsiInvalidToken(let message) {
+        } catch MochiError.cdsiInvalidToken(let message) {
             XCTAssertEqual(message, "CDSI request token was invalid")
         }
         do {
             try failWithError("InvalidArgument")
-        } catch SignalError.invalidArgument(let message) {
+        } catch MochiError.invalidArgument(let message) {
             XCTAssertEqual(message, "invalid argument: request was invalid: fake reason")
         }
         do {
             try failWithError("Parse")
-        } catch SignalError.networkProtocolError(let message) {
+        } catch MochiError.networkProtocolError(let message) {
             XCTAssertEqual(message, "Protocol error: failed to parse the response from the server")
         }
         do {
             try failWithError("ConnectDnsFailed")
-        } catch SignalError.ioError(let message) {
+        } catch MochiError.ioError(let message) {
             XCTAssertEqual(message, "IO error: DNS lookup failed")
         }
         do {
             try failWithError("WebSocketIdleTooLong")
-        } catch SignalError.webSocketError(let message) {
+        } catch MochiError.webSocketError(let message) {
             XCTAssertEqual(message, "WebSocket error: channel was idle for too long")
         }
         do {
             try failWithError("ConnectionTimedOut")
-        } catch SignalError.connectionTimeoutError(let message) {
+        } catch MochiError.connectionTimeoutError(let message) {
             XCTAssertEqual(message, "Connect timed out")
         }
         do {
             try failWithError("ServerCrashed")
-        } catch SignalError.networkProtocolError(let message) {
+        } catch MochiError.networkProtocolError(let message) {
             XCTAssertEqual(message, "Protocol error: server error: crashed")
         }
     }
@@ -137,8 +137,8 @@ final class Svr3Tests: TestCaseBase {
     private let storedSecret = randomBytes(32)
 
     func getEnclaveSecret() throws -> String {
-        guard let enclaveSecret = ProcessInfo.processInfo.environment["LIBSIGNAL_TESTING_ENCLAVE_SECRET"] else {
-            throw XCTSkip("requires LIBSIGNAL_TESTING_ENCLAVE_SECRET")
+        guard let enclaveSecret = ProcessInfo.processInfo.environment["LIBMOCHI_TESTING_ENCLAVE_SECRET"] else {
+            throw XCTSkip("requires LIBMOCHI_TESTING_ENCLAVE_SECRET")
         }
         return enclaveSecret
     }
@@ -196,7 +196,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: self.state!.auth
             )
             XCTFail("Should have thrown")
-        } catch SignalError.svrDataMissing(_) {
+        } catch MochiError.svrDataMissing(_) {
             // Success!
         } catch {
             XCTFail("Unexpected exception: '\(error)'")
@@ -224,7 +224,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: self.state!.auth
             )
             XCTFail("Should have thrown")
-        } catch SignalError.svrRestoreFailed(let triesRemaining, _) {
+        } catch MochiError.svrRestoreFailed(let triesRemaining, _) {
             // Success!
             XCTAssertEqual(triesRemaining, tries - 1)
         } catch {
@@ -249,7 +249,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: self.state!.auth
             )
             XCTFail("Should have thrown")
-        } catch SignalError.svrRestoreFailed(_, _) {
+        } catch MochiError.svrRestoreFailed(_, _) {
             // Success!
         } catch {
             XCTFail("Unexpected exception: '\(error)'")
@@ -277,7 +277,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: self.state!.auth
             )
             XCTFail("Should have thrown")
-        } catch SignalError.svrDataMissing(_) {
+        } catch MochiError.svrDataMissing(_) {
             // Success!
         } catch {
             XCTFail("Unexpected exception: '\(error)'")
@@ -299,7 +299,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: self.state!.auth
             )
             XCTFail("Should have thrown")
-        } catch SignalError.svrRestoreFailed(_, _) {
+        } catch MochiError.svrRestoreFailed(_, _) {
             // Success!
         } catch {
             XCTFail("Unexpected exception: '\(error)'")
@@ -312,7 +312,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: self.state!.auth
             )
             XCTFail("Should have thrown")
-        } catch SignalError.svrDataMissing(_) {
+        } catch MochiError.svrDataMissing(_) {
             // Success!
         } catch {
             XCTFail("Unexpected exception: '\(error)'")
@@ -328,7 +328,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: self.state!.auth
             )
             XCTFail("Should have thrown")
-        } catch SignalError.invalidArgument(_) {
+        } catch MochiError.invalidArgument(_) {
             // Success!
         } catch {
             XCTFail("Unexpected error: \(error)")
@@ -344,7 +344,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: self.state!.auth
             )
             XCTFail("Should have thrown")
-        } catch SignalError.invalidArgument(_) {
+        } catch MochiError.invalidArgument(_) {
             // Success!
         } catch {
             XCTFail("Unexpected error: \(error)")
@@ -364,7 +364,7 @@ final class Svr3Tests: TestCaseBase {
                 auth: auth
             )
             XCTFail("Should have failed")
-        } catch SignalError.webSocketError(let message) {
+        } catch MochiError.webSocketError(let message) {
             XCTAssert(message.contains("401"))
         } catch {
             XCTFail("Unexpected error: \(error)")

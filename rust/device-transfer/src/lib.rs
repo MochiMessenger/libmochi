@@ -1,9 +1,9 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-//! Support logic for Signal's device-to-device transfer feature.
+//! Support logic for Mochi's device-to-device transfer feature.
 
 #![deny(unsafe_code)]
 #![warn(missing_docs)]
@@ -128,7 +128,7 @@ fn build_cert(
 fn build_self_signed_name(name: &str) -> Result<X509Name, ErrorStack> {
     let mut name_builder = X509NameBuilder::new()?;
     name_builder.append_entry_by_text("CN", name)?;
-    name_builder.append_entry_by_text("O", "Signal Foundation")?;
+    name_builder.append_entry_by_text("O", "Mochi Foundation")?;
     name_builder.append_entry_by_text("OU", "Device Transfer")?;
 
     Ok(name_builder.build())

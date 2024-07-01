@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -345,7 +345,7 @@ pub(crate) mod test {
         #[test]
         fn connection_info_description() {
             let connection_info = ConnectionInfo {
-                address: url::Host::Domain("test.signal.org".to_string()),
+                address: url::Host::Domain("test.mochi.org".to_string()),
                 dns_source: DnsSource::SystemLookup,
                 route_type: RouteType::Test,
             };
@@ -486,10 +486,10 @@ pub(crate) mod test {
     #[test]
     fn test_path_prefix_decorator() {
         let cases = vec![
-            ("https://chat.signal.org/", "/chat/"),
-            ("https://chat.signal.org/v1", "/chat/v1"),
-            ("https://chat.signal.org/v1?a=b", "/chat/v1"),
-            ("https://chat.signal.org/v1/endpoint", "/chat/v1/endpoint"),
+            ("https://chat.mochi.org/", "/chat/"),
+            ("https://chat.mochi.org/v1", "/chat/v1"),
+            ("https://chat.mochi.org/v1?a=b", "/chat/v1"),
+            ("https://chat.mochi.org/v1/endpoint", "/chat/v1/endpoint"),
         ];
         for (input, expected_path) in cases.into_iter() {
             let builder = Request::get(input);
@@ -502,7 +502,7 @@ pub(crate) mod test {
     #[test]
     fn test_header_auth_decorator() {
         let expected = "Basic dXNybm06cHNzd2Q=";
-        let builder = Request::get("https://chat.signal.org/");
+        let builder = Request::get("https://chat.mochi.org/");
         let builder = HttpRequestDecorator::Header(
             http::header::AUTHORIZATION,
             basic_authorization("usrnm", "psswd"),

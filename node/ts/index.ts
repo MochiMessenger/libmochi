@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -341,8 +341,8 @@ export class IdentityKeyPair {
     return Native.IdentityKeyPair_Serialize(this.publicKey, this.privateKey);
   }
 
-  signAlternateIdentity(other: PublicKey): Buffer {
-    return Native.IdentityKeyPair_SignAlternateIdentity(
+  mochiternateIdentity(other: PublicKey): Buffer {
+    return Native.IdentityKeyPair_MochiternateIdentity(
       this.publicKey,
       this.privateKey,
       other
@@ -599,10 +599,10 @@ export class KyberPreKeyRecord {
   }
 }
 
-export class SignalMessage {
-  readonly _nativeHandle: Native.SignalMessage;
+export class MochiMessage {
+  readonly _nativeHandle: Native.MochiMessage;
 
-  private constructor(handle: Native.SignalMessage) {
+  private constructor(handle: Native.MochiMessage) {
     this._nativeHandle = handle;
   }
 
@@ -615,9 +615,9 @@ export class SignalMessage {
     ciphertext: Buffer,
     senderIdentityKey: PublicKey,
     receiverIdentityKey: PublicKey
-  ): SignalMessage {
-    return new SignalMessage(
-      Native.SignalMessage_New(
+  ): MochiMessage {
+    return new MochiMessage(
+      Native.MochiMessage_New(
         messageVersion,
         macKey,
         senderRatchetKey,
@@ -630,24 +630,24 @@ export class SignalMessage {
     );
   }
 
-  static deserialize(buffer: Buffer): SignalMessage {
-    return new SignalMessage(Native.SignalMessage_Deserialize(buffer));
+  static deserialize(buffer: Buffer): MochiMessage {
+    return new MochiMessage(Native.MochiMessage_Deserialize(buffer));
   }
 
   body(): Buffer {
-    return Native.SignalMessage_GetBody(this);
+    return Native.MochiMessage_GetBody(this);
   }
 
   counter(): number {
-    return Native.SignalMessage_GetCounter(this);
+    return Native.MochiMessage_GetCounter(this);
   }
 
   messageVersion(): number {
-    return Native.SignalMessage_GetMessageVersion(this);
+    return Native.MochiMessage_GetMessageVersion(this);
   }
 
   serialize(): Buffer {
-    return Native.SignalMessage_GetSerialized(this);
+    return Native.MochiMessage_GetSerialized(this);
   }
 
   verifyMac(
@@ -655,7 +655,7 @@ export class SignalMessage {
     recevierIdentityKey: PublicKey,
     macKey: Buffer
   ): boolean {
-    return Native.SignalMessage_VerifyMac(
+    return Native.MochiMessage_VerifyMac(
       this,
       senderIdentityKey,
       recevierIdentityKey,
@@ -664,10 +664,10 @@ export class SignalMessage {
   }
 }
 
-export class PreKeySignalMessage {
-  readonly _nativeHandle: Native.PreKeySignalMessage;
+export class PreKeyMochiMessage {
+  readonly _nativeHandle: Native.PreKeyMochiMessage;
 
-  private constructor(handle: Native.PreKeySignalMessage) {
+  private constructor(handle: Native.PreKeyMochiMessage) {
     this._nativeHandle = handle;
   }
 
@@ -678,45 +678,45 @@ export class PreKeySignalMessage {
     signedPreKeyId: number,
     baseKey: PublicKey,
     identityKey: PublicKey,
-    signalMessage: SignalMessage
-  ): PreKeySignalMessage {
-    return new PreKeySignalMessage(
-      Native.PreKeySignalMessage_New(
+    mochiMessage: MochiMessage
+  ): PreKeyMochiMessage {
+    return new PreKeyMochiMessage(
+      Native.PreKeyMochiMessage_New(
         messageVersion,
         registrationId,
         preKeyId,
         signedPreKeyId,
         baseKey,
         identityKey,
-        signalMessage
+        mochiMessage
       )
     );
   }
 
-  static deserialize(buffer: Buffer): PreKeySignalMessage {
-    return new PreKeySignalMessage(
-      Native.PreKeySignalMessage_Deserialize(buffer)
+  static deserialize(buffer: Buffer): PreKeyMochiMessage {
+    return new PreKeyMochiMessage(
+      Native.PreKeyMochiMessage_Deserialize(buffer)
     );
   }
 
   preKeyId(): number | null {
-    return Native.PreKeySignalMessage_GetPreKeyId(this);
+    return Native.PreKeyMochiMessage_GetPreKeyId(this);
   }
 
   registrationId(): number {
-    return Native.PreKeySignalMessage_GetRegistrationId(this);
+    return Native.PreKeyMochiMessage_GetRegistrationId(this);
   }
 
   signedPreKeyId(): number {
-    return Native.PreKeySignalMessage_GetSignedPreKeyId(this);
+    return Native.PreKeyMochiMessage_GetSignedPreKeyId(this);
   }
 
   version(): number {
-    return Native.PreKeySignalMessage_GetVersion(this);
+    return Native.PreKeyMochiMessage_GetVersion(this);
   }
 
   serialize(): Buffer {
-    return Native.PreKeySignalMessage_Serialize(this);
+    return Native.PreKeyMochiMessage_Serialize(this);
   }
 }
 
@@ -1520,7 +1520,7 @@ export function processPreKeyBundle(
   );
 }
 
-export async function signalEncrypt(
+export async function mochiEncrypt(
   message: Buffer,
   address: ProtocolAddress,
   sessionStore: SessionStore,
@@ -1538,13 +1538,13 @@ export async function signalEncrypt(
   );
 }
 
-export function signalDecrypt(
-  message: SignalMessage,
+export function mochiDecrypt(
+  message: MochiMessage,
   address: ProtocolAddress,
   sessionStore: SessionStore,
   identityStore: IdentityKeyStore
 ): Promise<Buffer> {
-  return Native.SessionCipher_DecryptSignalMessage(
+  return Native.SessionCipher_DecryptMochiMessage(
     message,
     address,
     sessionStore,
@@ -1552,8 +1552,8 @@ export function signalDecrypt(
   );
 }
 
-export function signalDecryptPreKey(
-  message: PreKeySignalMessage,
+export function mochiDecryptPreKey(
+  message: PreKeyMochiMessage,
   address: ProtocolAddress,
   sessionStore: SessionStore,
   identityStore: IdentityKeyStore,
@@ -1561,7 +1561,7 @@ export function signalDecryptPreKey(
   signedPrekeyStore: SignedPreKeyStore,
   kyberPrekeyStore: KyberPreKeyStore
 ): Promise<Buffer> {
-  return Native.SessionCipher_DecryptPreKeySignalMessage(
+  return Native.SessionCipher_DecryptPreKeyMochiMessage(
     message,
     address,
     sessionStore,
@@ -1579,7 +1579,7 @@ export async function sealedSenderEncryptMessage(
   sessionStore: SessionStore,
   identityStore: IdentityKeyStore
 ): Promise<Buffer> {
-  const ciphertext = await signalEncrypt(
+  const ciphertext = await mochiEncrypt(
     message,
     address,
     sessionStore,
@@ -1831,7 +1831,7 @@ export function initLogger(
         default:
           callback(
             LogLevel.Warn,
-            'signal-client',
+            'mochi-client',
             'index.ts',
             0,
             `unknown log level ${nativeLevel}; treating as error`

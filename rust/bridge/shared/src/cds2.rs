@@ -1,15 +1,15 @@
 //
-// Copyright 2021-2022 Signal Messenger, LLC.
+// Copyright 2021-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use ::attest::cds2;
 use ::attest::enclave::Result;
-use libsignal_bridge_macros::*;
+use libmochi_bridge_macros::*;
 #[cfg(all(not(target_os = "android"), feature = "jni"))]
-use libsignal_bridge_types::cds2::Cds2Metrics;
-use libsignal_bridge_types::sgx_session::SgxClientState;
-use libsignal_bridge_types::support::*;
+use libmochi_bridge_types::cds2::Cds2Metrics;
+use libmochi_bridge_types::sgx_session::SgxClientState;
+use libmochi_bridge_types::support::*;
 
 use crate::protocol::Timestamp;
 use crate::*;

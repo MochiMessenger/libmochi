@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -26,7 +26,7 @@ use crate::*;
 ///
 /// ```no_run
 /// # use neon::prelude::*;
-/// # use signal_neon_futures::*;
+/// # use mochi_neon_futures::*;
 /// #
 /// # struct TraitImpl;
 /// # impl TraitImpl {

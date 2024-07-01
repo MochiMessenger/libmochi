@@ -1,9 +1,9 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_core::{Aci, Pni};
+use libmochi_core::{Aci, Pni};
 use partial_default::PartialDefault;
 use serde::{Deserialize, Serialize};
 use zkcredential::credentials::{CredentialKeyPair, CredentialPublicKey};
@@ -17,7 +17,7 @@ use crate::crypto::uid_struct::UidStruct;
 use crate::groups::{GroupPublicParams, GroupSecretParams, UuidCiphertext};
 use crate::{ServerPublicParams, ServerSecretParams, ZkGroupVerificationFailure};
 
-const CREDENTIAL_LABEL: &[u8] = b"20240222_Signal_AuthCredentialZkc";
+const CREDENTIAL_LABEL: &[u8] = b"20240222_Mochi_AuthCredentialZkc";
 
 /// Authentication credential implemented using [`zkcredential`].
 ///

@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -46,7 +46,7 @@ impl ReceiptStruct {
         bytes[..std::mem::size_of::<Timestamp>()]
             .copy_from_slice(&receipt_expiration_time.to_be_bytes());
         bytes[std::mem::size_of::<Timestamp>()..].copy_from_slice(&receipt_level.to_be_bytes());
-        let mut sho = Sho::new(b"Signal_ZKGroup_20210919_Receipt_CalcM1", &bytes);
+        let mut sho = Sho::new(b"Mochi_ZKGroup_20210919_Receipt_CalcM1", &bytes);
         sho.get_scalar()
     }
 }

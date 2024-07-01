@@ -1,11 +1,11 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 pub(crate) mod curve25519;
 
-use crate::{Result, SignalProtocolError};
+use crate::{Result, MochiProtocolError};
 
 use std::cmp::Ordering;
 
@@ -36,12 +36,12 @@ impl KeyType {
 }
 
 impl TryFrom<u8> for KeyType {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(x: u8) -> Result<Self> {
         match x {
             0x05u8 => Ok(KeyType::Djb),
-            t => Err(SignalProtocolError::BadKeyType(t)),
+            t => Err(MochiProtocolError::BadKeyType(t)),
         }
     }
 }
@@ -63,14 +63,14 @@ impl PublicKey {
 
     pub fn deserialize(value: &[u8]) -> Result<Self> {
         if value.is_empty() {
-            return Err(SignalProtocolError::NoKeyTypeIdentifier);
+            return Err(MochiProtocolError::NoKeyTypeIdentifier);
         }
         let key_type = KeyType::try_from(value[0])?;
         match key_type {
             KeyType::Djb => {
                 // We allow trailing data after the public key (why?)
                 if value.len() < curve25519::PUBLIC_KEY_LENGTH + 1 {
-                    return Err(SignalProtocolError::BadKeyLength(KeyType::Djb, value.len()));
+                    return Err(MochiProtocolError::BadKeyLength(KeyType::Djb, value.len()));
                 }
                 let mut key = [0u8; curve25519::PUBLIC_KEY_LENGTH];
                 key.copy_from_slice(&value[1..][..curve25519::PUBLIC_KEY_LENGTH]);
@@ -89,7 +89,7 @@ impl PublicKey {
 
     pub fn from_djb_public_key_bytes(bytes: &[u8]) -> Result<Self> {
         match <[u8; curve25519::PUBLIC_KEY_LENGTH]>::try_from(bytes) {
-            Err(_) => Err(SignalProtocolError::BadKeyLength(KeyType::Djb, bytes.len())),
+            Err(_) => Err(MochiProtocolError::BadKeyLength(KeyType::Djb, bytes.len())),
             Ok(key) => Ok(PublicKey {
                 key: PublicKeyData::DjbPublicKey(key),
             }),
@@ -151,7 +151,7 @@ impl From<PublicKeyData> for PublicKey {
 }
 
 impl TryFrom<&[u8]> for PublicKey {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         Self::deserialize(value)
@@ -217,7 +217,7 @@ pub struct PrivateKey {
 impl PrivateKey {
     pub fn deserialize(value: &[u8]) -> Result<Self> {
         if value.len() != curve25519::PRIVATE_KEY_LENGTH {
-            Err(SignalProtocolError::BadKeyLength(KeyType::Djb, value.len()))
+            Err(MochiProtocolError::BadKeyLength(KeyType::Djb, value.len()))
         } else {
             let mut key = [0u8; curve25519::PRIVATE_KEY_LENGTH];
             key.copy_from_slice(&value[..curve25519::PRIVATE_KEY_LENGTH]);
@@ -289,7 +289,7 @@ impl From<PrivateKeyData> for PrivateKey {
 }
 
 impl TryFrom<&[u8]> for PrivateKey {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         Self::deserialize(value)
@@ -349,7 +349,7 @@ impl KeyPair {
 }
 
 impl TryFrom<PrivateKey> for KeyPair {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: PrivateKey) -> Result<Self> {
         let public_key = value.public_key()?;

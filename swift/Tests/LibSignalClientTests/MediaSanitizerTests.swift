@@ -1,25 +1,25 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-#if SIGNAL_MEDIA_SUPPORTED
+#if MOCHI_MEDIA_SUPPORTED
 
-@testable import LibSignalClient
+@testable import LibMochiClient
 import XCTest
 
 class Mp4SanitizerTests: TestCaseBase {
     func testEmptyMp4() {
         let input: [UInt8] = []
-        XCTAssertThrowsError(try sanitizeMp4(input: SignalInputStreamAdapter(input), len: UInt64(input.count))) { error in
-            if case SignalError.invalidMediaInput = error {} else { XCTFail("\(error)") }
+        XCTAssertThrowsError(try sanitizeMp4(input: MochiInputStreamAdapter(input), len: UInt64(input.count))) { error in
+            if case MochiError.invalidMediaInput = error {} else { XCTFail("\(error)") }
         }
     }
 
     func testTruncatedMp4() {
         let input: [UInt8] = [0, 0, 0, 0]
-        XCTAssertThrowsError(try sanitizeMp4(input: SignalInputStreamAdapter(input), len: UInt64(input.count))) { error in
-            if case SignalError.invalidMediaInput = error {} else { XCTFail("\(error)") }
+        XCTAssertThrowsError(try sanitizeMp4(input: MochiInputStreamAdapter(input), len: UInt64(input.count))) { error in
+            if case MochiError.invalidMediaInput = error {} else { XCTFail("\(error)") }
         }
     }
 
@@ -27,7 +27,7 @@ class Mp4SanitizerTests: TestCaseBase {
         let metadata = ftyp() + moov()
         let input = metadata + mdat()
 
-        let sanitized = try sanitizeMp4(input: SignalInputStreamAdapter(input), len: UInt64(input.count))
+        let sanitized = try sanitizeMp4(input: MochiInputStreamAdapter(input), len: UInt64(input.count))
         assertSanitizedMetadataEqual(sanitized, dataOffset: metadata.count, dataLen: input.count - metadata.count, metadata: nil)
     }
 
@@ -35,13 +35,13 @@ class Mp4SanitizerTests: TestCaseBase {
         let metadata = ftyp() + moov()
         let input = ftyp() + mdat() + moov()
 
-        let sanitized = try sanitizeMp4(input: SignalInputStreamAdapter(input), len: UInt64(input.count))
+        let sanitized = try sanitizeMp4(input: MochiInputStreamAdapter(input), len: UInt64(input.count))
         assertSanitizedMetadataEqual(sanitized, dataOffset: ftyp().count, dataLen: input.count - metadata.count, metadata: metadata)
     }
 
     func testMp4IoError() throws {
         XCTAssertThrowsError(try sanitizeMp4(input: ErrorInputStream(), len: 1)) { error in
-            if case SignalError.ioError = error {} else { XCTFail("\(error)") }
+            if case MochiError.ioError = error {} else { XCTFail("\(error)") }
         }
     }
 }
@@ -49,26 +49,26 @@ class Mp4SanitizerTests: TestCaseBase {
 class WebpSanitizerTests: TestCaseBase {
     func testEmptyWebp() {
         let input: [UInt8] = []
-        XCTAssertThrowsError(try sanitizeWebp(input: SignalInputStreamAdapter(input))) { error in
-            if case SignalError.invalidMediaInput = error {} else { XCTFail("\(error)") }
+        XCTAssertThrowsError(try sanitizeWebp(input: MochiInputStreamAdapter(input))) { error in
+            if case MochiError.invalidMediaInput = error {} else { XCTFail("\(error)") }
         }
     }
 
     func testTruncatedWebp() {
         let input: [UInt8] = [0, 0, 0, 0]
-        XCTAssertThrowsError(try sanitizeWebp(input: SignalInputStreamAdapter(input))) { error in
-            if case SignalError.invalidMediaInput = error {} else { XCTFail("\(error)") }
+        XCTAssertThrowsError(try sanitizeWebp(input: MochiInputStreamAdapter(input))) { error in
+            if case MochiError.invalidMediaInput = error {} else { XCTFail("\(error)") }
         }
     }
 
     func testMinimalWebp() throws {
         let input = webp()
-        try sanitizeWebp(input: SignalInputStreamAdapter(input))
+        try sanitizeWebp(input: MochiInputStreamAdapter(input))
     }
 
     func testWebpIoError() throws {
         XCTAssertThrowsError(try sanitizeWebp(input: ErrorInputStream(), len: 1)) { error in
-            if case SignalError.ioError = error {} else { XCTFail("\(error)") }
+            if case MochiError.ioError = error {} else { XCTFail("\(error)") }
         }
     }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -31,7 +31,7 @@ struct CallLinkRoomIdPoint(RistrettoPoint);
 
 impl CallLinkRoomIdPoint {
     fn new(room_id: &[u8]) -> Self {
-        Self(Sho::new(b"20230413_Signal_CallLinkRoomId", room_id).get_point())
+        Self(Sho::new(b"20230413_Mochi_CallLinkRoomId", room_id).get_point())
     }
 }
 
@@ -41,7 +41,7 @@ impl zkcredential::attributes::RevealedAttribute for CallLinkRoomIdPoint {
     }
 }
 
-const CREDENTIAL_LABEL: &[u8] = b"20230413_Signal_CreateCallLinkCredential";
+const CREDENTIAL_LABEL: &[u8] = b"20230413_Mochi_CreateCallLinkCredential";
 
 #[derive(Serialize, Deserialize, PartialDefault)]
 pub struct CreateCallLinkCredentialRequestContext {
@@ -53,7 +53,7 @@ pub struct CreateCallLinkCredentialRequestContext {
 impl CreateCallLinkCredentialRequestContext {
     pub fn new(room_id: &[u8], randomness: RandomnessBytes) -> Self {
         let mut sho =
-            poksho::ShoHmacSha256::new(b"20230413_Signal_CreateCallLinkCredentialRequest");
+            poksho::ShoHmacSha256::new(b"20230413_Mochi_CreateCallLinkCredentialRequest");
         sho.absorb_and_ratchet(&randomness);
 
         let key_pair = zkcredential::issuance::blind::BlindingKeyPair::generate(&mut sho);
@@ -96,7 +96,7 @@ pub struct CreateCallLinkCredentialRequest {
 impl CreateCallLinkCredentialRequest {
     pub fn issue(
         &self,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
         timestamp: Timestamp,
         params: &GenericServerSecretParams,
         randomness: RandomnessBytes,
@@ -125,7 +125,7 @@ impl CreateCallLinkCredentialRequestContext {
     pub fn receive(
         self,
         response: CreateCallLinkCredentialResponse,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
         params: &GenericServerPublicParams,
     ) -> Result<CreateCallLinkCredential, ZkGroupVerificationFailure> {
         if !response.timestamp.is_day_aligned() {
@@ -163,7 +163,7 @@ impl CreateCallLinkCredential {
     pub fn present(
         &self,
         room_id: &[u8],
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
         server_params: &GenericServerPublicParams,
         call_link_params: &CallLinkSecretParams,
         randomness: RandomnessBytes,

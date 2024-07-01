@@ -1,9 +1,9 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_protocol::{ServiceId, ServiceIdFixedWidthBinaryBytes};
+use libmochi_protocol::{ServiceId, ServiceIdFixedWidthBinaryBytes};
 use rayon::iter::ParallelIterator as _;
 use rayon::slice::ParallelSlice as _;
 

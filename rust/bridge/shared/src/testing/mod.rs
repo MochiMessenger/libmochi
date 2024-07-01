@@ -1,13 +1,13 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use futures_util::FutureExt;
-use libsignal_bridge_macros::*;
-use libsignal_bridge_types::support::*;
-use libsignal_bridge_types::*;
-use libsignal_protocol::SignalProtocolError;
+use libmochi_bridge_macros::*;
+use libmochi_bridge_types::support::*;
+use libmochi_bridge_types::*;
+use libmochi_protocol::MochiProtocolError;
 
 use std::future::Future;
 
@@ -71,8 +71,8 @@ async fn TESTING_FutureSuccess(input: u8) -> i32 {
 }
 
 #[bridge_io(NonSuspendingBackgroundThreadRuntime)]
-async fn TESTING_FutureFailure(_input: u8) -> Result<i32, SignalProtocolError> {
-    Err(SignalProtocolError::InvalidArgument("failure".to_string()))
+async fn TESTING_FutureFailure(_input: u8) -> Result<i32, MochiProtocolError> {
+    Err(MochiProtocolError::InvalidArgument("failure".to_string()))
 }
 
 #[derive(Clone)]
@@ -197,11 +197,11 @@ async fn TESTING_ErrorOnReturnIo(_needs_cleanup: Ignored<NeedsCleanup>) -> Ignor
 struct CustomErrorType;
 
 #[cfg(feature = "jni")]
-impl From<CustomErrorType> for crate::jni::SignalJniError {
+impl From<CustomErrorType> for crate::jni::MochiJniError {
     fn from(CustomErrorType: CustomErrorType) -> Self {
         Self::TestingError {
             exception_class: crate::jni::ClassName(
-                "org.signal.libsignal.internal.TestingException",
+                "org.mochi.libmochi.internal.TestingException",
             ),
         }
     }

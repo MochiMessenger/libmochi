@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@ use prost::Message;
 use rand::{CryptoRng, Rng};
 use subtle::ConstantTimeEq;
 
-use signal_crypto::{aes_256_cbc_decrypt, aes_256_cbc_encrypt};
+use mochi_crypto::{aes_256_cbc_decrypt, aes_256_cbc_encrypt};
 
 use crate::constants::{
     USERNAME_LINK_ENTROPY_SIZE, USERNAME_LINK_HMAC_LEN, USERNAME_LINK_IV_SIZE,

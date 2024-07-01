@@ -1,12 +1,12 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use super::*;
 
 use async_trait::async_trait;
-use signal_neon_futures::*;
+use mochi_neon_futures::*;
 use std::cell::RefCell;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -103,7 +103,7 @@ impl Finalize for NodePreKeyStore {
 
 #[async_trait(?Send)]
 impl PreKeyStore for NodePreKeyStore {
-    async fn get_pre_key(&self, pre_key_id: PreKeyId) -> Result<PreKeyRecord, SignalProtocolError> {
+    async fn get_pre_key(&self, pre_key_id: PreKeyId) -> Result<PreKeyRecord, MochiProtocolError> {
         self.do_get_pre_key(pre_key_id.into())
             .await
             .map_err(|s| js_error_to_rust("getPreKey", s))
@@ -113,13 +113,13 @@ impl PreKeyStore for NodePreKeyStore {
         &mut self,
         pre_key_id: PreKeyId,
         record: &PreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         self.do_save_pre_key(pre_key_id.into(), record.clone())
             .await
             .map_err(|s| js_error_to_rust("savePreKey", s))
     }
 
-    async fn remove_pre_key(&mut self, pre_key_id: PreKeyId) -> Result<(), SignalProtocolError> {
+    async fn remove_pre_key(&mut self, pre_key_id: PreKeyId) -> Result<(), MochiProtocolError> {
         self.do_remove_pre_key(pre_key_id.into())
             .await
             .map_err(|s| js_error_to_rust("removePreKey", s))
@@ -202,7 +202,7 @@ impl SignedPreKeyStore for NodeSignedPreKeyStore {
     async fn get_signed_pre_key(
         &self,
         signed_pre_key_id: SignedPreKeyId,
-    ) -> Result<SignedPreKeyRecord, SignalProtocolError> {
+    ) -> Result<SignedPreKeyRecord, MochiProtocolError> {
         self.do_get_signed_pre_key(signed_pre_key_id.into())
             .await
             .map_err(|s| js_error_to_rust("getSignedPreKey", s))
@@ -212,7 +212,7 @@ impl SignedPreKeyStore for NodeSignedPreKeyStore {
         &mut self,
         signed_pre_key_id: SignedPreKeyId,
         record: &SignedPreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         self.do_save_signed_pre_key(signed_pre_key_id.into(), record.clone())
             .await
             .map_err(|s| js_error_to_rust("saveSignedPreKey", s))
@@ -318,7 +318,7 @@ impl KyberPreKeyStore for NodeKyberPreKeyStore {
     async fn get_kyber_pre_key(
         &self,
         kyber_pre_key_id: KyberPreKeyId,
-    ) -> Result<KyberPreKeyRecord, SignalProtocolError> {
+    ) -> Result<KyberPreKeyRecord, MochiProtocolError> {
         self.do_get_kyber_pre_key(kyber_pre_key_id.into())
             .await
             .map_err(|s| js_error_to_rust("getKyberPreKey", s))
@@ -328,7 +328,7 @@ impl KyberPreKeyStore for NodeKyberPreKeyStore {
         &mut self,
         kyber_pre_key_id: KyberPreKeyId,
         record: &KyberPreKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         self.do_save_kyber_pre_key(kyber_pre_key_id.into(), record.clone())
             .await
             .map_err(|s| js_error_to_rust("saveKyberPreKey", s))
@@ -337,7 +337,7 @@ impl KyberPreKeyStore for NodeKyberPreKeyStore {
     async fn mark_kyber_pre_key_used(
         &mut self,
         kyber_pre_key_id: KyberPreKeyId,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         self.do_mark_kyber_pre_key_used(kyber_pre_key_id.into())
             .await
             .map_err(|s| js_error_to_rust("markKyberPreKeyUsed", s))
@@ -426,7 +426,7 @@ impl SessionStore for NodeSessionStore {
     async fn load_session(
         &self,
         name: &ProtocolAddress,
-    ) -> Result<Option<SessionRecord>, SignalProtocolError> {
+    ) -> Result<Option<SessionRecord>, MochiProtocolError> {
         self.do_get_session(name.clone())
             .await
             .map_err(|s| js_error_to_rust("getSession", s))
@@ -436,7 +436,7 @@ impl SessionStore for NodeSessionStore {
         &mut self,
         name: &ProtocolAddress,
         record: &SessionRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         self.do_save_session(name.clone(), record.clone())
             .await
             .map_err(|s| js_error_to_rust("saveSession", s))
@@ -603,7 +603,7 @@ impl Finalize for NodeIdentityKeyStore {
 
 #[async_trait(?Send)]
 impl IdentityKeyStore for NodeIdentityKeyStore {
-    async fn get_identity_key_pair(&self) -> Result<IdentityKeyPair, SignalProtocolError> {
+    async fn get_identity_key_pair(&self) -> Result<IdentityKeyPair, MochiProtocolError> {
         let pk = self
             .do_get_identity_key()
             .await
@@ -612,7 +612,7 @@ impl IdentityKeyStore for NodeIdentityKeyStore {
         IdentityKeyPair::try_from(pk)
     }
 
-    async fn get_local_registration_id(&self) -> Result<u32, SignalProtocolError> {
+    async fn get_local_registration_id(&self) -> Result<u32, MochiProtocolError> {
         self.do_get_local_registration_id()
             .await
             .map_err(|s| js_error_to_rust("getLocalRegistrationId", s))
@@ -621,7 +621,7 @@ impl IdentityKeyStore for NodeIdentityKeyStore {
     async fn get_identity(
         &self,
         address: &ProtocolAddress,
-    ) -> Result<Option<IdentityKey>, SignalProtocolError> {
+    ) -> Result<Option<IdentityKey>, MochiProtocolError> {
         Ok(self
             .do_get_identity(address.clone())
             .await
@@ -633,7 +633,7 @@ impl IdentityKeyStore for NodeIdentityKeyStore {
         &mut self,
         address: &ProtocolAddress,
         identity: &IdentityKey,
-    ) -> Result<bool, SignalProtocolError> {
+    ) -> Result<bool, MochiProtocolError> {
         self.do_save_identity(address.clone(), *identity.public_key())
             .await
             .map_err(|s| js_error_to_rust("saveIdentity", s))
@@ -643,8 +643,8 @@ impl IdentityKeyStore for NodeIdentityKeyStore {
         &self,
         address: &ProtocolAddress,
         identity: &IdentityKey,
-        direction: libsignal_protocol::Direction,
-    ) -> Result<bool, SignalProtocolError> {
+        direction: libmochi_protocol::Direction,
+    ) -> Result<bool, MochiProtocolError> {
         self.do_is_trusted(address.clone(), *identity.public_key(), direction)
             .await
             .map_err(|s| js_error_to_rust("isTrustedIdentity", s))
@@ -746,7 +746,7 @@ impl SenderKeyStore for NodeSenderKeyStore {
         &mut self,
         sender: &ProtocolAddress,
         distribution_id: Uuid,
-    ) -> Result<Option<SenderKeyRecord>, SignalProtocolError> {
+    ) -> Result<Option<SenderKeyRecord>, MochiProtocolError> {
         self.do_get_sender_key(sender.clone(), distribution_id)
             .await
             .map_err(|s| js_error_to_rust("getSenderKey", s))
@@ -757,7 +757,7 @@ impl SenderKeyStore for NodeSenderKeyStore {
         sender: &ProtocolAddress,
         distribution_id: Uuid,
         record: &SenderKeyRecord,
-    ) -> Result<(), SignalProtocolError> {
+    ) -> Result<(), MochiProtocolError> {
         self.do_save_sender_key(sender.clone(), distribution_id, record.clone())
             .await
             .map_err(|s| js_error_to_rust("saveSenderKey", s))

@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -448,7 +448,7 @@ pub(crate) mod test {
 
     fn test_request() -> DnsLookupRequest {
         DnsLookupRequest {
-            hostname: Arc::from("chat.signal.org"),
+            hostname: Arc::from("chat.mochi.org"),
             ipv6_enabled: true,
         }
     }

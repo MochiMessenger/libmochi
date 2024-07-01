@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -22,7 +22,7 @@
 //! # Example
 //! Basic usage:
 //! ```
-//! # use libsignal_protocol::kem::*;
+//! # use libmochi_protocol::kem::*;
 //! // Generate a Kyber1024 key pair
 //! let kp = KeyPair::generate(KeyType::Kyber1024);
 //!
@@ -37,7 +37,7 @@
 //!
 //! Serialization:
 //! ```
-//! # use libsignal_protocol::kem::*;
+//! # use libmochi_protocol::kem::*;
 //! // Generate a Kyber1024 key pair
 //! let kp = KeyPair::generate(KeyType::Kyber1024);
 //!
@@ -56,7 +56,7 @@ mod kyber768;
 #[cfg(feature = "mlkem1024")]
 mod mlkem1024;
 
-use crate::{Result, SignalProtocolError};
+use crate::{Result, MochiProtocolError};
 
 use derive_where::derive_where;
 use displaydoc::Display;
@@ -71,7 +71,7 @@ type SharedSecret = Box<[u8]>;
 pub(crate) type RawCiphertext = Box<[u8]>;
 pub type SerializedCiphertext = Box<[u8]>;
 
-/// Each KEM supported by libsignal-protocol implements this trait.
+/// Each KEM supported by libmochi-protocol implements this trait.
 ///
 /// Similar to the traits in RustCrypto's [kem](https://docs.rs/kem/) crate.
 ///
@@ -182,7 +182,7 @@ impl KeyType {
 }
 
 impl TryFrom<u8> for KeyType {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(x: u8) -> Result<Self> {
         match x {
@@ -191,7 +191,7 @@ impl TryFrom<u8> for KeyType {
             0x08 => Ok(KeyType::Kyber1024),
             #[cfg(feature = "mlkem1024")]
             0x0A => Ok(KeyType::MLKEM1024),
-            t => Err(SignalProtocolError::BadKEMKeyType(t)),
+            t => Err(MochiProtocolError::BadKEMKeyType(t)),
         }
     }
 }
@@ -250,11 +250,11 @@ impl<T: KeyKind> Key<T> {
     /// function `Key<Kind>::serialize(&self)`.
     pub fn deserialize(value: &[u8]) -> Result<Self> {
         if value.is_empty() {
-            return Err(SignalProtocolError::NoKeyTypeIdentifier);
+            return Err(MochiProtocolError::NoKeyTypeIdentifier);
         }
         let key_type = KeyType::try_from(value[0])?;
         if value.len() != T::key_length(key_type) + 1 {
-            return Err(SignalProtocolError::BadKEMKeyLength(key_type, value.len()));
+            return Err(MochiProtocolError::BadKEMKeyLength(key_type, value.len()));
         }
         Ok(Key {
             key_type,
@@ -299,7 +299,7 @@ impl Key<Secret> {
         // deserialization checks that the length is correct for the KeyType
         let ct = Ciphertext::deserialize(ct_bytes)?;
         if ct.key_type != self.key_type {
-            return Err(SignalProtocolError::WrongKEMKeyType(
+            return Err(MochiProtocolError::WrongKEMKeyType(
                 ct.key_type.value(),
                 self.key_type.value(),
             ));
@@ -311,7 +311,7 @@ impl Key<Secret> {
 }
 
 impl TryFrom<&[u8]> for Key<Public> {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         Self::deserialize(value)
@@ -319,7 +319,7 @@ impl TryFrom<&[u8]> for Key<Public> {
 }
 
 impl TryFrom<&[u8]> for Key<Secret> {
-    type Error = SignalProtocolError;
+    type Error = MochiProtocolError;
 
     fn try_from(value: &[u8]) -> Result<Self> {
         Self::deserialize(value)
@@ -391,7 +391,7 @@ impl KeyPair {
         let public_key = PublicKey::try_from(public_key)?;
         let secret_key = SecretKey::try_from(secret_key)?;
         if public_key.key_type != secret_key.key_type {
-            Err(SignalProtocolError::WrongKEMKeyType(
+            Err(MochiProtocolError::WrongKEMKeyType(
                 secret_key.key_type.value(),
                 public_key.key_type.value(),
             ))
@@ -415,11 +415,11 @@ impl<'a> Ciphertext<'a> {
     /// function `Ciphertext::serialize(&self)`.
     pub fn deserialize(value: &'a [u8]) -> Result<Self> {
         if value.is_empty() {
-            return Err(SignalProtocolError::NoKeyTypeIdentifier);
+            return Err(MochiProtocolError::NoKeyTypeIdentifier);
         }
         let key_type = KeyType::try_from(value[0])?;
         if value.len() != key_type.parameters().ciphertext_length() + 1 {
-            return Err(SignalProtocolError::BadKEMCiphertextLength(
+            return Err(MochiProtocolError::BadKEMCiphertextLength(
                 key_type,
                 value.len(),
             ));

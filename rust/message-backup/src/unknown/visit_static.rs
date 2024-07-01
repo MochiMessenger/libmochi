@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@ use std::ops::ControlFlow;
 
 use protobuf::{EnumOrUnknown, MessageField, SpecialFields, UnknownFields};
 
-pub(crate) use libsignal_message_backup_macros::VisitUnknownFields;
+pub(crate) use libmochi_message_backup_macros::VisitUnknownFields;
 
 use crate::unknown::{MapKey, Part, Path, UnknownFieldVisitor, UnknownValue};
 

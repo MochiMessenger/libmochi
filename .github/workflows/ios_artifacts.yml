@@ -46,7 +46,7 @@ jobs:
           }
 
     - id: archive-name
-      run: echo name=libsignal-client-ios-build-v$(sed -En "s/${VERSION_REGEX}/\1/p" LibSignalClient.podspec).tar.gz >> $GITHUB_OUTPUT
+      run: echo name=libmochi-client-ios-build-v$(sed -En "s/${VERSION_REGEX}/\1/p" LibMochiClient.podspec).tar.gz >> $GITHUB_OUTPUT
       env:
         VERSION_REGEX: "^.*[.]version += '(.+)'$"
 
@@ -69,7 +69,7 @@ jobs:
       env:
         CARGO_BUILD_TARGET: aarch64-apple-ios-sim
 
-    - run: tar -c --auto-compress --no-mac-metadata -f ${{ steps.archive-name.outputs.name }} target/*/release/libsignal_ffi.a
+    - run: tar -c --auto-compress --no-mac-metadata -f ${{ steps.archive-name.outputs.name }} target/*/release/libmochi_ffi.a
 
     - run: 'shasum -a 256 ${{ steps.archive-name.outputs.name }} | tee -a $GITHUB_STEP_SUMMARY ${{ steps.archive-name.outputs.name }}.sha256'
       shell: bash # Explicitly setting the shell turns on pipefail in GitHub Actions
@@ -78,19 +78,19 @@ jobs:
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
       with:
         path: ${{ steps.archive-name.outputs.name }}
-        name: libsignal-client-ios
+        name: libmochi-client-ios
 
     - uses: google-github-actions/auth@55bd3a7c6e2ae7cf1877fd1ccb9d54c0503c457c # v2.1.2
       if: ${{ !inputs.dry_run }}
       with:
         workload_identity_provider: 'projects/741367068918/locations/global/workloadIdentityPools/github/providers/github-actions'
-        service_account: 'github-actions@signal-build-artifacts.iam.gserviceaccount.com'
+        service_account: 'github-actions@mochi-build-artifacts.iam.gserviceaccount.com'
 
     - uses: google-github-actions/upload-cloud-storage@22121cd842b0d185e042e28d969925b538c33d77 # v2.1.0
       if: ${{ !inputs.dry_run }}
       with:
         path: ${{ steps.archive-name.outputs.name }}
-        destination: build-artifacts.signal.org/libraries
+        destination: build-artifacts.mochi.org/libraries
 
     # This step is expected to fail if not run on a tag.
     - name: Upload checksum to release

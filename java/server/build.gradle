@@ -5,7 +5,7 @@ plugins {
 }
 
 sourceCompatibility = 17
-archivesBaseName = "libsignal-server"
+archivesBaseName = "libmochi-server"
 
 repositories {
     mavenCentral()
@@ -15,7 +15,7 @@ repositories {
 sourceSets {
     main {
         java {
-            // Include libsignal sources shared between the client and server
+            // Include libmochi sources shared between the client and server
             srcDir '../shared/java'
         }
         resources {
@@ -65,13 +65,13 @@ publishing {
 
             pom {
                 name = archivesBaseName
-                description = 'Signal Protocol cryptography library for Java (server-side)'
-                url = 'https://github.com/signalapp/libsignal'
+                description = 'Mochi Protocol cryptography library for Java (server-side)'
+                url = 'https://github.com/mochimessenger/libmochi'
 
                 scm {
-                    url = 'scm:git@github.com:signalapp/libsignal.git'
-                    connection = 'scm:git@github.com:signalapp/libsignal.git'
-                    developerConnection = 'scm:git@github.com:signalapp/libsignal.git'
+                    url = 'scm:git@github.com:mochimessenger/libmochi.git'
+                    connection = 'scm:git@github.com:mochimessenger/libmochi.git'
+                    developerConnection = 'scm:git@github.com:mochimessenger/libmochi.git'
                 }
 
                 licenses {
@@ -83,7 +83,7 @@ publishing {
 
                 developers {
                     developer {
-                        name = 'Signal Messenger LLC'
+                        name = 'Mochi Messenger LLC'
                     }
                 }
             }

@@ -24,9 +24,9 @@ jobs:
         os: [windows-latest, macos-12]
         include:
           - os: windows-latest
-            library: signal_jni.dll
+            library: mochi_jni.dll
           - os: macos-12
-            library: libsignal_jni.dylib
+            library: libmochi_jni.dylib
             additional-rust-target: aarch64-apple-darwin
         # Ubuntu binaries are built using Docker, below
 
@@ -87,7 +87,7 @@ jobs:
     - name: Upload library
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
       with:
-        name: libsignal_jni (${{matrix.os}})
+        name: libmochi_jni (${{matrix.os}})
         path: target/release/${{ matrix.library }}
 
   verify-rust:
@@ -135,26 +135,26 @@ jobs:
       if: ${{ inputs.dry_run }}
       working-directory: java
 
-    - name: Upload libsignal-android
+    - name: Upload libmochi-android
       if: ${{ inputs.dry_run }}
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
       with:
-        name: libsignal-android
-        path: java/android/build/outputs/aar/libsignal-android-release.aar
+        name: libmochi-android
+        path: java/android/build/outputs/aar/libmochi-android-release.aar
 
-    - name: Upload libsignal-client
+    - name: Upload libmochi-client
       if: ${{ inputs.dry_run }}
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
       with:
-        name: libsignal-client
-        path: java/client/build/libs/libsignal-client-*.jar
+        name: libmochi-client
+        path: java/client/build/libs/libmochi-client-*.jar
 
-    - name: Upload libsignal-server
+    - name: Upload libmochi-server
       if: ${{ inputs.dry_run }}
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
       with:
-        name: libsignal-server
-        path: java/server/build/libs/libsignal-server-*.jar
+        name: libmochi-server
+        path: java/server/build/libs/libmochi-server-*.jar
 
     - run: make publish_java
       if: ${{ !inputs.dry_run }}

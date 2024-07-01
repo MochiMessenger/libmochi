@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -14,12 +14,12 @@ fn test_endorsement() {
     let randomness3: RandomnessBytes = [0x45u8; RANDOMNESS_LEN];
 
     // first set up a group
-    let client_user_id = libsignal_core::Aci::from_uuid_bytes([0x04u8; UUID_LEN]);
+    let client_user_id = libmochi_core::Aci::from_uuid_bytes([0x04u8; UUID_LEN]);
 
     let moxie_user_id =
-        libsignal_core::Aci::from(uuid::uuid!("e36fdce7-36da-4c6f-a21b-9afe2b754650"));
+        libmochi_core::Aci::from(uuid::uuid!("e36fdce7-36da-4c6f-a21b-9afe2b754650"));
     let brian_user_id =
-        libsignal_core::Aci::from(uuid::uuid!("8c78cd2a-16ff-427d-83dc-1a5e36ce713d"));
+        libmochi_core::Aci::from(uuid::uuid!("8c78cd2a-16ff-427d-83dc-1a5e36ce713d"));
 
     let group_members = [
         client_user_id.into(),
@@ -132,7 +132,7 @@ fn test_single_member_group() {
     let randomness3: RandomnessBytes = [0x45u8; RANDOMNESS_LEN];
 
     // first set up a group
-    let client_user_id = libsignal_core::Aci::from_uuid_bytes([0x04u8; UUID_LEN]);
+    let client_user_id = libmochi_core::Aci::from_uuid_bytes([0x04u8; UUID_LEN]);
 
     let group_secret_params = zkgroup::groups::GroupSecretParams::generate(randomness1);
     let client_user_id_ciphertext = group_secret_params.encrypt_service_id(client_user_id.into());
@@ -168,12 +168,12 @@ fn test_client_rejects_bad_expirations() {
     let randomness3: RandomnessBytes = [0x45u8; RANDOMNESS_LEN];
 
     // first set up a group
-    let client_user_id = libsignal_core::Aci::from_uuid_bytes([0x04u8; UUID_LEN]);
+    let client_user_id = libmochi_core::Aci::from_uuid_bytes([0x04u8; UUID_LEN]);
 
     let moxie_user_id =
-        libsignal_core::Aci::from(uuid::uuid!("e36fdce7-36da-4c6f-a21b-9afe2b754650"));
+        libmochi_core::Aci::from(uuid::uuid!("e36fdce7-36da-4c6f-a21b-9afe2b754650"));
     let brian_user_id =
-        libsignal_core::Aci::from(uuid::uuid!("8c78cd2a-16ff-427d-83dc-1a5e36ce713d"));
+        libmochi_core::Aci::from(uuid::uuid!("8c78cd2a-16ff-427d-83dc-1a5e36ce713d"));
 
     let group_members = [
         client_user_id.into(),

@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Signal Messenger, LLC.
+// Copyright 2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -19,7 +19,7 @@ pub struct ExpiringProfileKeyCredential {
 }
 
 impl ExpiringProfileKeyCredential {
-    pub fn aci(&self) -> libsignal_core::Aci {
+    pub fn aci(&self) -> libmochi_core::Aci {
         uuid::Uuid::from_bytes(self.aci_bytes).into()
     }
 

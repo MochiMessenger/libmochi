@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -54,7 +54,7 @@ export enum ErrorCode {
   Cancelled,
 }
 
-export class LibSignalErrorBase extends Error {
+export class LibMochiErrorBase extends Error {
   public readonly code: ErrorCode;
   public readonly operation: string;
   readonly _addr?: string | Native.ProtocolAddress;
@@ -71,7 +71,7 @@ export class LibSignalErrorBase extends Error {
       this.name = name;
       this.code = ErrorCode[name];
     } else {
-      this.name = 'LibSignalError';
+      this.name = 'LibMochiError';
       this.code = ErrorCode.Generic;
     }
     this.operation = operation;
@@ -100,151 +100,151 @@ export class LibSignalErrorBase extends Error {
   }
 }
 
-export type LibSignalErrorCommon = Omit<LibSignalErrorBase, 'addr'>;
+export type LibMochiErrorCommon = Omit<LibMochiErrorBase, 'addr'>;
 
-export type GenericError = LibSignalErrorCommon & {
+export type GenericError = LibMochiErrorCommon & {
   code: ErrorCode.Generic;
 };
 
-export type DuplicatedMessageError = LibSignalErrorCommon & {
+export type DuplicatedMessageError = LibMochiErrorCommon & {
   code: ErrorCode.DuplicatedMessage;
 };
 
-export type SealedSenderSelfSendError = LibSignalErrorCommon & {
+export type SealedSenderSelfSendError = LibMochiErrorCommon & {
   code: ErrorCode.SealedSenderSelfSend;
 };
 
-export type UntrustedIdentityError = LibSignalErrorCommon & {
+export type UntrustedIdentityError = LibMochiErrorCommon & {
   code: ErrorCode.UntrustedIdentity;
   addr: string;
 };
 
-export type InvalidRegistrationIdError = LibSignalErrorCommon & {
+export type InvalidRegistrationIdError = LibMochiErrorCommon & {
   code: ErrorCode.InvalidRegistrationId;
   addr: ProtocolAddress;
 };
 
-export type VerificationFailedError = LibSignalErrorCommon & {
+export type VerificationFailedError = LibMochiErrorCommon & {
   code: ErrorCode.VerificationFailed;
 };
 
-export type InvalidSessionError = LibSignalErrorCommon & {
+export type InvalidSessionError = LibMochiErrorCommon & {
   code: ErrorCode.InvalidSession;
 };
 
-export type InvalidSenderKeySessionError = LibSignalErrorCommon & {
+export type InvalidSenderKeySessionError = LibMochiErrorCommon & {
   code: ErrorCode.InvalidSenderKeySession;
   distributionId: string;
 };
 
-export type NicknameCannotBeEmptyError = LibSignalErrorCommon & {
+export type NicknameCannotBeEmptyError = LibMochiErrorCommon & {
   code: ErrorCode.NicknameCannotBeEmpty;
 };
-export type CannotStartWithDigitError = LibSignalErrorCommon & {
+export type CannotStartWithDigitError = LibMochiErrorCommon & {
   code: ErrorCode.CannotStartWithDigit;
 };
-export type MissingSeparatorError = LibSignalErrorCommon & {
+export type MissingSeparatorError = LibMochiErrorCommon & {
   code: ErrorCode.MissingSeparator;
 };
 
-export type BadNicknameCharacterError = LibSignalErrorCommon & {
+export type BadNicknameCharacterError = LibMochiErrorCommon & {
   code: ErrorCode.BadNicknameCharacter;
 };
 
-export type NicknameTooShortError = LibSignalErrorCommon & {
+export type NicknameTooShortError = LibMochiErrorCommon & {
   code: ErrorCode.NicknameTooShort;
 };
 
-export type NicknameTooLongError = LibSignalErrorCommon & {
+export type NicknameTooLongError = LibMochiErrorCommon & {
   code: ErrorCode.NicknameTooLong;
 };
 
-export type DiscriminatorCannotBeEmptyError = LibSignalErrorCommon & {
+export type DiscriminatorCannotBeEmptyError = LibMochiErrorCommon & {
   code: ErrorCode.DiscriminatorCannotBeEmpty;
 };
-export type DiscriminatorCannotBeZeroError = LibSignalErrorCommon & {
+export type DiscriminatorCannotBeZeroError = LibMochiErrorCommon & {
   code: ErrorCode.DiscriminatorCannotBeZero;
 };
-export type DiscriminatorCannotBeSingleDigitError = LibSignalErrorCommon & {
+export type DiscriminatorCannotBeSingleDigitError = LibMochiErrorCommon & {
   code: ErrorCode.DiscriminatorCannotBeSingleDigit;
 };
-export type DiscriminatorCannotHaveLeadingZerosError = LibSignalErrorCommon & {
+export type DiscriminatorCannotHaveLeadingZerosError = LibMochiErrorCommon & {
   code: ErrorCode.DiscriminatorCannotHaveLeadingZeros;
 };
-export type BadDiscriminatorCharacterError = LibSignalErrorCommon & {
+export type BadDiscriminatorCharacterError = LibMochiErrorCommon & {
   code: ErrorCode.BadDiscriminatorCharacter;
 };
-export type DiscriminatorTooLargeError = LibSignalErrorCommon & {
+export type DiscriminatorTooLargeError = LibMochiErrorCommon & {
   code: ErrorCode.DiscriminatorTooLarge;
 };
 
-export type InputDataTooLong = LibSignalErrorCommon & {
+export type InputDataTooLong = LibMochiErrorCommon & {
   code: ErrorCode.InputDataTooLong;
 };
 
-export type InvalidEntropyDataLength = LibSignalErrorCommon & {
+export type InvalidEntropyDataLength = LibMochiErrorCommon & {
   code: ErrorCode.InvalidEntropyDataLength;
 };
 
-export type InvalidUsernameLinkEncryptedData = LibSignalErrorCommon & {
+export type InvalidUsernameLinkEncryptedData = LibMochiErrorCommon & {
   code: ErrorCode.InvalidUsernameLinkEncryptedData;
 };
 
-export type IoError = LibSignalErrorCommon & {
+export type IoError = LibMochiErrorCommon & {
   code: ErrorCode.IoError;
 };
 
-export type CdsiInvalidTokenError = LibSignalErrorCommon & {
+export type CdsiInvalidTokenError = LibMochiErrorCommon & {
   code: ErrorCode.CdsiInvalidToken;
 };
 
-export type InvalidUriError = LibSignalErrorCommon & {
+export type InvalidUriError = LibMochiErrorCommon & {
   code: ErrorCode.InvalidUri;
 };
 
-export type InvalidMediaInputError = LibSignalErrorCommon & {
+export type InvalidMediaInputError = LibMochiErrorCommon & {
   code: ErrorCode.InvalidMediaInput;
 };
 
-export type UnsupportedMediaInputError = LibSignalErrorCommon & {
+export type UnsupportedMediaInputError = LibMochiErrorCommon & {
   code: ErrorCode.UnsupportedMediaInput;
 };
 
-export type RateLimitedError = LibSignalErrorBase & {
+export type RateLimitedError = LibMochiErrorBase & {
   code: ErrorCode.RateLimitedError;
   readonly retryAfterSecs: number;
 };
 
-export type ChatServiceInactive = LibSignalErrorBase & {
+export type ChatServiceInactive = LibMochiErrorBase & {
   code: ErrorCode.ChatServiceInactive;
 };
 
-export type AppExpiredError = LibSignalErrorBase & {
+export type AppExpiredError = LibMochiErrorBase & {
   code: ErrorCode.AppExpired;
 };
 
-export type DeviceDelinkedError = LibSignalErrorBase & {
+export type DeviceDelinkedError = LibMochiErrorBase & {
   code: ErrorCode.DeviceDelinked;
 };
 
-export type SvrDataMissingError = LibSignalErrorBase & {
+export type SvrDataMissingError = LibMochiErrorBase & {
   code: ErrorCode.SvrDataMissing;
 };
 
-export type SvrRequestFailedError = LibSignalErrorCommon & {
+export type SvrRequestFailedError = LibMochiErrorCommon & {
   code: ErrorCode.SvrRequestFailed;
 };
 
-export type SvrRestoreFailedError = LibSignalErrorCommon & {
+export type SvrRestoreFailedError = LibMochiErrorCommon & {
   code: ErrorCode.SvrRestoreFailed;
   readonly triesRemaining: number;
 };
 
-export type CancellationError = LibSignalErrorCommon & {
+export type CancellationError = LibMochiErrorCommon & {
   code: ErrorCode.Cancelled;
 };
 
-export type LibSignalError =
+export type LibMochiError =
   | GenericError
   | DuplicatedMessageError
   | SealedSenderSelfSendError

@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use std::error::Error;
@@ -11,11 +11,11 @@ use attest::hsm_enclave::Error as HsmEnclaveError;
 use device_transfer::Error as DeviceTransferError;
 use jni::objects::{GlobalRef, JThrowable, JValue, JValueOwned};
 use jni::JavaVM;
-use libsignal_net::infra::ws::WebSocketServiceError;
-use libsignal_net::svr3::Error as Svr3Error;
-use libsignal_protocol::*;
-use signal_crypto::Error as SignalCryptoError;
-use signal_pin::Error as PinError;
+use libmochi_net::infra::ws::WebSocketServiceError;
+use libmochi_net::svr3::Error as Svr3Error;
+use libmochi_protocol::*;
+use mochi_crypto::Error as MochiCryptoError;
+use mochi_pin::Error as PinError;
 use usernames::{UsernameError, UsernameLinkError};
 
 use crate::net::cdsi::CdsiError;
@@ -45,7 +45,7 @@ pub use futures::*;
 
 mod io;
 pub use io::*;
-use libsignal_net::chat::ChatServiceError;
+use libmochi_net::chat::ChatServiceError;
 
 mod storage;
 pub use storage::*;
@@ -88,7 +88,7 @@ impl<'a, T> From<JavaCompletableFuture<'a, T>> for JObject<'a> {
     }
 }
 
-fn convert_to_exception<'a, 'env, F>(env: &'a mut JNIEnv<'env>, error: SignalJniError, consume: F)
+fn convert_to_exception<'a, 'env, F>(env: &'a mut JNIEnv<'env>, error: MochiJniError, consume: F)
 where
     F: 'a
         + FnOnce(
@@ -112,20 +112,20 @@ struct ConsumableException<'a> {
 enum ConsumableExceptionError {
     String(String),
     Static(&'static str),
-    JniError(SignalJniError),
+    JniError(MochiJniError),
 }
 
 impl<'env> ConsumableException<'env> {
-    fn new(env: &mut JNIEnv<'env>, error: SignalJniError) -> Self {
+    fn new(env: &mut JNIEnv<'env>, error: MochiJniError) -> Self {
         let (exception_type, error) = match error {
-            SignalJniError::Bridge(BridgeLayerError::CallbackException(callback, exception)) => {
+            MochiJniError::Bridge(BridgeLayerError::CallbackException(callback, exception)) => {
                 let throwable = env.new_local_ref(exception.as_obj()).map(JThrowable::from);
                 return ConsumableException {
                     throwable: throwable.map_err(Into::into),
                     error: format!("error in method call '{callback}'").into(),
                 };
             }
-            SignalJniError::Io(error) if error.kind() == std::io::ErrorKind::Other => {
+            MochiJniError::Io(error) if error.kind() == std::io::ErrorKind::Other => {
                 let thrown_exception = error
                     .get_ref()
                     .and_then(|e| e.downcast_ref::<ThrownException>())
@@ -140,10 +140,10 @@ impl<'env> ConsumableException<'env> {
                         error: "error in callback".into(),
                     };
                 }
-                (ClassName("java.io.IOException"), SignalJniError::Io(error))
+                (ClassName("java.io.IOException"), MochiJniError::Io(error))
             }
 
-            SignalJniError::Protocol(SignalProtocolError::ApplicationCallbackError(
+            MochiJniError::Protocol(MochiProtocolError::ApplicationCallbackError(
                 callback,
                 exception,
             )) if <dyn Error>::is::<ThrownException>(&*exception) => {
@@ -154,13 +154,13 @@ impl<'env> ConsumableException<'env> {
                     <dyn Error>::downcast::<ThrownException>(exception).expect("just checked");
                 return Self::new(
                     env,
-                    SignalJniError::Bridge(BridgeLayerError::CallbackException(
+                    MochiJniError::Bridge(BridgeLayerError::CallbackException(
                         callback, *exception,
                     )),
                 );
             }
 
-            SignalJniError::Protocol(SignalProtocolError::UntrustedIdentity(ref addr)) => {
+            MochiJniError::Protocol(MochiProtocolError::UntrustedIdentity(ref addr)) => {
                 let throwable =
                     env.new_string(addr.name())
                         .map_err(Into::into)
@@ -168,7 +168,7 @@ impl<'env> ConsumableException<'env> {
                             new_instance(
                                 env,
                                 ClassName(
-                                    "org.signal.libsignal.protocol.UntrustedIdentityException",
+                                    "org.mochi.libmochi.protocol.UntrustedIdentityException",
                                 ),
                                 jni_args!((addr_name => java.lang.String) -> void),
                             )
@@ -180,15 +180,15 @@ impl<'env> ConsumableException<'env> {
                 };
             }
 
-            SignalJniError::Protocol(SignalProtocolError::SessionNotFound(ref addr)) => {
+            MochiJniError::Protocol(MochiProtocolError::SessionNotFound(ref addr)) => {
                 let throwable = protocol_address_to_jobject(env, addr)
                     .and_then(|addr_object| Ok((addr_object, env.new_string(error.to_string())?)))
                     .and_then(|(addr_object, message)| {
                         new_instance(
                             env,
-                            ClassName("org.signal.libsignal.protocol.NoSessionException"),
+                            ClassName("org.mochi.libmochi.protocol.NoSessionException"),
                             jni_args!((
-                            addr_object => org.signal.libsignal.protocol.SignalProtocolAddress,
+                            addr_object => org.mochi.libmochi.protocol.MochiProtocolAddress,
                             message => java.lang.String,
                         ) -> void),
                         )
@@ -200,7 +200,7 @@ impl<'env> ConsumableException<'env> {
                 };
             }
 
-            SignalJniError::Protocol(SignalProtocolError::InvalidRegistrationId(
+            MochiJniError::Protocol(MochiProtocolError::InvalidRegistrationId(
                 ref addr,
                 _value,
             )) => {
@@ -210,10 +210,10 @@ impl<'env> ConsumableException<'env> {
                         new_instance(
                             env,
                             ClassName(
-                                "org.signal.libsignal.protocol.InvalidRegistrationIdException",
+                                "org.mochi.libmochi.protocol.InvalidRegistrationIdException",
                             ),
                             jni_args!((
-                            addr_object => org.signal.libsignal.protocol.SignalProtocolAddress,
+                            addr_object => org.mochi.libmochi.protocol.MochiProtocolAddress,
                             message => java.lang.String,
                         ) -> void),
                         )
@@ -225,7 +225,7 @@ impl<'env> ConsumableException<'env> {
                 };
             }
 
-            SignalJniError::Protocol(SignalProtocolError::InvalidSenderKeySession {
+            MochiJniError::Protocol(MochiProtocolError::InvalidSenderKeySession {
                 distribution_id,
             }) => {
                 let throwable = distribution_id
@@ -237,7 +237,7 @@ impl<'env> ConsumableException<'env> {
                         new_instance(
                         env,
                         ClassName(
-                            "org.signal.libsignal.protocol.groups.InvalidSenderKeySessionException",
+                            "org.mochi.libmochi.protocol.groups.InvalidSenderKeySessionException",
                         ),
                         jni_args!((
                             distribution_id_obj => java.util.UUID,
@@ -252,14 +252,14 @@ impl<'env> ConsumableException<'env> {
                 };
             }
 
-            SignalJniError::Protocol(SignalProtocolError::FingerprintVersionMismatch(
+            MochiJniError::Protocol(MochiProtocolError::FingerprintVersionMismatch(
                 theirs,
                 ours,
             )) => {
                 let throwable = new_instance(
                 env,
                 ClassName(
-                    "org.signal.libsignal.protocol.fingerprint.FingerprintVersionMismatchException",
+                    "org.mochi.libmochi.protocol.fingerprint.FingerprintVersionMismatchException",
                 ),
                 jni_args!((theirs as jint => int, ours as jint => int) -> void),
             );
@@ -270,10 +270,10 @@ impl<'env> ConsumableException<'env> {
                 };
             }
 
-            SignalJniError::Protocol(SignalProtocolError::SealedSenderSelfSend) => {
+            MochiJniError::Protocol(MochiProtocolError::SealedSenderSelfSend) => {
                 let throwable = new_instance(
                     env,
-                    ClassName("org.signal.libsignal.metadata.SelfSendException"),
+                    ClassName("org.mochi.libmochi.metadata.SelfSendException"),
                     jni_args!(() -> void),
                 );
 
@@ -283,14 +283,14 @@ impl<'env> ConsumableException<'env> {
                 };
             }
 
-            SignalJniError::Cdsi(CdsiError::RateLimited { retry_after }) => {
+            MochiJniError::Cdsi(CdsiError::RateLimited { retry_after }) => {
                 let retry_after_seconds = retry_after
                     .as_secs()
                     .try_into()
                     .expect("duration < lifetime of the universe");
                 let throwable = new_instance(
                     env,
-                    ClassName("org.signal.libsignal.net.RetryLaterException"),
+                    ClassName("org.mochi.libmochi.net.RetryLaterException"),
                     jni_args!((retry_after_seconds => long) -> void),
                 );
 
@@ -300,9 +300,9 @@ impl<'env> ConsumableException<'env> {
                 };
             }
 
-            SignalJniError::Bridge(BridgeLayerError::UnexpectedPanic(_))
-            | SignalJniError::Bridge(BridgeLayerError::BadJniParameter(_))
-            | SignalJniError::Bridge(BridgeLayerError::UnexpectedJniResultType(_, _)) => {
+            MochiJniError::Bridge(BridgeLayerError::UnexpectedPanic(_))
+            | MochiJniError::Bridge(BridgeLayerError::BadJniParameter(_))
+            | MochiJniError::Bridge(BridgeLayerError::UnexpectedJniResultType(_, _)) => {
                 // java.lang.AssertionError has a slightly different signature.
                 let throwable = env
                     .new_string(error.to_string())
@@ -321,273 +321,273 @@ impl<'env> ConsumableException<'env> {
                 };
             }
 
-            SignalJniError::Bridge(BridgeLayerError::NullPointer(_)) => {
+            MochiJniError::Bridge(BridgeLayerError::NullPointer(_)) => {
                 (ClassName("java.lang.NullPointerException"), error)
             }
 
-            SignalJniError::Protocol(SignalProtocolError::InvalidState(_, _)) => {
+            MochiJniError::Protocol(MochiProtocolError::InvalidState(_, _)) => {
                 (ClassName("java.lang.IllegalStateException"), error)
             }
 
-            SignalJniError::Protocol(SignalProtocolError::InvalidArgument(_))
-            | SignalJniError::SignalCrypto(SignalCryptoError::UnknownAlgorithm(_, _))
-            | SignalJniError::SignalCrypto(SignalCryptoError::InvalidInputSize)
-            | SignalJniError::SignalCrypto(SignalCryptoError::InvalidNonceSize)
-            | SignalJniError::Bridge(BridgeLayerError::BadArgument(_))
-            | SignalJniError::Bridge(BridgeLayerError::IncorrectArrayLength { .. }) => {
+            MochiJniError::Protocol(MochiProtocolError::InvalidArgument(_))
+            | MochiJniError::MochiCrypto(MochiCryptoError::UnknownAlgorithm(_, _))
+            | MochiJniError::MochiCrypto(MochiCryptoError::InvalidInputSize)
+            | MochiJniError::MochiCrypto(MochiCryptoError::InvalidNonceSize)
+            | MochiJniError::Bridge(BridgeLayerError::BadArgument(_))
+            | MochiJniError::Bridge(BridgeLayerError::IncorrectArrayLength { .. }) => {
                 (ClassName("java.lang.IllegalArgumentException"), error)
             }
 
-            SignalJniError::Bridge(BridgeLayerError::IntegerOverflow(_))
-            | SignalJniError::Bridge(BridgeLayerError::Jni(_))
-            | SignalJniError::Protocol(SignalProtocolError::ApplicationCallbackError(_, _))
-            | SignalJniError::Protocol(SignalProtocolError::FfiBindingError(_))
-            | SignalJniError::DeviceTransfer(DeviceTransferError::InternalError(_))
-            | SignalJniError::DeviceTransfer(DeviceTransferError::KeyDecodingFailed) => {
+            MochiJniError::Bridge(BridgeLayerError::IntegerOverflow(_))
+            | MochiJniError::Bridge(BridgeLayerError::Jni(_))
+            | MochiJniError::Protocol(MochiProtocolError::ApplicationCallbackError(_, _))
+            | MochiJniError::Protocol(MochiProtocolError::FfiBindingError(_))
+            | MochiJniError::DeviceTransfer(DeviceTransferError::InternalError(_))
+            | MochiJniError::DeviceTransfer(DeviceTransferError::KeyDecodingFailed) => {
                 (ClassName("java.lang.RuntimeException"), error)
             }
 
-            SignalJniError::Protocol(SignalProtocolError::DuplicatedMessage(_, _)) => (
-                ClassName("org.signal.libsignal.protocol.DuplicateMessageException"),
+            MochiJniError::Protocol(MochiProtocolError::DuplicatedMessage(_, _)) => (
+                ClassName("org.mochi.libmochi.protocol.DuplicateMessageException"),
                 error,
             ),
 
-            SignalJniError::Protocol(SignalProtocolError::InvalidPreKeyId)
-            | SignalJniError::Protocol(SignalProtocolError::InvalidSignedPreKeyId)
-            | SignalJniError::Protocol(SignalProtocolError::InvalidKyberPreKeyId) => (
-                ClassName("org.signal.libsignal.protocol.InvalidKeyIdException"),
+            MochiJniError::Protocol(MochiProtocolError::InvalidPreKeyId)
+            | MochiJniError::Protocol(MochiProtocolError::InvalidSignedPreKeyId)
+            | MochiJniError::Protocol(MochiProtocolError::InvalidKyberPreKeyId) => (
+                ClassName("org.mochi.libmochi.protocol.InvalidKeyIdException"),
                 error,
             ),
 
-            SignalJniError::Protocol(SignalProtocolError::NoKeyTypeIdentifier)
-            | SignalJniError::Protocol(SignalProtocolError::SignatureValidationFailed)
-            | SignalJniError::Protocol(SignalProtocolError::BadKeyType(_))
-            | SignalJniError::Protocol(SignalProtocolError::BadKeyLength(_, _))
-            | SignalJniError::Protocol(SignalProtocolError::InvalidMacKeyLength(_))
-            | SignalJniError::Protocol(SignalProtocolError::BadKEMKeyType(_))
-            | SignalJniError::Protocol(SignalProtocolError::WrongKEMKeyType(_, _))
-            | SignalJniError::Protocol(SignalProtocolError::BadKEMKeyLength(_, _))
-            | SignalJniError::SignalCrypto(SignalCryptoError::InvalidKeySize) => (
-                ClassName("org.signal.libsignal.protocol.InvalidKeyException"),
+            MochiJniError::Protocol(MochiProtocolError::NoKeyTypeIdentifier)
+            | MochiJniError::Protocol(MochiProtocolError::SignatureValidationFailed)
+            | MochiJniError::Protocol(MochiProtocolError::BadKeyType(_))
+            | MochiJniError::Protocol(MochiProtocolError::BadKeyLength(_, _))
+            | MochiJniError::Protocol(MochiProtocolError::InvalidMacKeyLength(_))
+            | MochiJniError::Protocol(MochiProtocolError::BadKEMKeyType(_))
+            | MochiJniError::Protocol(MochiProtocolError::WrongKEMKeyType(_, _))
+            | MochiJniError::Protocol(MochiProtocolError::BadKEMKeyLength(_, _))
+            | MochiJniError::MochiCrypto(MochiCryptoError::InvalidKeySize) => (
+                ClassName("org.mochi.libmochi.protocol.InvalidKeyException"),
                 error,
             ),
 
-            SignalJniError::Protocol(SignalProtocolError::NoSenderKeyState { .. }) => (
-                ClassName("org.signal.libsignal.protocol.NoSessionException"),
+            MochiJniError::Protocol(MochiProtocolError::NoSenderKeyState { .. }) => (
+                ClassName("org.mochi.libmochi.protocol.NoSessionException"),
                 error,
             ),
 
-            SignalJniError::Protocol(SignalProtocolError::InvalidSessionStructure(_)) => (
-                ClassName("org.signal.libsignal.protocol.InvalidSessionException"),
+            MochiJniError::Protocol(MochiProtocolError::InvalidSessionStructure(_)) => (
+                ClassName("org.mochi.libmochi.protocol.InvalidSessionException"),
                 error,
             ),
 
-            SignalJniError::Protocol(SignalProtocolError::InvalidMessage(..))
-            | SignalJniError::Protocol(SignalProtocolError::CiphertextMessageTooShort(_))
-            | SignalJniError::Protocol(SignalProtocolError::InvalidProtobufEncoding)
-            | SignalJniError::Protocol(SignalProtocolError::InvalidSealedSenderMessage(_))
-            | SignalJniError::Protocol(SignalProtocolError::BadKEMCiphertextLength(_, _))
-            | SignalJniError::SignalCrypto(SignalCryptoError::InvalidTag) => (
-                ClassName("org.signal.libsignal.protocol.InvalidMessageException"),
+            MochiJniError::Protocol(MochiProtocolError::InvalidMessage(..))
+            | MochiJniError::Protocol(MochiProtocolError::CiphertextMessageTooShort(_))
+            | MochiJniError::Protocol(MochiProtocolError::InvalidProtobufEncoding)
+            | MochiJniError::Protocol(MochiProtocolError::InvalidSealedSenderMessage(_))
+            | MochiJniError::Protocol(MochiProtocolError::BadKEMCiphertextLength(_, _))
+            | MochiJniError::MochiCrypto(MochiCryptoError::InvalidTag) => (
+                ClassName("org.mochi.libmochi.protocol.InvalidMessageException"),
                 error,
             ),
 
-            SignalJniError::Protocol(SignalProtocolError::UnrecognizedCiphertextVersion(_))
-            | SignalJniError::Protocol(SignalProtocolError::UnrecognizedMessageVersion(_))
-            | SignalJniError::Protocol(SignalProtocolError::UnknownSealedSenderVersion(_)) => (
-                ClassName("org.signal.libsignal.protocol.InvalidVersionException"),
+            MochiJniError::Protocol(MochiProtocolError::UnrecognizedCiphertextVersion(_))
+            | MochiJniError::Protocol(MochiProtocolError::UnrecognizedMessageVersion(_))
+            | MochiJniError::Protocol(MochiProtocolError::UnknownSealedSenderVersion(_)) => (
+                ClassName("org.mochi.libmochi.protocol.InvalidVersionException"),
                 error,
             ),
 
-            SignalJniError::Protocol(SignalProtocolError::LegacyCiphertextVersion(_)) => (
-                ClassName("org.signal.libsignal.protocol.LegacyMessageException"),
+            MochiJniError::Protocol(MochiProtocolError::LegacyCiphertextVersion(_)) => (
+                ClassName("org.mochi.libmochi.protocol.LegacyMessageException"),
                 error,
             ),
 
-            SignalJniError::Protocol(SignalProtocolError::FingerprintParsingError) => (
-                ClassName("org.signal.libsignal.protocol.fingerprint.FingerprintParsingException"),
+            MochiJniError::Protocol(MochiProtocolError::FingerprintParsingError) => (
+                ClassName("org.mochi.libmochi.protocol.fingerprint.FingerprintParsingException"),
                 error,
             ),
 
-            SignalJniError::HsmEnclave(HsmEnclaveError::HSMHandshakeError(_))
-            | SignalJniError::HsmEnclave(HsmEnclaveError::HSMCommunicationError(_)) => (
-                ClassName("org.signal.libsignal.hsmenclave.EnclaveCommunicationFailureException"),
+            MochiJniError::HsmEnclave(HsmEnclaveError::HSMHandshakeError(_))
+            | MochiJniError::HsmEnclave(HsmEnclaveError::HSMCommunicationError(_)) => (
+                ClassName("org.mochi.libmochi.hsmenclave.EnclaveCommunicationFailureException"),
                 error,
             ),
-            SignalJniError::HsmEnclave(HsmEnclaveError::TrustedCodeError) => (
-                ClassName("org.signal.libsignal.hsmenclave.TrustedCodeMismatchException"),
+            MochiJniError::HsmEnclave(HsmEnclaveError::TrustedCodeError) => (
+                ClassName("org.mochi.libmochi.hsmenclave.TrustedCodeMismatchException"),
                 error,
             ),
-            SignalJniError::HsmEnclave(HsmEnclaveError::InvalidPublicKeyError)
-            | SignalJniError::HsmEnclave(HsmEnclaveError::InvalidCodeHashError) => {
+            MochiJniError::HsmEnclave(HsmEnclaveError::InvalidPublicKeyError)
+            | MochiJniError::HsmEnclave(HsmEnclaveError::InvalidCodeHashError) => {
                 (ClassName("java.lang.IllegalArgumentException"), error)
             }
-            SignalJniError::HsmEnclave(HsmEnclaveError::InvalidBridgeStateError) => {
+            MochiJniError::HsmEnclave(HsmEnclaveError::InvalidBridgeStateError) => {
                 (ClassName("java.lang.IllegalStateException"), error)
             }
 
-            SignalJniError::Enclave(EnclaveError::NoiseHandshakeError(_))
-            | SignalJniError::Enclave(EnclaveError::NoiseError(_)) => (
-                ClassName("org.signal.libsignal.sgxsession.SgxCommunicationFailureException"),
+            MochiJniError::Enclave(EnclaveError::NoiseHandshakeError(_))
+            | MochiJniError::Enclave(EnclaveError::NoiseError(_)) => (
+                ClassName("org.mochi.libmochi.sgxsession.SgxCommunicationFailureException"),
                 error,
             ),
-            SignalJniError::Enclave(EnclaveError::AttestationError(_)) => (
-                ClassName("org.signal.libsignal.attest.AttestationFailedException"),
+            MochiJniError::Enclave(EnclaveError::AttestationError(_)) => (
+                ClassName("org.mochi.libmochi.attest.AttestationFailedException"),
                 error,
             ),
-            SignalJniError::Enclave(EnclaveError::AttestationDataError { .. }) => (
-                ClassName("org.signal.libsignal.attest.AttestationDataException"),
+            MochiJniError::Enclave(EnclaveError::AttestationDataError { .. }) => (
+                ClassName("org.mochi.libmochi.attest.AttestationDataException"),
                 error,
             ),
-            SignalJniError::Enclave(EnclaveError::InvalidBridgeStateError) => {
+            MochiJniError::Enclave(EnclaveError::InvalidBridgeStateError) => {
                 (ClassName("java.lang.IllegalStateException"), error)
             }
 
-            SignalJniError::Pin(PinError::Argon2Error(_))
-            | SignalJniError::Pin(PinError::DecodingError(_))
-            | SignalJniError::Pin(PinError::MrenclaveLookupError) => {
+            MochiJniError::Pin(PinError::Argon2Error(_))
+            | MochiJniError::Pin(PinError::DecodingError(_))
+            | MochiJniError::Pin(PinError::MrenclaveLookupError) => {
                 (ClassName("java.lang.IllegalArgumentException"), error)
             }
 
-            SignalJniError::ZkGroupDeserializationFailure(_) => (
-                ClassName("org.signal.libsignal.zkgroup.InvalidInputException"),
+            MochiJniError::ZkGroupDeserializationFailure(_) => (
+                ClassName("org.mochi.libmochi.zkgroup.InvalidInputException"),
                 error,
             ),
 
-            SignalJniError::ZkGroupVerificationFailure(_) => (
-                ClassName("org.signal.libsignal.zkgroup.VerificationFailedException"),
+            MochiJniError::ZkGroupVerificationFailure(_) => (
+                ClassName("org.mochi.libmochi.zkgroup.VerificationFailedException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::NicknameCannotBeEmpty) => (
-                ClassName("org.signal.libsignal.usernames.CannotBeEmptyException"),
+            MochiJniError::UsernameError(UsernameError::NicknameCannotBeEmpty) => (
+                ClassName("org.mochi.libmochi.usernames.CannotBeEmptyException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::NicknameCannotStartWithDigit) => (
-                ClassName("org.signal.libsignal.usernames.CannotStartWithDigitException"),
+            MochiJniError::UsernameError(UsernameError::NicknameCannotStartWithDigit) => (
+                ClassName("org.mochi.libmochi.usernames.CannotStartWithDigitException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::MissingSeparator) => (
-                ClassName("org.signal.libsignal.usernames.MissingSeparatorException"),
+            MochiJniError::UsernameError(UsernameError::MissingSeparator) => (
+                ClassName("org.mochi.libmochi.usernames.MissingSeparatorException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::BadNicknameCharacter) => (
-                ClassName("org.signal.libsignal.usernames.BadNicknameCharacterException"),
+            MochiJniError::UsernameError(UsernameError::BadNicknameCharacter) => (
+                ClassName("org.mochi.libmochi.usernames.BadNicknameCharacterException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::NicknameTooShort) => (
-                ClassName("org.signal.libsignal.usernames.NicknameTooShortException"),
+            MochiJniError::UsernameError(UsernameError::NicknameTooShort) => (
+                ClassName("org.mochi.libmochi.usernames.NicknameTooShortException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::NicknameTooLong) => (
-                ClassName("org.signal.libsignal.usernames.NicknameTooLongException"),
+            MochiJniError::UsernameError(UsernameError::NicknameTooLong) => (
+                ClassName("org.mochi.libmochi.usernames.NicknameTooLongException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::DiscriminatorCannotBeEmpty) => (
-                ClassName("org.signal.libsignal.usernames.DiscriminatorCannotBeEmptyException"),
+            MochiJniError::UsernameError(UsernameError::DiscriminatorCannotBeEmpty) => (
+                ClassName("org.mochi.libmochi.usernames.DiscriminatorCannotBeEmptyException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::DiscriminatorCannotBeZero) => (
-                ClassName("org.signal.libsignal.usernames.DiscriminatorCannotBeZeroException"),
+            MochiJniError::UsernameError(UsernameError::DiscriminatorCannotBeZero) => (
+                ClassName("org.mochi.libmochi.usernames.DiscriminatorCannotBeZeroException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::DiscriminatorCannotBeSingleDigit) => (
+            MochiJniError::UsernameError(UsernameError::DiscriminatorCannotBeSingleDigit) => (
                 ClassName(
-                    "org.signal.libsignal.usernames.DiscriminatorCannotBeSingleDigitException",
+                    "org.mochi.libmochi.usernames.DiscriminatorCannotBeSingleDigitException",
                 ),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::DiscriminatorCannotHaveLeadingZeros) => (
+            MochiJniError::UsernameError(UsernameError::DiscriminatorCannotHaveLeadingZeros) => (
                 ClassName(
-                    "org.signal.libsignal.usernames.DiscriminatorCannotHaveLeadingZerosException",
+                    "org.mochi.libmochi.usernames.DiscriminatorCannotHaveLeadingZerosException",
                 ),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::BadDiscriminatorCharacter) => (
-                ClassName("org.signal.libsignal.usernames.BadDiscriminatorCharacterException"),
+            MochiJniError::UsernameError(UsernameError::BadDiscriminatorCharacter) => (
+                ClassName("org.mochi.libmochi.usernames.BadDiscriminatorCharacterException"),
                 error,
             ),
 
-            SignalJniError::UsernameError(UsernameError::DiscriminatorTooLarge) => (
-                ClassName("org.signal.libsignal.usernames.DiscriminatorTooLargeException"),
+            MochiJniError::UsernameError(UsernameError::DiscriminatorTooLarge) => (
+                ClassName("org.mochi.libmochi.usernames.DiscriminatorTooLargeException"),
                 error,
             ),
 
-            SignalJniError::UsernameProofError(usernames::ProofVerificationFailure) => (
-                ClassName("org.signal.libsignal.usernames.ProofVerificationFailureException"),
+            MochiJniError::UsernameProofError(usernames::ProofVerificationFailure) => (
+                ClassName("org.mochi.libmochi.usernames.ProofVerificationFailureException"),
                 error,
             ),
 
-            SignalJniError::UsernameLinkError(UsernameLinkError::InputDataTooLong) => (
-                ClassName("org.signal.libsignal.usernames.UsernameLinkInputDataTooLong"),
+            MochiJniError::UsernameLinkError(UsernameLinkError::InputDataTooLong) => (
+                ClassName("org.mochi.libmochi.usernames.UsernameLinkInputDataTooLong"),
                 error,
             ),
 
-            SignalJniError::UsernameLinkError(UsernameLinkError::InvalidEntropyDataLength) => (
-                ClassName("org.signal.libsignal.usernames.UsernameLinkInvalidEntropyDataLength"),
+            MochiJniError::UsernameLinkError(UsernameLinkError::InvalidEntropyDataLength) => (
+                ClassName("org.mochi.libmochi.usernames.UsernameLinkInvalidEntropyDataLength"),
                 error,
             ),
 
-            SignalJniError::UsernameLinkError(_) => (
-                ClassName("org.signal.libsignal.usernames.UsernameLinkInvalidLinkData"),
+            MochiJniError::UsernameLinkError(_) => (
+                ClassName("org.mochi.libmochi.usernames.UsernameLinkInvalidLinkData"),
                 error,
             ),
 
-            SignalJniError::Io(_) => (ClassName("java.io.IOException"), error),
+            MochiJniError::Io(_) => (ClassName("java.io.IOException"), error),
 
-            #[cfg(feature = "signal-media")]
-            SignalJniError::Mp4SanitizeParse(_) | SignalJniError::WebpSanitizeParse(_) => (
-                ClassName("org.signal.libsignal.media.ParseException"),
+            #[cfg(feature = "mochi-media")]
+            MochiJniError::Mp4SanitizeParse(_) | MochiJniError::WebpSanitizeParse(_) => (
+                ClassName("org.mochi.libmochi.media.ParseException"),
                 error,
             ),
 
-            SignalJniError::Cdsi(CdsiError::InvalidToken) => (
-                ClassName("org.signal.libsignal.net.CdsiInvalidTokenException"),
+            MochiJniError::Cdsi(CdsiError::InvalidToken) => (
+                ClassName("org.mochi.libmochi.net.CdsiInvalidTokenException"),
                 error,
             ),
-            SignalJniError::Cdsi(
+            MochiJniError::Cdsi(
                 CdsiError::InvalidResponse
                 | CdsiError::ParseError
                 | CdsiError::Protocol
                 | CdsiError::Server { reason: _ },
             ) => (
-                ClassName("org.signal.libsignal.net.CdsiProtocolException"),
+                ClassName("org.mochi.libmochi.net.CdsiProtocolException"),
                 error,
             ),
 
-            SignalJniError::WebSocket(WebSocketServiceError::Http(_)) => (
+            MochiJniError::WebSocket(WebSocketServiceError::Http(_)) => (
                 // In practice, all WebSocket HTTP errors come from multi-route connections, so any
                 // that make it to the point of bridging are considered to have resulted from a
                 // successful *connection* that then gets an error status code, and so we use
                 // NetworkProtocolException instead of NetworkException. We may want to revisit
                 // assuming that *here*, though.
-                ClassName("org.signal.libsignal.net.NetworkProtocolException"),
+                ClassName("org.mochi.libmochi.net.NetworkProtocolException"),
                 error,
             ),
 
-            SignalJniError::WebSocket(_) | SignalJniError::ConnectTimedOut => (
-                ClassName("org.signal.libsignal.net.NetworkException"),
+            MochiJniError::WebSocket(_) | MochiJniError::ConnectTimedOut => (
+                ClassName("org.mochi.libmochi.net.NetworkException"),
                 error,
             ),
 
-            SignalJniError::Svr3(Svr3Error::RestoreFailed(tries_remaining)) => {
+            MochiJniError::Svr3(Svr3Error::RestoreFailed(tries_remaining)) => {
                 let throwable = env
                     .new_string(error.to_string())
                     .map_err(BridgeLayerError::from)
                     .and_then(|message| {
                         new_instance(
                             env,
-                            ClassName("org.signal.libsignal.svr.RestoreFailedException"),
+                            ClassName("org.mochi.libmochi.svr.RestoreFailedException"),
                             // The number of tries will be hard-coded by the client app
                             // to some sensible value well within the int (i32) range.
                             // Malicious server can still send an invalid value. In
@@ -602,32 +602,32 @@ impl<'env> ConsumableException<'env> {
                     error: error.into(),
                 };
             }
-            SignalJniError::Svr3(Svr3Error::DataMissing) => (
-                ClassName("org.signal.libsignal.svr.DataMissingException"),
+            MochiJniError::Svr3(Svr3Error::DataMissing) => (
+                ClassName("org.mochi.libmochi.svr.DataMissingException"),
                 error,
             ),
-            SignalJniError::Svr3(_) => (ClassName("org.signal.libsignal.svr.SvrException"), error),
+            MochiJniError::Svr3(_) => (ClassName("org.mochi.libmochi.svr.SvrException"), error),
 
-            SignalJniError::InvalidUri(_) => (ClassName("java.net.MalformedURLException"), error),
+            MochiJniError::InvalidUri(_) => (ClassName("java.net.MalformedURLException"), error),
 
-            SignalJniError::ChatService(ChatServiceError::ServiceInactive) => (
-                ClassName("org.signal.libsignal.net.ChatServiceInactiveException"),
+            MochiJniError::ChatService(ChatServiceError::ServiceInactive) => (
+                ClassName("org.mochi.libmochi.net.ChatServiceInactiveException"),
                 error,
             ),
-            SignalJniError::ChatService(ChatServiceError::AppExpired) => (
-                ClassName("org.signal.libsignal.net.AppExpiredException"),
+            MochiJniError::ChatService(ChatServiceError::AppExpired) => (
+                ClassName("org.mochi.libmochi.net.AppExpiredException"),
                 error,
             ),
-            SignalJniError::ChatService(ChatServiceError::DeviceDeregistered) => (
-                ClassName("org.signal.libsignal.net.DeviceDeregisteredException"),
+            MochiJniError::ChatService(ChatServiceError::DeviceDeregistered) => (
+                ClassName("org.mochi.libmochi.net.DeviceDeregisteredException"),
                 error,
             ),
-            SignalJniError::ChatService(_) => (
-                ClassName("org.signal.libsignal.net.ChatServiceException"),
+            MochiJniError::ChatService(_) => (
+                ClassName("org.mochi.libmochi.net.ChatServiceException"),
                 error,
             ),
 
-            SignalJniError::TestingError { exception_class } => (exception_class, error),
+            MochiJniError::TestingError { exception_class } => (exception_class, error),
         };
 
         let throwable = env
@@ -659,8 +659,8 @@ impl From<String> for ConsumableExceptionError {
     }
 }
 
-impl From<SignalJniError> for ConsumableExceptionError {
-    fn from(value: SignalJniError) -> Self {
+impl From<MochiJniError> for ConsumableExceptionError {
+    fn from(value: MochiJniError) -> Self {
         Self::JniError(value)
     }
 }
@@ -679,7 +679,7 @@ impl Display for ConsumableExceptionError {
 ///
 /// Exceptions thrown in callbacks will be rethrown; all other errors will be mapped to an
 /// appropriate Java exception class and thrown.
-fn throw_error(env: &mut JNIEnv, error: SignalJniError) {
+fn throw_error(env: &mut JNIEnv, error: MochiJniError) {
     convert_to_exception(env, error, |env, throwable, error| match throwable {
         Err(failure) => log::error!("failed to create exception for {}: {}", error, failure),
         Ok(throwable) => {
@@ -694,7 +694,7 @@ fn throw_error(env: &mut JNIEnv, error: SignalJniError) {
 #[inline(always)]
 pub fn run_ffi_safe<'local, F, R>(env: &mut JNIEnv<'local>, f: F) -> R
 where
-    F: for<'a> FnOnce(&'a mut JNIEnv<'local>) -> Result<R, SignalJniError> + std::panic::UnwindSafe,
+    F: for<'a> FnOnce(&'a mut JNIEnv<'local>) -> Result<R, MochiJniError> + std::panic::UnwindSafe,
     R: Default,
 {
     // This AssertUnwindSafe is not technically safe.
@@ -836,9 +836,9 @@ pub fn jobject_from_native_handle<'a>(
     )?)
 }
 
-/// Constructs a Java SignalProtocolAddress from a ProtocolAddress value.
+/// Constructs a Java MochiProtocolAddress from a ProtocolAddress value.
 ///
-/// A convenience wrapper around `jobject_from_native_handle` for SignalProtocolAddress.
+/// A convenience wrapper around `jobject_from_native_handle` for MochiProtocolAddress.
 fn protocol_address_to_jobject<'a>(
     env: &mut JNIEnv<'a>,
     address: &ProtocolAddress,
@@ -846,7 +846,7 @@ fn protocol_address_to_jobject<'a>(
     let handle = address.clone().convert_into(env)?;
     jobject_from_native_handle(
         env,
-        ClassName("org.signal.libsignal.protocol.SignalProtocolAddress"),
+        ClassName("org.mochi.libmochi.protocol.MochiProtocolAddress"),
         handle,
     )
 }
@@ -879,8 +879,8 @@ pub fn get_object_with_native_handle<T: 'static + Clone, const LEN: usize>(
     store_obj: &JObject,
     callback_args: JniArgs<JObject<'_>, LEN>,
     callback_fn: &'static str,
-) -> Result<Option<T>, SignalJniError> {
-    env.with_local_frame(64, |env| -> SignalJniResult<Option<T>> {
+) -> Result<Option<T>, MochiJniError> {
+    env.with_local_frame(64, |env| -> MochiJniResult<Option<T>> {
         let obj = call_method_checked(
             env,
             store_obj,
@@ -911,8 +911,8 @@ pub fn get_object_with_serialization<const LEN: usize>(
     store_obj: &JObject,
     callback_args: JniArgs<JObject<'_>, LEN>,
     callback_fn: &'static str,
-) -> Result<Option<Vec<u8>>, SignalJniError> {
-    env.with_local_frame(64, |env| -> SignalJniResult<Option<Vec<u8>>> {
+) -> Result<Option<Vec<u8>>, MochiJniError> {
+    env.with_local_frame(64, |env| -> MochiJniResult<Option<Vec<u8>>> {
         let obj = call_method_checked(
             env,
             store_obj,
@@ -937,8 +937,8 @@ pub fn get_object_with_serialization<const LEN: usize>(
 /// work to bridge it back to Rust.
 #[derive(Clone, Copy)]
 pub enum CiphertextMessageRef<'a> {
-    SignalMessage(&'a SignalMessage),
-    PreKeySignalMessage(&'a PreKeySignalMessage),
+    MochiMessage(&'a MochiMessage),
+    PreKeyMochiMessage(&'a PreKeyMochiMessage),
     SenderKeyMessage(&'a SenderKeyMessage),
     PlaintextContent(&'a PlaintextContent),
 }
@@ -946,8 +946,8 @@ pub enum CiphertextMessageRef<'a> {
 impl<'a> CiphertextMessageRef<'a> {
     pub fn message_type(self) -> CiphertextMessageType {
         match self {
-            CiphertextMessageRef::SignalMessage(_) => CiphertextMessageType::Whisper,
-            CiphertextMessageRef::PreKeySignalMessage(_) => CiphertextMessageType::PreKey,
+            CiphertextMessageRef::MochiMessage(_) => CiphertextMessageType::Whisper,
+            CiphertextMessageRef::PreKeyMochiMessage(_) => CiphertextMessageType::PreKey,
             CiphertextMessageRef::SenderKeyMessage(_) => CiphertextMessageType::SenderKey,
             CiphertextMessageRef::PlaintextContent(_) => CiphertextMessageType::Plaintext,
         }
@@ -955,8 +955,8 @@ impl<'a> CiphertextMessageRef<'a> {
 
     pub fn serialize(self) -> &'a [u8] {
         match self {
-            CiphertextMessageRef::SignalMessage(x) => x.serialized(),
-            CiphertextMessageRef::PreKeySignalMessage(x) => x.serialized(),
+            CiphertextMessageRef::MochiMessage(x) => x.serialized(),
+            CiphertextMessageRef::PreKeyMochiMessage(x) => x.serialized(),
             CiphertextMessageRef::SenderKeyMessage(x) => x.serialized(),
             CiphertextMessageRef::PlaintextContent(x) => x.serialized(),
         }
@@ -971,7 +971,7 @@ macro_rules! jni_bridge_handle_destroy {
     ( $typ:ty as $jni_name:ident ) => {
         ::paste::paste! {
             #[export_name = concat!(
-                env!("LIBSIGNAL_BRIDGE_FN_PREFIX_JNI"),
+                env!("LIBMOCHI_BRIDGE_FN_PREFIX_JNI"),
                 stringify!($jni_name),
                 "_1Destroy"
             )]

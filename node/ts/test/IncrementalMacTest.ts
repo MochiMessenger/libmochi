@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -12,7 +12,7 @@ import {
   inferChunkSize,
   chunkSizeInBytes,
 } from '../incremental_mac';
-import { LibSignalErrorBase } from '../Errors';
+import { LibMochiErrorBase } from '../Errors';
 
 import * as stream from 'stream';
 
@@ -79,7 +79,7 @@ describe('Incremental MAC', () => {
         stream.Readable.from(badInput),
         validating
       );
-      await assert.isRejected(promise, LibSignalErrorBase);
+      await assert.isRejected(promise, LibMochiErrorBase);
     });
 
     it('corrupted input in finalize', async () => {
@@ -93,7 +93,7 @@ describe('Incremental MAC', () => {
         stream.Readable.from(badInput),
         validating
       );
-      await assert.isRejected(promise, LibSignalErrorBase);
+      await assert.isRejected(promise, LibMochiErrorBase);
     });
 
     it('corrupted digest', async () => {
@@ -108,7 +108,7 @@ describe('Incremental MAC', () => {
         stream.Readable.from(TEST_INPUT),
         validating
       );
-      await assert.isRejected(promise, LibSignalErrorBase);
+      await assert.isRejected(promise, LibMochiErrorBase);
     });
 
     it('keeps track of validated size', () => {

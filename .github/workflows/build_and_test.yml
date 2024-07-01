@@ -9,7 +9,7 @@ env:
   CARGO_TERM_COLOR: always
   NDK_VERSION: 25.2.9519653
   RUST_BACKTRACE: 1
-  LIBSIGNAL_MINIMUM_SUPPORTED_RUST_VERSION: 1.72
+  LIBMOCHI_MINIMUM_SUPPORTED_RUST_VERSION: 1.72
   # For dev builds, include limited debug info in the output. See
   # https://doc.rust-lang.org/cargo/reference/profiles.html#debug
   CARGO_PROFILE_DEV_DEBUG: limited
@@ -76,7 +76,7 @@ jobs:
           swift:
           - *rust_ios
           - 'swift/**'
-          - 'LibSignalClient.podspec'
+          - 'LibMochiClient.podspec'
           ignored:
           - 'LICENSE'
           - '*.md'
@@ -110,7 +110,7 @@ jobs:
           toolchain: "$(cat rust-toolchain)"
           cargo-keep-going: "--keep-going"
         - version: stable
-          toolchain: "${LIBSIGNAL_MINIMUM_SUPPORTED_RUST_VERSION}"
+          toolchain: "${LIBMOCHI_MINIMUM_SUPPORTED_RUST_VERSION}"
           # Remove this switch once our MSRV is at least 1.74, which stablilized the --keep-going flag.
           cargo-keep-going: ""
 
@@ -167,7 +167,7 @@ jobs:
       if: matrix.version == 'nightly'
 
     - name: Build
-      run: cargo +${{ matrix.toolchain }} build --workspace --features libsignal-ffi/signal-media --verbose ${{ matrix.cargo-keep-going }}
+      run: cargo +${{ matrix.toolchain }} build --workspace --features libmochi-ffi/mochi-media --verbose ${{ matrix.cargo-keep-going }}
 
     - name: Run tests
       run: cargo +${{ matrix.toolchain }} test --workspace --all-features --verbose --no-fail-fast -- --include-ignored
@@ -235,7 +235,7 @@ jobs:
         - version: nightly
           toolchain: "$(cat rust-toolchain)"
         - version: stable
-          toolchain: "${LIBSIGNAL_MINIMUM_SUPPORTED_RUST_VERSION}"
+          toolchain: "${LIBMOCHI_MINIMUM_SUPPORTED_RUST_VERSION}"
 
     timeout-minutes: 45
 
@@ -249,8 +249,8 @@ jobs:
     - run: rustup toolchain install ${{ matrix.toolchain }} --profile minimal --target i686-unknown-linux-gnu
 
     - name: Run tests (32-bit)
-      # Exclude signal-neon-futures because those tests run Node
-      run: cargo +${{ matrix.toolchain }} test --workspace --all-features --verbose --target i686-unknown-linux-gnu --exclude signal-neon-futures --no-fail-fast -- --include-ignored
+      # Exclude mochi-neon-futures because those tests run Node
+      run: cargo +${{ matrix.toolchain }} test --workspace --all-features --verbose --target i686-unknown-linux-gnu --exclude mochi-neon-futures --no-fail-fast -- --include-ignored
 
   java:
     name: Java
@@ -383,7 +383,7 @@ jobs:
 
     - run: swift/verify_error_codes.sh
 
-    - name: Build libsignal-ffi
+    - name: Build libmochi-ffi
       run: swift/build_ffi.sh -d -v --verify-ffi
 
     - name: Build Swift and run tests

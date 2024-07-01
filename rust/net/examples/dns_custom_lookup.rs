@@ -1,16 +1,16 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use clap::{Parser, ValueEnum};
 use const_str::ip_addr;
 use either::{for_both, Either};
-use libsignal_net::infra::certs::RootCertificates;
-use libsignal_net::infra::dns::custom_resolver::CustomDnsResolver;
-use libsignal_net::infra::dns::dns_lookup::{DnsLookup, DnsLookupRequest};
-use libsignal_net::infra::dns::dns_transport_doh::DohTransport;
-use libsignal_net::infra::dns::dns_transport_udp::UdpTransport;
-use libsignal_net::infra::{ConnectionParams, HttpRequestDecoratorSeq, RouteType};
+use libmochi_net::infra::certs::RootCertificates;
+use libmochi_net::infra::dns::custom_resolver::CustomDnsResolver;
+use libmochi_net::infra::dns::dns_lookup::{DnsLookup, DnsLookupRequest};
+use libmochi_net::infra::dns::dns_transport_doh::DohTransport;
+use libmochi_net::infra::dns::dns_transport_udp::UdpTransport;
+use libmochi_net::infra::{ConnectionParams, HttpRequestDecoratorSeq, RouteType};
 use nonzero_ext::nonzero;
 use std::net::IpAddr;
 use std::sync::Arc;

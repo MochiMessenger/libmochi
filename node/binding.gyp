@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020 Signal Messenger, LLC.
+# Copyright (C) 2020 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -15,7 +15,7 @@
     ],
     'targets': [
         {
-            'target_name': 'libsignal_client_<(NODE_OS_NAME)_<(target_arch).node',
+            'target_name': 'libmochi_client_<(NODE_OS_NAME)_<(target_arch).node',
             'type': 'none',
             'actions': [
                 {

@@ -1,13 +1,13 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use jni::objects::{AutoLocal, JByteBuffer, JMap, JObjectArray};
 use jni::sys::{jbyte, JNI_FALSE, JNI_TRUE};
 use jni::JNIEnv;
-use libsignal_net::cdsi::LookupResponseEntry;
-use libsignal_protocol::*;
+use libmochi_net::cdsi::LookupResponseEntry;
+use libmochi_protocol::*;
 
 use paste::paste;
 
@@ -26,7 +26,7 @@ use super::*;
 /// `ArgTypeInfo` has two required methods: `borrow` and `load_from`. The use site looks like this:
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::jni::*;
+/// # use libmochi_bridge_types::jni::*;
 /// # use jni::JNIEnv;
 /// # struct Foo;
 /// # impl SimpleArgTypeInfo<'_> for Foo {
@@ -70,7 +70,7 @@ pub trait ArgTypeInfo<'storage, 'param: 'storage, 'context: 'param>: Sized {
 /// This trait is easier to use when writing JNI functions manually:
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::jni::*;
+/// # use libmochi_bridge_types::jni::*;
 /// # use jni::objects::JObject;
 /// # use jni::JNIEnv;
 /// # struct Foo;
@@ -121,7 +121,7 @@ where
 /// `ResultTypeInfo` is used to implement the `bridge_fn` macro, but can also be used outside it.
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::jni::*;
+/// # use libmochi_bridge_types::jni::*;
 /// # use jni::JNIEnv;
 /// # use jni::objects::JString;
 /// # struct Foo;
@@ -271,7 +271,7 @@ impl<'a> SimpleArgTypeInfo<'a> for uuid::Uuid {
     }
 }
 
-impl<'a> SimpleArgTypeInfo<'a> for libsignal_net::cdsi::E164 {
+impl<'a> SimpleArgTypeInfo<'a> for libmochi_net::cdsi::E164 {
     type ArgType = <String as SimpleArgTypeInfo<'a>>::ArgType;
     fn convert_from(
         env: &mut JNIEnv<'a>,
@@ -470,8 +470,8 @@ impl<'a> SimpleArgTypeInfo<'a> for CiphertextMessageRef<'a> {
             native_handle_from_message(
                 env,
                 foreign,
-                jni_class_name!(org.signal.libsignal.protocol.message.SignalMessage),
-                Self::SignalMessage,
+                jni_class_name!(org.mochi.libmochi.protocol.message.MochiMessage),
+                Self::MochiMessage,
             )
             .transpose()
         })
@@ -479,8 +479,8 @@ impl<'a> SimpleArgTypeInfo<'a> for CiphertextMessageRef<'a> {
             native_handle_from_message(
                 env,
                 foreign,
-                jni_class_name!(org.signal.libsignal.protocol.message.PreKeySignalMessage),
-                Self::PreKeySignalMessage,
+                jni_class_name!(org.mochi.libmochi.protocol.message.PreKeyMochiMessage),
+                Self::PreKeyMochiMessage,
             )
             .transpose()
         })
@@ -488,7 +488,7 @@ impl<'a> SimpleArgTypeInfo<'a> for CiphertextMessageRef<'a> {
             native_handle_from_message(
                 env,
                 foreign,
-                jni_class_name!(org.signal.libsignal.protocol.message.SenderKeyMessage),
+                jni_class_name!(org.mochi.libmochi.protocol.message.SenderKeyMessage),
                 Self::SenderKeyMessage,
             )
             .transpose()
@@ -497,7 +497,7 @@ impl<'a> SimpleArgTypeInfo<'a> for CiphertextMessageRef<'a> {
             native_handle_from_message(
                 env,
                 foreign,
-                jni_class_name!(org.signal.libsignal.protocol.message.PlaintextContent),
+                jni_class_name!(org.mochi.libmochi.protocol.message.PlaintextContent),
                 Self::PlaintextContent,
             )
             .transpose()
@@ -711,19 +711,19 @@ impl<'a> ResultTypeInfo<'a> for CiphertextMessage {
     type ResultType = JavaCiphertextMessage<'a>;
     fn convert_into(self, env: &mut JNIEnv<'a>) -> Result<Self::ResultType, BridgeLayerError> {
         match self {
-            CiphertextMessage::SignalMessage(m) => {
+            CiphertextMessage::MochiMessage(m) => {
                 let message = m.convert_into(env)?;
                 jobject_from_native_handle(
                     env,
-                    ClassName("org.signal.libsignal.protocol.message.SignalMessage"),
+                    ClassName("org.mochi.libmochi.protocol.message.MochiMessage"),
                     message,
                 )
             }
-            CiphertextMessage::PreKeySignalMessage(m) => {
+            CiphertextMessage::PreKeyMochiMessage(m) => {
                 let message = m.convert_into(env)?;
                 jobject_from_native_handle(
                     env,
-                    ClassName("org.signal.libsignal.protocol.message.PreKeySignalMessage"),
+                    ClassName("org.mochi.libmochi.protocol.message.PreKeyMochiMessage"),
                     message,
                 )
             }
@@ -731,7 +731,7 @@ impl<'a> ResultTypeInfo<'a> for CiphertextMessage {
                 let message = m.convert_into(env)?;
                 jobject_from_native_handle(
                     env,
-                    ClassName("org.signal.libsignal.protocol.message.SenderKeyMessage"),
+                    ClassName("org.mochi.libmochi.protocol.message.SenderKeyMessage"),
                     message,
                 )
             }
@@ -739,7 +739,7 @@ impl<'a> ResultTypeInfo<'a> for CiphertextMessage {
                 let message = m.convert_into(env)?;
                 jobject_from_native_handle(
                     env,
-                    ClassName("org.signal.libsignal.protocol.message.PlaintextContent"),
+                    ClassName("org.mochi.libmochi.protocol.message.PlaintextContent"),
                     message,
                 )
             }
@@ -960,7 +960,7 @@ where
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_net::cdsi::LookupResponse {
+impl<'a> ResultTypeInfo<'a> for libmochi_net::cdsi::LookupResponse {
     type ResultType = JObject<'a>;
 
     fn convert_into(self, env: &mut JNIEnv<'a>) -> Result<Self::ResultType, BridgeLayerError> {
@@ -975,7 +975,7 @@ impl<'a> ResultTypeInfo<'a> for libsignal_net::cdsi::LookupResponse {
 
         let entry_class = {
             const ENTRY_CLASS: ClassName =
-                ClassName("org.signal.libsignal.net.CdsiLookupResponse$Entry");
+                ClassName("org.mochi.libmochi.net.CdsiLookupResponse$Entry");
             find_class(env, ENTRY_CLASS)?
         };
 
@@ -1009,13 +1009,13 @@ impl<'a> ResultTypeInfo<'a> for libsignal_net::cdsi::LookupResponse {
 
         new_instance(
             env,
-            ClassName("org.signal.libsignal.net.CdsiLookupResponse"),
+            ClassName("org.mochi.libmochi.net.CdsiLookupResponse"),
             jni_args!((entries_hashmap => java.util.Map, debug_permits_used => int) -> void),
         )
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_net::chat::Response {
+impl<'a> ResultTypeInfo<'a> for libmochi_net::chat::Response {
     type ResultType = JObject<'a>;
 
     fn convert_into(self, env: &mut JNIEnv<'a>) -> Result<Self::ResultType, BridgeLayerError> {
@@ -1044,7 +1044,7 @@ impl<'a> ResultTypeInfo<'a> for libsignal_net::chat::Response {
 
         new_instance(
             env,
-            ClassName("org.signal.libsignal.net.ChatService$Response"),
+            ClassName("org.mochi.libmochi.net.ChatService$Response"),
             jni_args!((
                 status.as_u16().into() => int,
                 message_local => java.lang.String,
@@ -1055,7 +1055,7 @@ impl<'a> ResultTypeInfo<'a> for libsignal_net::chat::Response {
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_net::chat::DebugInfo {
+impl<'a> ResultTypeInfo<'a> for libmochi_net::chat::DebugInfo {
     type ResultType = JObject<'a>;
 
     fn convert_into(self, env: &mut JNIEnv<'a>) -> Result<Self::ResultType, BridgeLayerError> {
@@ -1080,7 +1080,7 @@ impl<'a> ResultTypeInfo<'a> for libsignal_net::chat::DebugInfo {
 
         new_instance(
             env,
-            ClassName("org.signal.libsignal.net.ChatService$DebugInfo"),
+            ClassName("org.mochi.libmochi.net.ChatService$DebugInfo"),
             jni_args!((
                 reconnect_count_i32 => int,
                 ip_type_byte => byte,
@@ -1105,10 +1105,10 @@ impl<'a> ResultTypeInfo<'a> for ResponseAndDebugInfo {
 
         new_instance(
             env,
-            ClassName("org.signal.libsignal.net.ChatService$ResponseAndDebugInfo"),
+            ClassName("org.mochi.libmochi.net.ChatService$ResponseAndDebugInfo"),
             jni_args!((
-                response => org.signal.libsignal.net.ChatService::Response,
-                debug_info => org.signal.libsignal.net.ChatService::DebugInfo
+                response => org.mochi.libmochi.net.ChatService::Response,
+                debug_info => org.mochi.libmochi.net.ChatService::DebugInfo
             ) -> void),
         )
     }
@@ -1184,7 +1184,7 @@ impl<'a> ResultTypeInfo<'a> for MessageBackupValidationOutcome {
 
         new_instance(
             env,
-            ClassName("org.signal.libsignal.protocol.util.Pair"),
+            ClassName("org.mochi.libmochi.protocol.util.Pair"),
             jni_args!((error_message => java.lang.Object, unknown_fields => java.lang.Object) -> void),
         )
     }

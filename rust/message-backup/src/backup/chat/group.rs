@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Signal Messenger, LLC.
+// Copyright (C) 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,7 +10,7 @@
 use std::fmt::Debug;
 
 use itertools::Itertools as _;
-use libsignal_protocol::{Aci, Pni, ServiceId};
+use libmochi_protocol::{Aci, Pni, ServiceId};
 use macro_rules_attribute::macro_rules_derive;
 use protobuf::{EnumOrUnknown, Message};
 

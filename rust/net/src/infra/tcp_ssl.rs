@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -163,7 +163,7 @@ impl ProxyConnector {
             proxy_host: actual_host.into(),
             proxy_port,
             // We don't bundle roots of trust for all the SSL proxies, just the
-            // Signal servers. It's fine to use the system SSL trust roots;
+            // Mochi servers. It's fine to use the system SSL trust roots;
             // even if the outer connection is not secure, the inner connection
             // is also TLS-encrypted.
             proxy_certs: RootCertificates::Native,
@@ -361,7 +361,7 @@ pub(crate) mod testutil {
     use tokio_util::either::Either;
     use warp::Filter;
 
-    pub(crate) const SERVER_HOSTNAME: &str = "test-server.signal.org.local";
+    pub(crate) const SERVER_HOSTNAME: &str = "test-server.mochi.org.local";
 
     lazy_static! {
         pub(crate) static ref SERVER_CERTIFICATE: CertifiedKey =
@@ -409,7 +409,7 @@ pub(crate) mod testutil {
         assert_eq!(lines.last(), Some(FAKE_RESPONSE).as_ref(), "{lines:?}");
     }
 
-    pub(crate) const PROXY_HOSTNAME: &str = "test-proxy.signal.org.local";
+    pub(crate) const PROXY_HOSTNAME: &str = "test-proxy.mochi.org.local";
 
     lazy_static! {
         pub(crate) static ref PROXY_CERTIFICATE: CertifiedKey =

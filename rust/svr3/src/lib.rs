@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use std::io::Write;
@@ -18,7 +18,7 @@ mod proto;
 use proto::svr3::{self, create_response, evaluate_response, query_response};
 
 const SECRET_BYTES: usize = 32;
-const CONTEXT: &str = "Signal_SVR3_20231121_PPSS_Context";
+const CONTEXT: &str = "Mochi_SVR3_20231121_PPSS_Context";
 
 pub fn make_remove_request() -> Vec<u8> {
     svr3::Request {
@@ -143,7 +143,7 @@ impl<'a> Restore<'a> {
 pub enum Query {}
 
 impl Query {
-    // Using `impl Iterator<...>` makes libsignal-net fail to build in Rust 1.72
+    // Using `impl Iterator<...>` makes libmochi-net fail to build in Rust 1.72
     pub fn requests() -> std::iter::Repeat<Vec<u8>> {
         std::iter::repeat(make_query_request().encode_to_vec())
     }

@@ -30,7 +30,7 @@ module.exports = {
       'line',
       [
         '',
-        { pattern: ' Copyright \\d{4}(-\\d{4})? Signal Messenger, LLC.' },
+        { pattern: ' Copyright \\d{4}(-\\d{4})? Mochi Messenger, LLC.' },
         ' SPDX-License-Identifier: AGPL-3.0-only',
         '',
       ],

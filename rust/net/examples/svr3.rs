@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 //! An example program demonstrating the backup and restore capabilities of a built-in Svr3Env.
@@ -14,16 +14,16 @@ use assert_matches::assert_matches;
 use base64::prelude::{Engine, BASE64_STANDARD};
 use clap::Parser;
 use colored::Colorize as _;
-use libsignal_net::infra::dns::DnsResolver;
+use libmochi_net::infra::dns::DnsResolver;
 use nonzero_ext::nonzero;
 use rand_core::{CryptoRngCore, OsRng, RngCore};
 
-use libsignal_net::auth::Auth;
-use libsignal_net::enclave::{EnclaveEndpointConnection, Nitro, Sgx, Tpm2Snp};
-use libsignal_net::env::Svr3Env;
-use libsignal_net::infra::tcp_ssl::DirectConnector as TcpSslTransportConnector;
-use libsignal_net::svr::SvrConnection;
-use libsignal_net::svr3::{Error, OpaqueMaskedShareSet, PpssOps};
+use libmochi_net::auth::Auth;
+use libmochi_net::enclave::{EnclaveEndpointConnection, Nitro, Sgx, Tpm2Snp};
+use libmochi_net::env::Svr3Env;
+use libmochi_net::infra::tcp_ssl::DirectConnector as TcpSslTransportConnector;
+use libmochi_net::svr::SvrConnection;
+use libmochi_net::svr3::{Error, OpaqueMaskedShareSet, PpssOps};
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -42,14 +42,14 @@ async fn main() {
     let enclave_secret: [u8; 32] = {
         let b64 = &args
             .enclave_secret
-            .or_else(|| std::env::var("LIBSIGNAL_TESTING_ENCLAVE_SECRET").ok())
+            .or_else(|| std::env::var("LIBMOCHI_TESTING_ENCLAVE_SECRET").ok())
             .expect("Enclave secret is not set");
         parse_auth_secret(b64)
     };
 
     let mut rng = OsRng;
 
-    let env = libsignal_net::env::STAGING.svr3;
+    let env = libmochi_net::env::STAGING.svr3;
 
     let uid = {
         let mut bytes = [0u8; 16];

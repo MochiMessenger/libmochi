@@ -1,13 +1,13 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 #![warn(clippy::unwrap_used)]
 
 use futures::executor;
-use libsignal_bridge::node::{AssumedImmutableBuffer, ResultTypeInfo, SignalNodeError};
-use libsignal_protocol::{IdentityKeyPair, SealedSenderV2SentMessage};
+use libmochi_bridge::node::{AssumedImmutableBuffer, ResultTypeInfo, MochiNodeError};
+use libmochi_protocol::{IdentityKeyPair, SealedSenderV2SentMessage};
 use minidump::Minidump;
 use minidump_processor::ProcessorOptions;
 use minidump_unwind::symbols::string_symbol_supplier;
@@ -19,7 +19,7 @@ mod logging;
 
 #[neon::main]
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
-    libsignal_bridge::node::register(&mut cx)?;
+    libmochi_bridge::node::register(&mut cx)?;
     cx.export_function("initLogger", logging::init_logger)?;
     cx.export_function("IdentityKeyPair_Deserialize", identitykeypair_deserialize)?;
     cx.export_function(
@@ -36,7 +36,7 @@ fn identitykeypair_deserialize(mut cx: FunctionContext) -> JsResult<JsObject> {
     let identity_keypair_or_error = IdentityKeyPair::try_from(buffer.as_slice(&cx));
     let identity_keypair = identity_keypair_or_error.or_else(|e| {
         let module = cx.this()?;
-        SignalNodeError::throw(e, &mut cx, module, "identitykeypair_deserialize")?;
+        MochiNodeError::throw(e, &mut cx, module, "identitykeypair_deserialize")?;
         unreachable!()
     })?;
     let public_key = identity_keypair.public_key().convert_into(&mut cx)?;
@@ -81,7 +81,7 @@ fn sealed_sender_multi_recipient_message_parse(mut cx: FunctionContext) -> JsRes
         Ok(messages) => messages,
         Err(e) => {
             let module = cx.this()?;
-            SignalNodeError::throw(
+            MochiNodeError::throw(
                 e,
                 &mut cx,
                 module,

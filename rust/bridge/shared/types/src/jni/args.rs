@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,8 +7,8 @@ use std::marker::PhantomData;
 
 use jni::objects::{JObject, JValue};
 
-/// Takes a Java-esque class name of the form `org.signal.Outer::Inner` and turns it into a
-/// JNI-style name `org/signal/Outer$Inner`.
+/// Takes a Java-esque class name of the form `org.mochi.Outer::Inner` and turns it into a
+/// JNI-style name `org/mochi/Outer$Inner`.
 #[macro_export]
 macro_rules! jni_class_name {
     ( $arg_base:tt $(. $arg_rest:ident)+ $(:: $nested:ident)* ) => {
@@ -249,7 +249,7 @@ impl<'local, 'obj_ref, 'output, const LEN: usize> JniArgs<'local, 'obj_ref, JObj
 /// # Example
 ///
 /// ```
-/// # use libsignal_bridge_types::jni_args;
+/// # use libmochi_bridge_types::jni_args;
 /// # use jni::objects::JValue;
 /// # let name = jni::objects::JObject::null();
 /// let args = jni_args!((name => java.lang.String, 0x3FFF => short) -> void);

@@ -1,1 +1,1 @@
-# libsignal-jni
+# libmochi-jni

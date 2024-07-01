@@ -1,10 +1,10 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use futures_util::FutureExt;
-use libsignal_protocol_v21::*;
+use libmochi_protocol_v21::*;
 
 use rand_v7::{thread_rng, Rng};
 
@@ -12,9 +12,9 @@ fn address(id: &str) -> ProtocolAddress {
     ProtocolAddress::new(id.into(), 1.into())
 }
 
-pub struct LibSignalProtocolV21(InMemSignalProtocolStore);
+pub struct LibMochiProtocolV21(InMemMochiProtocolStore);
 
-impl LibSignalProtocolV21 {
+impl LibMochiProtocolV21 {
     pub fn new() -> Self {
         let mut csprng = thread_rng();
         let identity_key = IdentityKeyPair::generate(&mut csprng);
@@ -22,13 +22,13 @@ impl LibSignalProtocolV21 {
         let registration_id: u8 = csprng.gen();
 
         Self(
-            InMemSignalProtocolStore::new(identity_key, registration_id as u32)
+            InMemMochiProtocolStore::new(identity_key, registration_id as u32)
                 .expect("can initialize"),
         )
     }
 }
 
-impl super::LibSignalProtocolStore for LibSignalProtocolV21 {
+impl super::LibMochiProtocolStore for LibMochiProtocolV21 {
     fn version(&self) -> &'static str {
         "v21"
     }
@@ -199,8 +199,8 @@ impl super::LibSignalProtocolStore for LibSignalProtocolV21 {
         msg_type: super::CiphertextMessageType,
     ) -> Vec<u8> {
         match msg_type {
-            super::CiphertextMessageType::Whisper => message_decrypt_signal(
-                &SignalMessage::try_from(msg).expect("valid"),
+            super::CiphertextMessageType::Whisper => message_decrypt_mochi(
+                &MochiMessage::try_from(msg).expect("valid"),
                 &address(remote),
                 &mut self.0.session_store,
                 &mut self.0.identity_store,
@@ -211,7 +211,7 @@ impl super::LibSignalProtocolStore for LibSignalProtocolV21 {
             .expect("synchronous")
             .expect("can decrypt messages"),
             super::CiphertextMessageType::PreKey => message_decrypt_prekey(
-                &PreKeySignalMessage::try_from(msg).expect("valid"),
+                &PreKeyMochiMessage::try_from(msg).expect("valid"),
                 &address(remote),
                 &mut self.0.session_store,
                 &mut self.0.identity_store,

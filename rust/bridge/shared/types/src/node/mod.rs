@@ -1,9 +1,9 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 
 use std::ops::Deref;
 
@@ -22,8 +22,8 @@ macro_rules! node_register {
         ::paste::paste! {
             #[no_mangle] // necessary because we are linking as a cdylib
             #[allow(non_upper_case_globals)]
-            #[linkme::distributed_slice($crate::node::LIBSIGNAL_FNS)]
-            static [<signal_register_node_ $name>]: (&str, $crate::node::JsFn) =
+            #[linkme::distributed_slice($crate::node::LIBMOCHI_FNS)]
+            static [<mochi_register_node_ $name>]: (&str, $crate::node::JsFn) =
                 (stringify!($name), [<node_ $name>]);
         }
     };
@@ -53,11 +53,11 @@ pub type JsFn = for<'a> fn(FunctionContext<'a>) -> JsResult<'a, JsValue>;
 
 #[doc(hidden)]
 #[linkme::distributed_slice]
-pub static LIBSIGNAL_FNS: [(&'static str, JsFn)] = [..];
+pub static LIBMOCHI_FNS: [(&'static str, JsFn)] = [..];
 
 /// Exports all `bridge_fn`-generated entry points.
 pub fn register(cx: &mut ModuleContext) -> NeonResult<()> {
-    for (name, f) in LIBSIGNAL_FNS {
+    for (name, f) in LIBMOCHI_FNS {
         cx.export_function(name, *f)?;
     }
     Ok(())

@@ -1,20 +1,20 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use ::signal_crypto;
-use signal_crypto::*;
+use ::mochi_crypto;
+use mochi_crypto::*;
 
 use crate::*;
 
 pub struct Aes256GcmEncryption {
-    gcm: Option<signal_crypto::Aes256GcmEncryption>,
+    gcm: Option<mochi_crypto::Aes256GcmEncryption>,
 }
 
 impl Aes256GcmEncryption {
     pub fn new(key: &[u8], nonce: &[u8], associated_data: &[u8]) -> Result<Self> {
-        let gcm = signal_crypto::Aes256GcmEncryption::new(key, nonce, associated_data)?;
+        let gcm = mochi_crypto::Aes256GcmEncryption::new(key, nonce, associated_data)?;
         Ok(Self { gcm: Some(gcm) })
     }
 
@@ -29,12 +29,12 @@ impl Aes256GcmEncryption {
 }
 
 pub struct Aes256GcmDecryption {
-    gcm: Option<signal_crypto::Aes256GcmDecryption>,
+    gcm: Option<mochi_crypto::Aes256GcmDecryption>,
 }
 
 impl Aes256GcmDecryption {
     pub fn new(key: &[u8], nonce: &[u8], associated_data: &[u8]) -> Result<Self> {
-        let gcm = signal_crypto::Aes256GcmDecryption::new(key, nonce, associated_data)?;
+        let gcm = mochi_crypto::Aes256GcmDecryption::new(key, nonce, associated_data)?;
         Ok(Self { gcm: Some(gcm) })
     }
 

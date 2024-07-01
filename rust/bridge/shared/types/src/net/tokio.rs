@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -27,7 +27,7 @@ impl TokioAsyncContext {
             rt: tokio::runtime::Builder::new_multi_thread()
                 .enable_io()
                 .enable_time()
-                .thread_name("libsignal-tokio-worker")
+                .thread_name("libmochi-tokio-worker")
                 .build()
                 .expect("failed to create runtime"),
             tasks: Default::default(),

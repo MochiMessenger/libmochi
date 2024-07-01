@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,14 +7,14 @@ mod support;
 use support::*;
 
 use futures_util::FutureExt;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use rand::rngs::OsRng;
 
 use std::time::SystemTime;
 use uuid::Uuid;
 
 #[test]
-fn test_server_cert() -> Result<(), SignalProtocolError> {
+fn test_server_cert() -> Result<(), MochiProtocolError> {
     let mut rng = OsRng;
     let trust_root = KeyPair::generate(&mut rng);
     let server_key = KeyPair::generate(&mut rng);
@@ -41,9 +41,9 @@ fn test_server_cert() -> Result<(), SignalProtocolError> {
                 assert!(!cert.validate(&trust_root.public_key)?);
             }
             Err(e) => match e {
-                SignalProtocolError::InvalidProtobufEncoding
-                | SignalProtocolError::BadKeyType(_)
-                | SignalProtocolError::BadKeyLength(_, _) => {}
+                MochiProtocolError::InvalidProtobufEncoding
+                | MochiProtocolError::BadKeyType(_)
+                | MochiProtocolError::BadKeyLength(_, _) => {}
 
                 unexpected_err => {
                     panic!("unexpected error {:?}", unexpected_err)
@@ -56,7 +56,7 @@ fn test_server_cert() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn test_revoked_server_cert() -> Result<(), SignalProtocolError> {
+fn test_revoked_server_cert() -> Result<(), MochiProtocolError> {
     let mut rng = OsRng;
     let trust_root = KeyPair::generate(&mut rng);
     let server_key = KeyPair::generate(&mut rng);
@@ -80,7 +80,7 @@ fn test_revoked_server_cert() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn test_sender_cert() -> Result<(), SignalProtocolError> {
+fn test_sender_cert() -> Result<(), MochiProtocolError> {
     let mut rng = OsRng;
     let trust_root = KeyPair::generate(&mut rng);
     let server_key = KeyPair::generate(&mut rng);
@@ -119,9 +119,9 @@ fn test_sender_cert() -> Result<(), SignalProtocolError> {
                 assert!(!cert.validate(&trust_root.public_key, expires)?);
             }
             Err(e) => match e {
-                SignalProtocolError::InvalidProtobufEncoding
-                | SignalProtocolError::BadKeyLength(_, _)
-                | SignalProtocolError::BadKeyType(_) => {}
+                MochiProtocolError::InvalidProtobufEncoding
+                | MochiProtocolError::BadKeyLength(_, _)
+                | MochiProtocolError::BadKeyType(_) => {}
 
                 unexpected_err => {
                     panic!("unexpected error {:?}", unexpected_err)
@@ -134,7 +134,7 @@ fn test_sender_cert() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn test_sealed_sender() -> Result<(), SignalProtocolError> {
+fn test_sealed_sender() -> Result<(), MochiProtocolError> {
     async {
         let mut rng = OsRng;
 
@@ -246,7 +246,7 @@ fn test_sealed_sender() -> Result<(), SignalProtocolError> {
         .await;
 
         match bob_ptext {
-            Err(SignalProtocolError::InvalidSealedSenderMessage(_)) => { /* ok */ }
+            Err(MochiProtocolError::InvalidSealedSenderMessage(_)) => { /* ok */ }
             Err(err) => {
                 panic!("Unexpected error {}", err)
             }
@@ -286,7 +286,7 @@ fn test_sealed_sender() -> Result<(), SignalProtocolError> {
         .await;
 
         match bob_ptext {
-            Err(SignalProtocolError::InvalidSealedSenderMessage(_)) => { /* ok */ }
+            Err(MochiProtocolError::InvalidSealedSenderMessage(_)) => { /* ok */ }
             Err(err) => {
                 panic!("Unexpected error {}", err)
             }
@@ -302,7 +302,7 @@ fn test_sealed_sender() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn test_sender_key_in_sealed_sender() -> Result<(), SignalProtocolError> {
+fn test_sender_key_in_sealed_sender() -> Result<(), MochiProtocolError> {
     async {
         let mut rng = OsRng;
 
@@ -418,7 +418,7 @@ fn test_sender_key_in_sealed_sender() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn test_sealed_sender_multi_recipient() -> Result<(), SignalProtocolError> {
+fn test_sealed_sender_multi_recipient() -> Result<(), MochiProtocolError> {
     async {
         let mut rng = OsRng;
 
@@ -525,7 +525,7 @@ fn test_sealed_sender_multi_recipient() -> Result<(), SignalProtocolError> {
         assert_eq!(bob_ptext.device_id, alice_device_id);
 
         // Check the original SSv2 upload format too.
-        // libsignal doesn't support encoding it, so we're going to hand-edit.
+        // libmochi doesn't support encoding it, so we're going to hand-edit.
         let mut alice_ctext_old_format = alice_ctext;
         alice_ctext_old_format[0] = 0x22; // Update the version.
         assert_eq!(alice_ctext_old_format.remove(2), 0); // Check that we have the right byte.
@@ -585,7 +585,7 @@ fn test_sealed_sender_multi_recipient() -> Result<(), SignalProtocolError> {
         .await;
 
         match bob_ptext {
-            Err(SignalProtocolError::InvalidSealedSenderMessage(_)) => { /* ok */ }
+            Err(MochiProtocolError::InvalidSealedSenderMessage(_)) => { /* ok */ }
             Err(err) => {
                 panic!("Unexpected error {}", err)
             }
@@ -646,7 +646,7 @@ fn test_sealed_sender_multi_recipient() -> Result<(), SignalProtocolError> {
         .await;
 
         match bob_ptext {
-            Err(SignalProtocolError::InvalidSealedSenderMessage(_)) => { /* ok */ }
+            Err(MochiProtocolError::InvalidSealedSenderMessage(_)) => { /* ok */ }
             Err(err) => {
                 panic!("Unexpected error {}", err)
             }
@@ -662,7 +662,7 @@ fn test_sealed_sender_multi_recipient() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn test_sealed_sender_multi_recipient_legacy_derivation() -> Result<(), SignalProtocolError> {
+fn test_sealed_sender_multi_recipient_legacy_derivation() -> Result<(), MochiProtocolError> {
     async {
         let mut rng = OsRng;
 
@@ -776,7 +776,7 @@ fn test_sealed_sender_multi_recipient_legacy_derivation() -> Result<(), SignalPr
 
 #[test]
 fn test_sealed_sender_multi_recipient_encrypt_with_archived_session(
-) -> Result<(), SignalProtocolError> {
+) -> Result<(), MochiProtocolError> {
     async {
         let mut rng = OsRng;
 
@@ -881,7 +881,7 @@ fn test_sealed_sender_multi_recipient_encrypt_with_archived_session(
 
 #[test]
 fn test_sealed_sender_multi_recipient_encrypt_with_bad_registration_id(
-) -> Result<(), SignalProtocolError> {
+) -> Result<(), MochiProtocolError> {
     async {
         let mut rng = OsRng;
 
@@ -897,7 +897,7 @@ fn test_sealed_sender_multi_recipient_encrypt_with_bad_registration_id(
 
         let mut alice_store = support::test_in_memory_protocol_store()?;
         let mut bob_store =
-            InMemSignalProtocolStore::new(IdentityKeyPair::generate(&mut rng), 0x4000)?;
+            InMemMochiProtocolStore::new(IdentityKeyPair::generate(&mut rng), 0x4000)?;
 
         let alice_pubkey = *alice_store.get_identity_key_pair().await?.public_key();
 
@@ -964,7 +964,7 @@ fn test_sealed_sender_multi_recipient_encrypt_with_bad_registration_id(
         .await
         {
             Ok(_) => panic!("should have failed"),
-            Err(SignalProtocolError::InvalidRegistrationId(address, _id)) => {
+            Err(MochiProtocolError::InvalidRegistrationId(address, _id)) => {
                 assert_eq!(address, bob_uuid_address);
             }
             Err(e) => panic!("wrong error: {}", e),
@@ -977,7 +977,7 @@ fn test_sealed_sender_multi_recipient_encrypt_with_bad_registration_id(
 }
 
 #[test]
-fn test_decryption_error_in_sealed_sender() -> Result<(), SignalProtocolError> {
+fn test_decryption_error_in_sealed_sender() -> Result<(), MochiProtocolError> {
     async {
         let mut rng = OsRng;
 
@@ -1044,8 +1044,8 @@ fn test_decryption_error_in_sealed_sender() -> Result<(), SignalProtocolError> {
         .await?;
 
         let original_ratchet_key = match bob_message {
-            CiphertextMessage::PreKeySignalMessage(ref m) => m.message().sender_ratchet_key(),
-            _ => panic!("without ACKs, every message should be a PreKeySignalMessage"),
+            CiphertextMessage::PreKeyMochiMessage(ref m) => m.message().sender_ratchet_key(),
+            _ => panic!("without ACKs, every message should be a PreKeyMochiMessage"),
         };
 
         // Skip over the part where Bob sends this to Alice and Alice fails to decrypt it,
@@ -1123,7 +1123,7 @@ fn parse_empty_multi_recipient_sealed_sender() {
 }
 
 #[test]
-fn test_sealed_sender_multi_recipient_redundant_empty_devices() -> Result<(), SignalProtocolError> {
+fn test_sealed_sender_multi_recipient_redundant_empty_devices() -> Result<(), MochiProtocolError> {
     async {
         let mut csprng = OsRng;
 

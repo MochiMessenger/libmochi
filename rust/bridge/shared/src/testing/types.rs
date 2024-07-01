@@ -1,10 +1,10 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 #[allow(unused_imports)]
-use libsignal_protocol::SignalProtocolError;
+use libmochi_protocol::MochiProtocolError;
 
 use crate::*;
 
@@ -55,7 +55,7 @@ impl node::Finalize for NeedsCleanup {
 impl ffi::SimpleArgTypeInfo for NeedsCleanup {
     type ArgType = *const std::ffi::c_void;
 
-    fn convert_from(_foreign: Self::ArgType) -> ffi::SignalFfiResult<Self> {
+    fn convert_from(_foreign: Self::ArgType) -> ffi::MochiFfiResult<Self> {
         // The plain FFI bridge does not have any context or environment it's executed in,
         // so there's nothing to check.
         Ok(Self::None)
@@ -128,8 +128,8 @@ pub struct ErrorOnBorrow;
 impl ffi::SimpleArgTypeInfo for ErrorOnBorrow {
     type ArgType = *const std::ffi::c_void;
 
-    fn convert_from(_foreign: Self::ArgType) -> ffi::SignalFfiResult<Self> {
-        Err(SignalProtocolError::InvalidArgument("deliberate error".to_string()).into())
+    fn convert_from(_foreign: Self::ArgType) -> ffi::MochiFfiResult<Self> {
+        Err(MochiProtocolError::InvalidArgument("deliberate error".to_string()).into())
     }
 }
 
@@ -167,7 +167,7 @@ pub struct PanicOnBorrow;
 impl ffi::SimpleArgTypeInfo for PanicOnBorrow {
     type ArgType = *const std::ffi::c_void;
 
-    fn convert_from(_foreign: Self::ArgType) -> ffi::SignalFfiResult<Self> {
+    fn convert_from(_foreign: Self::ArgType) -> ffi::MochiFfiResult<Self> {
         panic!("deliberate panic")
     }
 }
@@ -209,7 +209,7 @@ impl<'storage> ffi::ArgTypeInfo<'storage> for PanicOnLoad {
 
     type StoredType = ();
 
-    fn borrow(_foreign: Self::ArgType) -> ffi::SignalFfiResult<Self::StoredType> {
+    fn borrow(_foreign: Self::ArgType) -> ffi::MochiFfiResult<Self::StoredType> {
         Ok(())
     }
 
@@ -280,8 +280,8 @@ pub struct ErrorOnReturn;
 impl ffi::ResultTypeInfo for ErrorOnReturn {
     type ResultType = *const std::ffi::c_void;
 
-    fn convert_into(self) -> ffi::SignalFfiResult<Self::ResultType> {
-        Err(SignalProtocolError::InvalidArgument("deliberate error".to_string()).into())
+    fn convert_into(self) -> ffi::MochiFfiResult<Self::ResultType> {
+        Err(MochiProtocolError::InvalidArgument("deliberate error".to_string()).into())
     }
 }
 
@@ -315,7 +315,7 @@ pub struct PanicOnReturn;
 impl ffi::ResultTypeInfo for PanicOnReturn {
     type ResultType = *const std::ffi::c_void;
 
-    fn convert_into(self) -> ffi::SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> ffi::MochiFfiResult<Self::ResultType> {
         panic!("deliberate panic");
     }
 }

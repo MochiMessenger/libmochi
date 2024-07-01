@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -31,13 +31,13 @@
 //! ```
 //!
 //! ```c
-//! SignalFfiError *signal_sender_key_message_new(
-//!     SignalSenderKeyMessage **out,
+//! MochiFfiError *mochi_sender_key_message_new(
+//!     MochiSenderKeyMessage **out,
 //!     uint32_t key_id,
 //!     uint32_t iteration,
 //!     const unsigned char *ciphertext,
 //!     size_t ciphertext_len,
-//!     const SignalPrivateKey *pk);
+//!     const MochiPrivateKey *pk);
 //! ```
 //!
 //! ```java
@@ -60,7 +60,7 @@
 //! # Async support for Node
 //!
 //! For the Node bridge, if a `bridge_fn` is declared as `async`, it will return a JavaScript
-//! Promise and run the function on the JavaScript event loop using the `signal-neon-futures`
+//! Promise and run the function on the JavaScript event loop using the `mochi-neon-futures`
 //! crate. Interaction with JavaScript can be done through async callbacks, including trait objects
 //! defined using the [`async-trait`][] crate. Like the synchronous implementations of all three
 //! bridges, **panics will be caught** and translated to JavaScript exceptions.
@@ -75,11 +75,11 @@
 //! By default, `bridge_fn` tries to pick a good name for each exposed entry point:
 //!
 //! - FFI: Convert the function's name to `lower_snake_case` and prepend the value of environment
-//!   variable `LIBSIGNAL_BRIDGE_FN_PREFIX_FFI`, which the client crate should set in its build.rs.
+//!   variable `LIBMOCHI_BRIDGE_FN_PREFIX_FFI`, which the client crate should set in its build.rs.
 //! - JNI: Escape any underscores in the function's name per the [JNI spec][], then prepend the
-//!   value of environment variable `LIBSIGNAL_BRIDGE_FN_PREFIX_JNI`, which the client should set in
-//!   its build.rs. The value should be something like `Java_org_signal_libsignal_internal_Native_`
-//!   to expose the function as a static method of the class `org.signal.libsignal.internal.Native`.
+//!   value of environment variable `LIBMOCHI_BRIDGE_FN_PREFIX_JNI`, which the client should set in
+//!   its build.rs. The value should be something like `Java_org_mochi_libmochi_internal_Native_`
+//!   to expose the function as a static method of the class `org.mochi.libmochi.internal.Native`.
 //! - Node: Use the original function's name.
 //!
 //! As such, the recommended naming scheme for `bridge_fn` functions is `ObjectOrGroup_Operation`.
@@ -346,7 +346,7 @@ fn bridge_fn_impl(
 /// # Example
 ///
 /// ```ignore
-/// // Produces a C function named "signal_checksum_buffer"
+/// // Produces a C function named "mochi_checksum_buffer"
 /// // and a TypeScript function manually named "Buffer_Checksum",
 /// // with the Java entry point disabled.
 /// # #[cfg(ignore_even_when_running_all_tests)]

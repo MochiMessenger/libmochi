@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2022 Signal Messenger, LLC.
+// Copyright 2021-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -27,7 +27,7 @@ use super::*;
 /// `ArgTypeInfo` has two required methods: `borrow` and `load_from`. The use site looks like this:
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::node::*;
+/// # use libmochi_bridge_types::node::*;
 /// # use neon::prelude::*;
 /// # struct Foo;
 /// # impl SimpleArgTypeInfo for Foo {
@@ -74,9 +74,9 @@ pub trait ArgTypeInfo<'storage, 'context: 'storage>: Sized {
 /// Conceptually, the use site for `AsyncArgTypeInfo` looks like this:
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::node::*;
+/// # use libmochi_bridge_types::node::*;
 /// # use neon::prelude::*;
-/// # extern crate signal_neon_futures;
+/// # extern crate mochi_neon_futures;
 /// # struct Foo;
 /// # impl SimpleArgTypeInfo for Foo {
 /// #     type ArgType = JsObject;
@@ -87,10 +87,10 @@ pub trait ArgTypeInfo<'storage, 'context: 'storage>: Sized {
 /// # fn test<'a>(mut cx: FunctionContext<'a>, js_arg: Handle<'a, JsObject>) -> NeonResult<()> {
 /// // DO NOT COPY THIS CODE - DOES NOT HANDLE ERRORS CORRECTLY
 /// let mut js_arg_stored = Foo::save_async_arg(&mut cx, js_arg)?;
-/// let promise = signal_neon_futures::promise(&mut cx, async move {
+/// let promise = mochi_neon_futures::promise(&mut cx, async move {
 ///     let rust_arg = Foo::load_async_arg(&mut js_arg_stored);
 ///     // ...
-///     signal_neon_futures::settle_promise(|cx| {
+///     mochi_neon_futures::settle_promise(|cx| {
 ///         js_arg_stored.finalize(cx);
 ///         // ...
 ///         # Ok(cx.undefined())
@@ -126,7 +126,7 @@ pub trait AsyncArgTypeInfo<'storage>: Sized {
 /// This trait is easier to use when writing Neon functions manually:
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::node::*;
+/// # use libmochi_bridge_types::node::*;
 /// # use neon::prelude::*;
 /// # struct Foo;
 /// impl SimpleArgTypeInfo for Foo {
@@ -220,7 +220,7 @@ impl<'a> AsyncArgTypeInfo<'a> for &'a [SessionRecord] {
 /// `ResultTypeInfo` is used to implement the `bridge_fn` macro, but can also be used outside it.
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::node::*;
+/// # use libmochi_bridge_types::node::*;
 /// # use neon::prelude::*;
 /// # struct Foo;
 /// # impl<'a> ResultTypeInfo<'a> for Foo {
@@ -305,7 +305,7 @@ impl SimpleArgTypeInfo for uuid::Uuid {
     }
 }
 
-impl SimpleArgTypeInfo for libsignal_protocol::ServiceId {
+impl SimpleArgTypeInfo for libmochi_protocol::ServiceId {
     type ArgType = JsBuffer;
     fn convert_from(cx: &mut FunctionContext, foreign: Handle<Self::ArgType>) -> NeonResult<Self> {
         foreign
@@ -320,25 +320,25 @@ impl SimpleArgTypeInfo for libsignal_protocol::ServiceId {
     }
 }
 
-impl SimpleArgTypeInfo for libsignal_protocol::Aci {
+impl SimpleArgTypeInfo for libmochi_protocol::Aci {
     type ArgType = JsBuffer;
     fn convert_from(cx: &mut FunctionContext, foreign: Handle<Self::ArgType>) -> NeonResult<Self> {
-        libsignal_protocol::ServiceId::convert_from(cx, foreign)?
+        libmochi_protocol::ServiceId::convert_from(cx, foreign)?
             .try_into()
             .or_else(|_| cx.throw_type_error("not an ACI"))
     }
 }
 
-impl SimpleArgTypeInfo for libsignal_protocol::Pni {
+impl SimpleArgTypeInfo for libmochi_protocol::Pni {
     type ArgType = JsBuffer;
     fn convert_from(cx: &mut FunctionContext, foreign: Handle<Self::ArgType>) -> NeonResult<Self> {
-        libsignal_protocol::ServiceId::convert_from(cx, foreign)?
+        libmochi_protocol::ServiceId::convert_from(cx, foreign)?
             .try_into()
             .or_else(|_| cx.throw_type_error("not a PNI"))
     }
 }
 
-impl SimpleArgTypeInfo for libsignal_net::cdsi::E164 {
+impl SimpleArgTypeInfo for libmochi_net::cdsi::E164 {
     type ArgType = <String as SimpleArgTypeInfo>::ArgType;
     fn convert_from(cx: &mut FunctionContext, e164: Handle<Self::ArgType>) -> NeonResult<Self> {
         let e164 = String::convert_from(cx, e164)?;
@@ -769,7 +769,7 @@ impl<'a> ResultTypeInfo<'a> for uuid::Uuid {
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_protocol::ServiceId {
+impl<'a> ResultTypeInfo<'a> for libmochi_protocol::ServiceId {
     type ResultType = JsBuffer;
     fn convert_into(self, cx: &mut impl Context<'a>) -> JsResult<'a, Self::ResultType> {
         let mut buffer = cx.buffer(17)?;
@@ -780,17 +780,17 @@ impl<'a> ResultTypeInfo<'a> for libsignal_protocol::ServiceId {
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_protocol::Aci {
+impl<'a> ResultTypeInfo<'a> for libmochi_protocol::Aci {
     type ResultType = JsBuffer;
     fn convert_into(self, cx: &mut impl Context<'a>) -> JsResult<'a, Self::ResultType> {
-        libsignal_protocol::ServiceId::from(self).convert_into(cx)
+        libmochi_protocol::ServiceId::from(self).convert_into(cx)
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_protocol::Pni {
+impl<'a> ResultTypeInfo<'a> for libmochi_protocol::Pni {
     type ResultType = JsBuffer;
     fn convert_into(self, cx: &mut impl Context<'a>) -> JsResult<'a, Self::ResultType> {
-        libsignal_protocol::ServiceId::from(self).convert_into(cx)
+        libmochi_protocol::ServiceId::from(self).convert_into(cx)
     }
 }
 
@@ -927,7 +927,7 @@ impl<'a, V: Value> OrUndefined<'a> for Option<Handle<'a, V>> {
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_net::chat::Response {
+impl<'a> ResultTypeInfo<'a> for libmochi_net::chat::Response {
     type ResultType = JsObject;
     fn convert_into(self, cx: &mut impl Context<'a>) -> JsResult<'a, Self::ResultType> {
         let Self {
@@ -967,7 +967,7 @@ impl<'a> ResultTypeInfo<'a> for libsignal_net::chat::Response {
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_net::chat::DebugInfo {
+impl<'a> ResultTypeInfo<'a> for libmochi_net::chat::DebugInfo {
     type ResultType = JsObject;
     fn convert_into(self, cx: &mut impl Context<'a>) -> JsResult<'a, Self::ResultType> {
         let Self {
@@ -1011,13 +1011,13 @@ impl<'a> ResultTypeInfo<'a> for ResponseAndDebugInfo {
     }
 }
 
-impl<'a> ResultTypeInfo<'a> for libsignal_net::cdsi::LookupResponse {
+impl<'a> ResultTypeInfo<'a> for libmochi_net::cdsi::LookupResponse {
     type ResultType = JsObject;
     fn convert_into(self, cx: &mut impl Context<'a>) -> JsResult<'a, Self::ResultType> {
         fn to_key_value<'a>(
             cx: &mut impl Context<'a>,
-            libsignal_net::cdsi::LookupResponseEntry { e164, aci, pni }:
-             libsignal_net::cdsi::LookupResponseEntry,
+            libmochi_net::cdsi::LookupResponseEntry { e164, aci, pni }:
+             libmochi_net::cdsi::LookupResponseEntry,
         ) -> NeonResult<(Handle<'a, JsString>, Handle<'a, JsObject>)> {
             let e164 = cx.string(e164.to_string());
             let value = cx.empty_object();
@@ -1226,7 +1226,7 @@ impl<'a, T: BridgeHandle> ResultTypeInfo<'a> for T {
 /// # Example
 ///
 /// ```no_run
-/// # use libsignal_bridge_types::node::{BridgeHandle, BorrowedJsBoxedBridgeHandle, Mutable};
+/// # use libmochi_bridge_types::node::{BridgeHandle, BorrowedJsBoxedBridgeHandle, Mutable};
 /// # use neon::prelude::*;
 /// # use std::cell::{RefCell, RefMut};
 /// #

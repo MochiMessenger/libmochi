@@ -1,4 +1,4 @@
-For the most part, libsignal is tested using each language's usual testing infrastructure, as described in the main [README.md](./README.md):
+For the most part, libmochi is tested using each language's usual testing infrastructure, as described in the main [README.md](./README.md):
 
 ```shell
 # Rust
@@ -37,7 +37,7 @@ Rust allows running tests with cross-compiled targets, but normally that only wo
     CARGO_TARGET_AARCH64_LINUX_ANDROID_RUNNER=bin/adb-run-test # in the repo root
     ```
 
-    (If working with a different target architecture, don't forget to change the environment variables above. You may need to set additional environment variables depending on what you're building; see [`build_jni.sh`][java/build_jni.sh] for the full set that libsignal-jni uses.)
+    (If working with a different target architecture, don't forget to change the environment variables above. You may need to set additional environment variables depending on what you're building; see [`build_jni.sh`][java/build_jni.sh] for the full set that libmochi-jni uses.)
 
 4. Finally, run `cargo test --target aarch64-linux-android -p PACKAGE`.
 

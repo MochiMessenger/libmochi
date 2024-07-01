@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -19,7 +19,7 @@ pub enum WebSocketConnectError {
     Timeout,
     WebSocketError(tungstenite::Error),
     /// A special case of [`tungstenite::Error::Http`] where the response is considered to come from
-    /// the Signal servers.
+    /// the Mochi servers.
     ///
     /// See [`ConnectionParams::connection_confirmation_header`](crate::infra::ConnectionParams::connection_confirmation_header).
     RejectedByServer(http::Response<Option<Vec<u8>>>),

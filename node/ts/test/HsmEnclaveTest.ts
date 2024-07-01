@@ -1,11 +1,11 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import { assert, use } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as SignalClient from '../index';
+import * as MochiClient from '../index';
 import * as util from './util';
 
 use(chaiAsPromised);
@@ -31,7 +31,7 @@ describe('HsmEnclaveClient', () => {
         'hex'
       )
     );
-    const hsmEnclaveClient = SignalClient.HsmEnclaveClient.new(
+    const hsmEnclaveClient = MochiClient.HsmEnclaveClient.new(
       validKey,
       hashes
     );
@@ -53,7 +53,7 @@ describe('HsmEnclaveClient', () => {
       )
     );
     try {
-      SignalClient.HsmEnclaveClient.new(validKey, hashes);
+      MochiClient.HsmEnclaveClient.new(validKey, hashes);
       assert.fail();
     } catch (e) {
       assert.instanceOf(e, Error);
@@ -62,12 +62,12 @@ describe('HsmEnclaveClient', () => {
   it('create client fails with no hashes', () => {
     const hashes: Buffer[] = [];
     try {
-      SignalClient.HsmEnclaveClient.new(validKey, hashes);
+      MochiClient.HsmEnclaveClient.new(validKey, hashes);
       assert.fail();
     } catch (e) {
       assert.instanceOf(e, Error);
-      assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-      const err = e as SignalClient.LibSignalError;
+      assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+      const err = e as MochiClient.LibMochiError;
       assert.equal(err.operation, 'HsmEnclaveClient_New'); // the Rust entry point
     }
   });
@@ -79,7 +79,7 @@ describe('HsmEnclaveClient', () => {
         'hex'
       )
     );
-    const hsmEnclaveClient = SignalClient.HsmEnclaveClient.new(
+    const hsmEnclaveClient = MochiClient.HsmEnclaveClient.new(
       validKey,
       hashes
     );
@@ -89,8 +89,8 @@ describe('HsmEnclaveClient', () => {
       assert.fail();
     } catch (e) {
       assert.instanceOf(e, Error);
-      assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-      const err = e as SignalClient.LibSignalError;
+      assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+      const err = e as MochiClient.LibMochiError;
       assert.equal(err.operation, 'HsmEnclaveClient_CompleteHandshake'); // the Rust entry point
     }
   });
@@ -102,7 +102,7 @@ describe('HsmEnclaveClient', () => {
         'hex'
       )
     );
-    const hsmEnclaveClient = SignalClient.HsmEnclaveClient.new(
+    const hsmEnclaveClient = MochiClient.HsmEnclaveClient.new(
       validKey,
       hashes
     );
@@ -112,8 +112,8 @@ describe('HsmEnclaveClient', () => {
       assert.fail();
     } catch (e) {
       assert.instanceOf(e, Error);
-      assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-      const err = e as SignalClient.LibSignalError;
+      assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+      const err = e as MochiClient.LibMochiError;
       assert.equal(err.operation, 'HsmEnclaveClient_EstablishedSend'); // the Rust entry point
     }
   });
@@ -125,7 +125,7 @@ describe('HsmEnclaveClient', () => {
         'hex'
       )
     );
-    const hsmEnclaveClient = SignalClient.HsmEnclaveClient.new(
+    const hsmEnclaveClient = MochiClient.HsmEnclaveClient.new(
       validKey,
       hashes
     );
@@ -135,8 +135,8 @@ describe('HsmEnclaveClient', () => {
       assert.fail();
     } catch (e) {
       assert.instanceOf(e, Error);
-      assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-      const err = e as SignalClient.LibSignalError;
+      assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+      const err = e as MochiClient.LibMochiError;
       assert.equal(err.operation, 'HsmEnclaveClient_EstablishedRecv'); // the Rust entry point
     }
   });

@@ -1,5 +1,5 @@
 //
-// Copyright 2021-2022 Signal Messenger, LLC.
+// Copyright 2021-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,14 +10,14 @@ use std::time::SystemTime;
 
 use futures_util::FutureExt;
 use libfuzzer_sys::fuzz_target;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use log::*;
 use rand::prelude::*;
 
 struct Participant {
     name: &'static str,
     address: ProtocolAddress,
-    store: InMemSignalProtocolStore,
+    store: InMemMochiProtocolStore,
     message_queue: Vec<(CiphertextMessage, Box<[u8]>)>,
     archive_count: u8,
     pre_key_count: u32,
@@ -50,7 +50,7 @@ impl Participant {
                 signed_pre_key_id,
                 &SignedPreKeyRecord::new(
                     signed_pre_key_id,
-                    libsignal_protocol::Timestamp::from_epoch_millis(42),
+                    libmochi_protocol::Timestamp::from_epoch_millis(42),
                     &their_signed_pre_key_pair,
                     &their_signed_pre_key_signature,
                 ),
@@ -133,11 +133,11 @@ impl Participant {
 
         // Test serialization ahead of time.
         let incoming_message = match outgoing_message.message_type() {
-            CiphertextMessageType::PreKey => CiphertextMessage::PreKeySignalMessage(
-                PreKeySignalMessage::try_from(outgoing_message.serialize()).unwrap(),
+            CiphertextMessageType::PreKey => CiphertextMessage::PreKeyMochiMessage(
+                PreKeyMochiMessage::try_from(outgoing_message.serialize()).unwrap(),
             ),
-            CiphertextMessageType::Whisper => CiphertextMessage::SignalMessage(
-                SignalMessage::try_from(outgoing_message.serialize()).unwrap(),
+            CiphertextMessageType::Whisper => CiphertextMessage::MochiMessage(
+                MochiMessage::try_from(outgoing_message.serialize()).unwrap(),
             ),
             other_type => panic!("unexpected type {:?}", other_type),
         };
@@ -192,7 +192,7 @@ fuzz_target!(|data: (u64, &[u8])| {
         let mut alice = Participant {
             name: "alice",
             address: ProtocolAddress::new("+14151111111".to_owned(), 1.into()),
-            store: InMemSignalProtocolStore::new(
+            store: InMemMochiProtocolStore::new(
                 IdentityKeyPair::generate(&mut csprng),
                 csprng.gen(),
             )
@@ -204,7 +204,7 @@ fuzz_target!(|data: (u64, &[u8])| {
         let mut bob = Participant {
             name: "bob",
             address: ProtocolAddress::new("+14151111112".to_owned(), 1.into()),
-            store: InMemSignalProtocolStore::new(
+            store: InMemMochiProtocolStore::new(
                 IdentityKeyPair::generate(&mut csprng),
                 csprng.gen(),
             )

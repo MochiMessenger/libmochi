@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -11,15 +11,15 @@ use jni::objects::{JByteArray, JClass, JLongArray, JObject, JString};
 use jni::objects::{JMap, JValue};
 use jni::JNIEnv;
 
-use libsignal_bridge::jni::*;
-use libsignal_bridge::net::TokioAsyncContext;
-use libsignal_bridge::{jni_args, jni_class_name};
-use libsignal_protocol::*;
+use libmochi_bridge::jni::*;
+use libmochi_bridge::net::TokioAsyncContext;
+use libmochi_bridge::{jni_args, jni_class_name};
+use libmochi_protocol::*;
 
 pub mod logging;
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_IdentityKeyPair_1Deserialize<
+pub unsafe extern "C" fn Java_org_mochi_libmochi_internal_Native_IdentityKeyPair_1Deserialize<
     'local,
 >(
     mut env: JNIEnv<'local>,
@@ -45,7 +45,7 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_IdentityKeyPa
 /// Initialization function used to set up internal data structures. This should
 /// be called once when the library is first loaded.
 #[no_mangle]
-pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_initializeLibrary<'local>(
+pub unsafe extern "C" fn Java_org_mochi_libmochi_internal_Native_initializeLibrary<'local>(
     mut env: JNIEnv<'local>,
     class: JClass<'local>,
 ) {
@@ -65,7 +65,7 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_initializeLib
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_AsyncLoadClass<'local>(
+pub unsafe extern "C" fn Java_org_mochi_libmochi_internal_Native_AsyncLoadClass<'local>(
     mut env: JNIEnv<'local>,
     _class: JClass,
     tokio_context: JObject<'local>,
@@ -99,7 +99,7 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_AsyncLoadClas
 
 #[cfg(not(target_os = "android"))]
 #[no_mangle]
-pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_SealedSender_1MultiRecipientParseSentMessage<
+pub unsafe extern "C" fn Java_org_mochi_libmochi_internal_Native_SealedSender_1MultiRecipientParseSentMessage<
     'local,
 >(
     mut env: JNIEnv<'local>,
@@ -124,15 +124,15 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_SealedSender_
             (messages.recipients.len() * NUMBER_OF_OBJECTS_PER_RECIPIENT)
                 .try_into()
                 .expect("too many recipients"),
-            |env| -> SignalJniResult<_> {
+            |env| -> MochiJniResult<_> {
                 let recipient_class = find_class(
                     env,
                     ClassName(
-                        "org.signal.libsignal.protocol.SealedSenderMultiRecipientMessage$Recipient",
+                        "org.mochi.libmochi.protocol.SealedSenderMultiRecipientMessage$Recipient",
                     ),
                 )?;
                 let service_id_class =
-                    find_class(env, ClassName("org.signal.libsignal.protocol.ServiceId"))?;
+                    find_class(env, ClassName("org.mochi.libmochi.protocol.ServiceId"))?;
 
                 let mut excluded_recipient_java_service_ids = vec![];
 
@@ -144,7 +144,7 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_SealedSender_
                         "parseFromFixedWidthBinary",
                         jni_args!((
                             java_service_id_bytes => [byte]
-                        ) -> org.signal.libsignal.protocol.ServiceId),
+                        ) -> org.mochi.libmochi.protocol.ServiceId),
                     )?;
 
                     if recipient.devices.is_empty() {
@@ -190,7 +190,7 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_SealedSender_
                         .len()
                         .try_into()
                         .expect("too many excluded recipients"),
-                    jni_class_name!(org.signal.libsignal.protocol.ServiceId),
+                    jni_class_name!(org.mochi.libmochi.protocol.ServiceId),
                     JObject::null(),
                 )?;
                 for (java_excluded_recipient, i) in
@@ -210,11 +210,11 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_SealedSender_
 
         Ok(new_instance(
             env,
-            ClassName("org.signal.libsignal.protocol.SealedSenderMultiRecipientMessage"),
+            ClassName("org.mochi.libmochi.protocol.SealedSenderMultiRecipientMessage"),
             jni_args!((
                 data => [byte],
                 recipient_map => java.util.Map,
-                excluded_recipients_array => [org.signal.libsignal.protocol.ServiceId],
+                excluded_recipients_array => [org.mochi.libmochi.protocol.ServiceId],
                 offset_of_shared_bytes.try_into().expect("data too large") => int,
             ) -> void),
         )?)
@@ -225,7 +225,7 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_SealedSender_
 ///
 /// cbindgen:ignore
 #[no_mangle]
-pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_keepAlive(
+pub unsafe extern "C" fn Java_org_mochi_libmochi_internal_Native_keepAlive(
     _env: JNIEnv,
     _class: JClass,
     _obj: JObject,
@@ -236,7 +236,7 @@ pub unsafe extern "C" fn Java_org_signal_libsignal_internal_Native_keepAlive(
 fn set_up_rustls_platform_verifier(
     env: &mut JNIEnv<'_>,
     class: JClass<'_>,
-) -> Result<(), SignalJniError> {
+) -> Result<(), MochiJniError> {
     // The "easy" way of setting up rustls-platform-verifier requires an Android Context object.
     // However, at the time of this writing, the Context was only used to extract a ClassLoader that
     // can find the rustls-platform-verifier Kotlin classes. We can do that with the Native class's

@@ -1,16 +1,16 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use hex_literal::hex;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 
 mod support;
 use support::*;
 
 #[test]
-fn test_ratcheting_session_as_bob() -> Result<(), SignalProtocolError> {
+fn test_ratcheting_session_as_bob() -> Result<(), MochiProtocolError> {
     let bob_ephemeral_public =
         hex!("052cb49776b8770205745a3a6e24f579cdb4ba7a89041005928ebbadc9c05ad458");
 
@@ -52,7 +52,7 @@ fn test_ratcheting_session_as_bob() -> Result<(), SignalProtocolError> {
 
     let alice_base_public_key = PublicKey::deserialize(&alice_base_public)?;
 
-    let bob_parameters = BobSignalProtocolParameters::new(
+    let bob_parameters = BobMochiProtocolParameters::new(
         bob_identity_key_pair,
         bob_signed_prekey_pair,
         None, // one time pre key pair
@@ -90,7 +90,7 @@ fn test_ratcheting_session_as_bob() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn test_ratcheting_session_as_alice() -> Result<(), SignalProtocolError> {
+fn test_ratcheting_session_as_alice() -> Result<(), MochiProtocolError> {
     let bob_ephemeral_public =
         hex!("052cb49776b8770205745a3a6e24f579cdb4ba7a89041005928ebbadc9c05ad458");
 
@@ -129,7 +129,7 @@ fn test_ratcheting_session_as_alice() -> Result<(), SignalProtocolError> {
 
     let alice_base_key = KeyPair::from_public_and_private(&alice_base_public, &alice_base_private)?;
 
-    let alice_parameters = AliceSignalProtocolParameters::new(
+    let alice_parameters = AliceMochiProtocolParameters::new(
         alice_identity_key_pair,
         alice_base_key,
         IdentityKey::decode(&bob_identity_public)?,
@@ -170,7 +170,7 @@ fn test_ratcheting_session_as_alice() -> Result<(), SignalProtocolError> {
 }
 
 #[test]
-fn test_alice_and_bob_agree_on_chain_keys_with_kyber() -> Result<(), SignalProtocolError> {
+fn test_alice_and_bob_agree_on_chain_keys_with_kyber() -> Result<(), MochiProtocolError> {
     let mut csprng = rand::rngs::OsRng;
 
     let alice_identity_key_pair = IdentityKeyPair::generate(&mut csprng);
@@ -182,7 +182,7 @@ fn test_alice_and_bob_agree_on_chain_keys_with_kyber() -> Result<(), SignalProto
 
     let bob_kyber_pre_key_pair = kem::KeyPair::generate(kem::KeyType::Kyber1024);
 
-    let alice_parameters = AliceSignalProtocolParameters::new(
+    let alice_parameters = AliceMochiProtocolParameters::new(
         alice_identity_key_pair,
         alice_base_key_pair,
         *bob_identity_key_pair.identity_key(),
@@ -205,7 +205,7 @@ fn test_alice_and_bob_agree_on_chain_keys_with_kyber() -> Result<(), SignalProto
         .clone()
         .into_boxed_slice();
 
-    let bob_parameters = BobSignalProtocolParameters::new(
+    let bob_parameters = BobMochiProtocolParameters::new(
         bob_identity_key_pair,
         bob_signed_pre_key_pair,
         None,

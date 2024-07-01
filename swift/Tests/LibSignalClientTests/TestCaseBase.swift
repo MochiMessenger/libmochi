@@ -1,16 +1,16 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import LibSignalClient
+import LibMochiClient
 import XCTest
 
 class TestCaseBase: XCTestCase {
     // Use a static stored property for one-time initialization.
     static let loggingInitialized: Bool = {
-        struct LogToNSLog: LibsignalLogger {
-            func log(level: LibsignalLogLevel, file: UnsafePointer<CChar>?, line: UInt32, message: UnsafePointer<CChar>) {
+        struct LogToNSLog: LibmochiLogger {
+            func log(level: LibmochiLogLevel, file: UnsafePointer<CChar>?, line: UInt32, message: UnsafePointer<CChar>) {
                 let abbreviation: String
                 switch level {
                 case .error: abbreviation = "E"
@@ -25,7 +25,7 @@ class TestCaseBase: XCTestCase {
 
             func flush() {}
         }
-        LogToNSLog().setUpLibsignalLogging(level: .trace)
+        LogToNSLog().setUpLibmochiLogging(level: .trace)
         return true
     }()
 

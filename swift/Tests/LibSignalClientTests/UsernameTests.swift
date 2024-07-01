@@ -1,9 +1,9 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import LibSignalClient
+import LibMochiClient
 import XCTest
 
 class UsernameTests: TestCaseBase {
@@ -29,7 +29,7 @@ class UsernameTests: TestCaseBase {
         XCTAssertThrowsError(
             try Username.candidates(from: "a_very_long_nickname", withValidLengthWithin: 3...10)
         )
-        let nickname = "SiGNAl"
+        let nickname = "Mochi"
         let candidates = try Username.candidates(from: nickname)
         XCTAssertEqual(20, candidates.count)
         for candidate in candidates {
@@ -55,7 +55,7 @@ class UsernameTests: TestCaseBase {
     }
 
     func testInvalidHash() throws {
-        let username = try Username("hello_signal.42")
+        let username = try Username("hello_mochi.42")
         var hash = username.hash
         let proof = username.generateProof()
 
@@ -73,7 +73,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username("I⍰Unicode.42")
             XCTFail("Should have failed")
-        } catch SignalError.badNicknameCharacter {
+        } catch MochiError.badNicknameCharacter {
         } catch {
             XCTFail("Unexpected error thrown")
         }
@@ -98,7 +98,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "", discriminator: "01", withValidLengthWithin: 3...32)
             XCTFail("should have failed")
-        } catch SignalError.nicknameCannotBeEmpty {
+        } catch MochiError.nicknameCannotBeEmpty {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -106,7 +106,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "1digit", discriminator: "01", withValidLengthWithin: 3...32)
             XCTFail("should have failed")
-        } catch SignalError.nicknameCannotStartWithDigit {
+        } catch MochiError.nicknameCannotStartWithDigit {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -114,7 +114,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "s p a c e s", discriminator: "01", withValidLengthWithin: 3...32)
             XCTFail("should have failed")
-        } catch SignalError.badNicknameCharacter {
+        } catch MochiError.badNicknameCharacter {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -122,7 +122,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "abcde", discriminator: "01", withValidLengthWithin: 10...32)
             XCTFail("should have failed")
-        } catch SignalError.nicknameTooShort {
+        } catch MochiError.nicknameTooShort {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -130,7 +130,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "abcde", discriminator: "01", withValidLengthWithin: 3...4)
             XCTFail("should have failed")
-        } catch SignalError.nicknameTooLong {
+        } catch MochiError.nicknameTooLong {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -138,7 +138,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "jimio", discriminator: "", withValidLengthWithin: 3...32)
             XCTFail("should have failed")
-        } catch SignalError.usernameDiscriminatorCannotBeEmpty {
+        } catch MochiError.usernameDiscriminatorCannotBeEmpty {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -146,7 +146,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "jimio", discriminator: "00", withValidLengthWithin: 3...32)
             XCTFail("should have failed")
-        } catch SignalError.usernameDiscriminatorCannotBeZero {
+        } catch MochiError.usernameDiscriminatorCannotBeZero {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -154,7 +154,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "jimio", discriminator: "012", withValidLengthWithin: 3...32)
             XCTFail("should have failed")
-        } catch SignalError.usernameDiscriminatorCannotHaveLeadingZeros {
+        } catch MochiError.usernameDiscriminatorCannotHaveLeadingZeros {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -162,7 +162,7 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "jimio", discriminator: "+12", withValidLengthWithin: 3...32)
             XCTFail("should have failed")
-        } catch SignalError.badDiscriminatorCharacter {
+        } catch MochiError.badDiscriminatorCharacter {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
@@ -170,21 +170,21 @@ class UsernameTests: TestCaseBase {
         do {
             _ = try Username(nickname: "jimio", discriminator: "18446744073709551616", withValidLengthWithin: 3...32)
             XCTFail("should have failed")
-        } catch SignalError.usernameDiscriminatorTooLarge {
+        } catch MochiError.usernameDiscriminatorTooLarge {
         } catch {
             XCTFail("unexpected error: \(error)")
         }
     }
 
     func testUsernameLinkWorksEndToEnd() throws {
-        let original = try Username("SiGNAl.42")
+        let original = try Username("Mochi.42")
         let (randomness, linkBytes) = try original.createLink()
         let recreated = try Username(fromLink: linkBytes, withRandomness: randomness)
         XCTAssertEqual(original, recreated)
     }
 
     func testUsernameLinkWithReusedEntropy() throws {
-        let original = try Username("SiGNAl.42")
+        let original = try Username("Mochi.42")
         let (randomness, linkBytes) = try original.createLink()
         let recreated = try Username(fromLink: linkBytes, withRandomness: randomness)
         XCTAssertEqual(original, recreated)
@@ -202,7 +202,7 @@ class UsernameTests: TestCaseBase {
             let linkBytes = [UInt8](repeating: 0, count: 32)
             _ = try Username(fromLink: linkBytes, withRandomness: randomness)
             XCTFail("Should have failed")
-        } catch SignalError.usernameLinkInvalidEntropyDataLength {
+        } catch MochiError.usernameLinkInvalidEntropyDataLength {
         } catch {
             XCTFail("Unexpected error thrown")
         }
@@ -214,7 +214,7 @@ class UsernameTests: TestCaseBase {
             let linkBytes = [UInt8](repeating: 0, count: 32)
             _ = try Username(fromLink: linkBytes, withRandomness: randomness)
             XCTFail("Should have failed")
-        } catch SignalError.usernameLinkInvalid {
+        } catch MochiError.usernameLinkInvalid {
         } catch {
             XCTFail("Unexpected error thrown")
         }

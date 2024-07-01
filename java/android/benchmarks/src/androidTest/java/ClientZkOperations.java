@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -9,14 +9,14 @@ import java.time.Instant;
 import java.util.UUID;
 import org.junit.Rule;
 import org.junit.Test;
-import org.signal.libsignal.protocol.ServiceId;
-import org.signal.libsignal.zkgroup.ServerPublicParams;
-import org.signal.libsignal.zkgroup.ServerSecretParams;
-import org.signal.libsignal.zkgroup.VerificationFailedException;
-import org.signal.libsignal.zkgroup.auth.AuthCredentialWithPni;
-import org.signal.libsignal.zkgroup.auth.AuthCredentialWithPniResponse;
-import org.signal.libsignal.zkgroup.auth.ServerZkAuthOperations;
-import org.signal.libsignal.zkgroup.groups.GroupSecretParams;
+import org.mochi.libmochi.protocol.ServiceId;
+import org.mochi.libmochi.zkgroup.ServerPublicParams;
+import org.mochi.libmochi.zkgroup.ServerSecretParams;
+import org.mochi.libmochi.zkgroup.VerificationFailedException;
+import org.mochi.libmochi.zkgroup.auth.AuthCredentialWithPni;
+import org.mochi.libmochi.zkgroup.auth.AuthCredentialWithPniResponse;
+import org.mochi.libmochi.zkgroup.auth.ServerZkAuthOperations;
+import org.mochi.libmochi.zkgroup.groups.GroupSecretParams;
 
 public class ClientZkOperations {
   @Rule public final BenchmarkRule benchmarkRule = new BenchmarkRule();
@@ -28,8 +28,8 @@ public class ClientZkOperations {
   private final GroupSecretParams groupParams = GroupSecretParams.generate();
   private final ServerZkAuthOperations serverZkAuthOperations =
       new ServerZkAuthOperations(serverParams);
-  private final org.signal.libsignal.zkgroup.auth.ClientZkAuthOperations clientZkOperations =
-      new org.signal.libsignal.zkgroup.auth.ClientZkAuthOperations(serverPublicParams);
+  private final org.mochi.libmochi.zkgroup.auth.ClientZkAuthOperations clientZkOperations =
+      new org.mochi.libmochi.zkgroup.auth.ClientZkAuthOperations(serverPublicParams);
 
   private final ServiceId.Aci aci = new ServiceId.Aci(UUID.randomUUID());
   private final ServiceId.Pni pni = new ServiceId.Pni(UUID.randomUUID());

@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -15,10 +15,10 @@ export enum ServiceIdKind {
 const SERVICE_ID_FIXED_WIDTH_BINARY_LEN = 17;
 
 /**
- * Typed representation of a Signal service ID, which can be one of various types.
+ * Typed representation of a Mochi service ID, which can be one of various types.
  *
  * Conceptually this is a UUID in a particular "namespace" representing a particular way to reach a
- * user on the Signal service.
+ * user on the Mochi service.
  */
 export abstract class ServiceId extends Object {
   private readonly serviceIdFixedWidthBinary: Buffer;

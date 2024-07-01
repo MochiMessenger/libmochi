@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,13 +7,13 @@ use std::time::SystemTime;
 
 use criterion::{criterion_group, criterion_main, Criterion};
 use futures_util::FutureExt;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use rand::rngs::OsRng;
 
 #[path = "../tests/support/mod.rs"]
 mod support;
 
-pub fn session_encrypt_result(c: &mut Criterion) -> Result<(), SignalProtocolError> {
+pub fn session_encrypt_result(c: &mut Criterion) -> Result<(), MochiProtocolError> {
     let (alice_session_record, bob_session_record) = support::initialize_sessions_v3()?;
 
     let alice_address = ProtocolAddress::new("+14159999999".to_owned(), 1.into());
@@ -181,7 +181,7 @@ pub fn session_encrypt_result(c: &mut Criterion) -> Result<(), SignalProtocolErr
     Ok(())
 }
 
-pub fn session_encrypt_decrypt_result(c: &mut Criterion) -> Result<(), SignalProtocolError> {
+pub fn session_encrypt_decrypt_result(c: &mut Criterion) -> Result<(), MochiProtocolError> {
     let (alice_session_record, bob_session_record) = support::initialize_sessions_v3()?;
 
     let alice_address = ProtocolAddress::new("+14159999999".to_owned(), 1.into());

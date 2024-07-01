@@ -1,7 +1,7 @@
 [package]
 name = "device-transfer"
 version = "0.1.0"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 edition = "2021"
 license = "AGPL-3.0-only"
 

@@ -1,11 +1,11 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use partial_default::PartialDefault;
 use serde::{Deserialize, Serialize};
-use signal_crypto::Aes256GcmEncryption;
+use mochi_crypto::Aes256GcmEncryption;
 use subtle::ConstantTimeEq;
 
 use crate::common::constants::*;
@@ -35,7 +35,7 @@ impl PartialEq for ProfileKey {
 impl ProfileKey {
     pub fn generate(randomness: RandomnessBytes) -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Random_ProfileKey_Generate",
+            b"Mochi_ZKGroup_20200424_Random_ProfileKey_Generate",
             &randomness,
         );
         let mut bytes = [0u8; PROFILE_KEY_LEN];
@@ -53,7 +53,7 @@ impl ProfileKey {
 
     pub fn get_commitment(
         &self,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
     ) -> api::profiles::ProfileKeyCommitment {
         let uid_bytes = uuid::Uuid::from(user_id).into_bytes();
         let profile_key = crypto::profile_key_struct::ProfileKeyStruct::new(self.bytes, uid_bytes);
@@ -67,14 +67,14 @@ impl ProfileKey {
 
     pub fn get_profile_key_version(
         &self,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
     ) -> api::profiles::ProfileKeyVersion {
         let uid_bytes = uuid::Uuid::from(user_id).into_bytes();
         let mut combined_array = [0u8; PROFILE_KEY_LEN + UUID_LEN];
         combined_array[..PROFILE_KEY_LEN].copy_from_slice(&self.bytes);
         combined_array[PROFILE_KEY_LEN..].copy_from_slice(&uid_bytes);
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_ProfileKeyAndUid_ProfileKey_GetProfileKeyVersion",
+            b"Mochi_ZKGroup_20200424_ProfileKeyAndUid_ProfileKey_GetProfileKeyVersion",
             &combined_array,
         );
 

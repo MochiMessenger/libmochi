@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2020-2021 Signal Messenger, LLC.
+# Copyright (C) 2020-2021 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -275,8 +275,8 @@ def main():
     convert_to_typescript(
         rust_crates=[
             Crate(path=os.path.join(our_abs_dir, '..')),
-            Crate(path=os.path.join(our_abs_dir, '..', '..', 'shared'), features=('node', 'signal-media', 'testing-fns')),
-            Crate(path=os.path.join(our_abs_dir, '..', '..', 'shared', 'types'), features=('node', 'signal-media')),
+            Crate(path=os.path.join(our_abs_dir, '..', '..', 'shared'), features=('node', 'mochi-media', 'testing-fns')),
+            Crate(path=os.path.join(our_abs_dir, '..', '..', 'shared', 'types'), features=('node', 'mochi-media')),
         ],
         ts_in_path=os.path.join(our_abs_dir, output_file_name + '.in'),
         ts_out_path=os.path.join(our_abs_dir, '..', '..', '..', '..', 'node', output_file_name),

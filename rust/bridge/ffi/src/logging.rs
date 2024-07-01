@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -65,11 +65,11 @@ unsafe impl Sync for FfiLogger {}
 
 impl log::Log for FfiLogger {
     fn enabled(&self, metadata: &log::Metadata) -> bool {
-        libsignal_bridge::logging::log_enabled_in_apps(metadata)
+        libmochi_bridge::logging::log_enabled_in_apps(metadata)
     }
 
     fn log(&self, record: &log::Record) {
-        if !libsignal_bridge::logging::log_enabled_in_apps(record.metadata()) {
+        if !libmochi_bridge::logging::log_enabled_in_apps(record.metadata()) {
             return;
         }
 
@@ -99,12 +99,12 @@ impl log::Log for FfiLogger {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn signal_init_logger(max_level: LogLevel, logger: FfiLogger) -> bool {
+pub unsafe extern "C" fn mochi_init_logger(max_level: LogLevel, logger: FfiLogger) -> bool {
     match log::set_logger(Box::leak(Box::new(logger))) {
         Ok(_) => {
             log::set_max_level(log::Level::from(max_level).to_level_filter());
             log::info!(
-                "Initializing libsignal version:{}",
+                "Initializing libmochi version:{}",
                 env!("CARGO_PKG_VERSION")
             );
             log_panics::Config::new()
@@ -113,7 +113,7 @@ pub unsafe extern "C" fn signal_init_logger(max_level: LogLevel, logger: FfiLogg
             true
         }
         Err(_) => {
-            log::warn!("logging already initialized for libsignal; ignoring later call");
+            log::warn!("logging already initialized for libmochi; ignoring later call");
             false
         }
     }

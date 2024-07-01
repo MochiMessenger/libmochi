@@ -1,5 +1,5 @@
 //
-// Copyright $YEAR Signal Messenger, LLC.
+// Copyright $YEAR Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 

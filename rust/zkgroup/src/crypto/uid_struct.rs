@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@
 use crate::common::sho::*;
 use crate::common::simple_types::*;
 use curve25519_dalek::ristretto::RistrettoPoint;
-use libsignal_core::ServiceId;
+use libmochi_core::ServiceId;
 use partial_default::PartialDefault;
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
@@ -43,7 +43,7 @@ impl UidStruct {
 
     pub fn calc_M1(service_id: ServiceId) -> RistrettoPoint {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_UID_CalcM1",
+            b"Mochi_ZKGroup_20200424_UID_CalcM1",
             &service_id.service_id_binary(),
         );
         sho.get_point()

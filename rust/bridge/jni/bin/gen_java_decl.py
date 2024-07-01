@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (C) 2020-2021 Signal Messenger, LLC.
+# Copyright (C) 2020-2021 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -39,7 +39,7 @@ IGNORE_THIS_WARNING = re.compile(
     r"WARN: Missing `\[defines\]` entry for `feature = \".*\"` in cbindgen config\.|"
     r"WARN: Missing `\[defines\]` entry for `target_os = \"android\"` in cbindgen config\.|"
     r"WARN: Missing `\[defines\]` entry for `ios_device_as_detected_in_build_rs` in cbindgen config\.|"
-    r"WARN: Skip libsignal-bridge::.+ - \(not `(?:pub|no_mangle)`\)\.|"
+    r"WARN: Skip libmochi-bridge::.+ - \(not `(?:pub|no_mangle)`\)\.|"
     r"WARN: Couldn't find path for Array\(Path\(GenericPath \{ .+ \}\), Name\(\"LEN\"\)\), skipping associated constants|"
     r"WARN: Cannot find a mangling for generic path GenericPath { path: Path { name: \"JavaCompletableFuture\" }.+|"
     r"WARN: Cannot find a mangling for generic path GenericPath { path: Path { name: \"Throwing\" }.+"
@@ -129,7 +129,7 @@ def translate_to_java(typ):
 
 JAVA_DECL = re.compile(r"""
     ([a-zA-Z0-9]+(?:<.+>)?)[ ]                 # (0) A possibly-generic return type
-    Java_org_signal_libsignal_internal_Native_ # The required JNI prefix
+    Java_org_mochi_libmochi_internal_Native_ # The required JNI prefix
     (([a-zA-Z0-9]+)                            # (1) The method name, with (2) a grouping prefix
     (?:_1[a-zA-Z0-9_]*)?)                      # ...possibly followed by an underscore and then more name
     \(JNIEnv[ ].?env,[ ]JClass[ ]class_        # and then the required JNI args,
@@ -213,7 +213,7 @@ def main():
     convert_to_java(
         rust_crate_dir=os.path.join(our_abs_dir, '..'),
         java_in_path=os.path.join(our_abs_dir, 'Native.java.in'),
-        java_out_path=os.path.join(our_abs_dir, '..', '..', '..', '..', 'java', 'shared', 'java', 'org', 'signal', 'libsignal', 'internal', 'Native.java'),
+        java_out_path=os.path.join(our_abs_dir, '..', '..', '..', '..', 'java', 'shared', 'java', 'org', 'mochi', 'libmochi', 'internal', 'Native.java'),
         verify=args.verify,
     )
 

@@ -1,12 +1,12 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use std::ffi::CString;
 
 use derive_where::derive_where;
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 
 #[macro_use]
 mod convert;
@@ -203,9 +203,9 @@ impl std::fmt::Debug for UnexpectedPanic {
 }
 
 #[inline(always)]
-pub fn run_ffi_safe<F: FnOnce() -> Result<(), SignalFfiError> + std::panic::UnwindSafe>(
+pub fn run_ffi_safe<F: FnOnce() -> Result<(), MochiFfiError> + std::panic::UnwindSafe>(
     f: F,
-) -> *mut SignalFfiError {
+) -> *mut MochiFfiError {
     let result = match std::panic::catch_unwind(f) {
         Ok(Ok(())) => Ok(()),
         Ok(Err(e)) => Err(e),
@@ -220,7 +220,7 @@ pub fn run_ffi_safe<F: FnOnce() -> Result<(), SignalFfiError> + std::panic::Unwi
     }
 }
 
-pub unsafe fn native_handle_cast<T>(handle: *const T) -> Result<&'static T, SignalFfiError> {
+pub unsafe fn native_handle_cast<T>(handle: *const T) -> Result<&'static T, MochiFfiError> {
     if handle.is_null() {
         return Err(NullPointerError.into());
     }
@@ -228,7 +228,7 @@ pub unsafe fn native_handle_cast<T>(handle: *const T) -> Result<&'static T, Sign
     Ok(&*(handle))
 }
 
-pub unsafe fn native_handle_cast_mut<T>(handle: *mut T) -> Result<&'static mut T, SignalFfiError> {
+pub unsafe fn native_handle_cast_mut<T>(handle: *mut T) -> Result<&'static mut T, MochiFfiError> {
     if handle.is_null() {
         return Err(NullPointerError.into());
     }
@@ -239,7 +239,7 @@ pub unsafe fn native_handle_cast_mut<T>(handle: *mut T) -> Result<&'static mut T
 pub unsafe fn write_result_to<T: ResultTypeInfo>(
     ptr: *mut T::ResultType,
     value: T,
-) -> SignalFfiResult<()> {
+) -> MochiFfiResult<()> {
     if ptr.is_null() {
         return Err(NullPointerError.into());
     }
@@ -256,14 +256,14 @@ macro_rules! ffi_bridge_handle_destroy {
         ::paste::paste! {
             #[cfg(feature = "ffi")]
             #[export_name = concat!(
-                env!("LIBSIGNAL_BRIDGE_FN_PREFIX_FFI"),
+                env!("LIBMOCHI_BRIDGE_FN_PREFIX_FFI"),
                 stringify!($ffi_name),
                 "_destroy",
             )]
             #[allow(non_snake_case)]
             pub unsafe extern "C" fn [<__bridge_handle_ffi_ $ffi_name _destroy>](
                 p: *mut $typ
-            ) -> *mut ffi::SignalFfiError {
+            ) -> *mut ffi::MochiFfiError {
                 // The only thing the closure does is drop the value if there is
                 // one. Drop shouldn't panic, and if it does and leaves the
                 // value in an (internally) inconsistent state, that's fine

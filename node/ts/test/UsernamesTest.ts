@@ -1,17 +1,17 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import { assert, expect } from 'chai';
-import { ErrorCode, LibSignalError, LibSignalErrorBase } from '../Errors';
+import { ErrorCode, LibMochiError, LibMochiErrorBase } from '../Errors';
 import * as usernames from '../usernames';
 import * as util from './util';
 import { decryptUsernameLink } from '../usernames';
 
 util.initLogger();
 
-function assertThrowsLibSignalError(
+function assertThrowsLibMochiError(
   expression: () => void,
   code: ErrorCode,
   message?: string
@@ -21,8 +21,8 @@ function assertThrowsLibSignalError(
     assert.fail(message);
   } catch (e) {
     assert.instanceOf(e, Error, message);
-    assert.instanceOf(e, LibSignalErrorBase, message);
-    const err = e as LibSignalError;
+    assert.instanceOf(e, LibMochiErrorBase, message);
+    const err = e as LibMochiError;
     assert.equal(err.code, code, message);
   }
 }
@@ -90,43 +90,43 @@ describe('usernames', () => {
     });
 
     it('produces the correct error for invalid usernames', () => {
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('', '01', 3, 32),
         ErrorCode.NicknameCannotBeEmpty
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('1digit', '01', 3, 32),
         ErrorCode.CannotStartWithDigit
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('s p a c e s', '01', 3, 32),
         ErrorCode.BadNicknameCharacter
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('abcde', '01', 10, 32),
         ErrorCode.NicknameTooShort
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('abcde', '01', 3, 4),
         ErrorCode.NicknameTooLong
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('jimio', '', 3, 32),
         ErrorCode.DiscriminatorCannotBeEmpty
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('jimio', '00', 3, 32),
         ErrorCode.DiscriminatorCannotBeZero
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('jimio', '012', 3, 32),
         ErrorCode.DiscriminatorCannotHaveLeadingZeros
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('jimio', '+12', 3, 32),
         ErrorCode.BadDiscriminatorCharacter
       );
-      assertThrowsLibSignalError(
+      assertThrowsLibMochiError(
         () => usernames.fromParts('jimio', `${2n ** 64n}`, 3, 32),
         ErrorCode.DiscriminatorTooLarge
       );
@@ -153,21 +153,21 @@ describe('usernames', () => {
 
     it('will error on invalid nicknames', () => {
       expect(() => usernames.generateCandidates('ab', 3, 32))
-        .throws(LibSignalErrorBase)
+        .throws(LibMochiErrorBase)
         .with.property('code', ErrorCode.NicknameTooShort);
       expect(() => usernames.generateCandidates('ab', 1, 32)).does.not.throw();
       expect(() => usernames.generateCandidates('abc', 1, 2))
-        .throws(LibSignalErrorBase)
+        .throws(LibMochiErrorBase)
         .with.property('code', ErrorCode.NicknameTooLong);
       expect(() => usernames.generateCandidates('Ke$ha', 3, 32))
-        .throws(LibSignalErrorBase)
+        .throws(LibMochiErrorBase)
         .with.property('code', ErrorCode.BadNicknameCharacter);
     });
   });
 
   describe('link', () => {
     it('works end to end with valid data', () => {
-      const expectedUsername = 'signal_test.42';
+      const expectedUsername = 'mochi_test.42';
       const usernameLinkData = usernames.createUsernameLink(expectedUsername);
       const actualUsername = decryptUsernameLink({
         entropy: usernameLinkData.entropy,
@@ -176,7 +176,7 @@ describe('usernames', () => {
       assert.equal(expectedUsername, actualUsername);
     });
     it('can reuse entropy', () => {
-      const expectedUsername = 'signal_test.42';
+      const expectedUsername = 'mochi_test.42';
       const usernameLinkData = usernames.createUsernameLink(expectedUsername);
       const actualUsername = decryptUsernameLink({
         entropy: usernameLinkData.entropy,
@@ -202,21 +202,21 @@ describe('usernames', () => {
     it('will error on too long input data', () => {
       const longUsername = 'a'.repeat(128);
       expect(() => usernames.createUsernameLink(longUsername))
-        .throws(LibSignalErrorBase)
+        .throws(LibMochiErrorBase)
         .with.property('code', ErrorCode.InputDataTooLong);
     });
     it('will error on invalid entropy data size', () => {
       const entropy = Buffer.alloc(16);
       const encryptedUsername = Buffer.alloc(32);
       expect(() => decryptUsernameLink({ entropy, encryptedUsername }))
-        .throws(LibSignalErrorBase)
+        .throws(LibMochiErrorBase)
         .with.property('code', ErrorCode.InvalidEntropyDataLength);
     });
     it('will error on invalid encrypted username data', () => {
       const entropy = Buffer.alloc(32);
       const encryptedUsername = Buffer.alloc(32);
       expect(() => decryptUsernameLink({ entropy, encryptedUsername }))
-        .throws(LibSignalErrorBase)
+        .throws(LibMochiErrorBase)
         .with.property('code', ErrorCode.InvalidUsernameLinkEncryptedData);
     });
   });

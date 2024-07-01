@@ -1,11 +1,11 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import Benchmark
 import Foundation
-import LibSignalClient
+import LibMochiClient
 
 private let SECONDS_PER_DAY: UInt64 = 24 * 60 * 60
 

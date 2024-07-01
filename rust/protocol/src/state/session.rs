@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,7 +10,7 @@ use prost::Message;
 use subtle::ConstantTimeEq;
 
 use crate::ratchet::{ChainKey, MessageKeys, RootKey};
-use crate::{kem, IdentityKey, KeyPair, PrivateKey, PublicKey, SignalProtocolError};
+use crate::{kem, IdentityKey, KeyPair, PrivateKey, PublicKey, MochiProtocolError};
 
 use crate::consts;
 use crate::proto::storage::{session_structure, RecordStructure, SessionStructure};
@@ -26,7 +26,7 @@ impl std::fmt::Display for InvalidSessionError {
     }
 }
 
-impl From<InvalidSessionError> for SignalProtocolError {
+impl From<InvalidSessionError> for MochiProtocolError {
     fn from(e: InvalidSessionError) -> Self {
         Self::InvalidSessionStructure(e.0)
     }
@@ -602,7 +602,7 @@ impl SessionRecord {
         }
     }
 
-    pub fn deserialize(bytes: &[u8]) -> Result<Self, SignalProtocolError> {
+    pub fn deserialize(bytes: &[u8]) -> Result<Self, MochiProtocolError> {
         let record = RecordStructure::decode(bytes)
             .map_err(|_| InvalidSessionError("failed to decode session record protobuf"))?;
 
@@ -692,14 +692,14 @@ impl SessionRecord {
         }
     }
 
-    pub fn archive_current_state(&mut self) -> Result<(), SignalProtocolError> {
+    pub fn archive_current_state(&mut self) -> Result<(), MochiProtocolError> {
         if !self.archive_current_state_inner() {
             log::info!("Skipping archive, current session state is fresh");
         }
         Ok(())
     }
 
-    pub fn serialize(&self) -> Result<Vec<u8>, SignalProtocolError> {
+    pub fn serialize(&self) -> Result<Vec<u8>, MochiProtocolError> {
         let record = RecordStructure {
             current_session: self.current_session.as_ref().map(|s| s.into()),
             previous_sessions: self.previous_sessions.clone(),
@@ -707,11 +707,11 @@ impl SessionRecord {
         Ok(record.encode_to_vec())
     }
 
-    pub fn remote_registration_id(&self) -> Result<u32, SignalProtocolError> {
+    pub fn remote_registration_id(&self) -> Result<u32, MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState(
+                MochiProtocolError::InvalidState(
                     "remote_registration_id",
                     "No current session".into(),
                 )
@@ -719,11 +719,11 @@ impl SessionRecord {
             .remote_registration_id())
     }
 
-    pub fn local_registration_id(&self) -> Result<u32, SignalProtocolError> {
+    pub fn local_registration_id(&self) -> Result<u32, MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState(
+                MochiProtocolError::InvalidState(
                     "local_registration_id",
                     "No current session".into(),
                 )
@@ -731,20 +731,20 @@ impl SessionRecord {
             .local_registration_id())
     }
 
-    pub fn session_version(&self) -> Result<u32, SignalProtocolError> {
+    pub fn session_version(&self) -> Result<u32, MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState("session_version", "No current session".into())
+                MochiProtocolError::InvalidState("session_version", "No current session".into())
             })?
             .session_version()?)
     }
 
-    pub fn local_identity_key_bytes(&self) -> Result<Vec<u8>, SignalProtocolError> {
+    pub fn local_identity_key_bytes(&self) -> Result<Vec<u8>, MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState(
+                MochiProtocolError::InvalidState(
                     "local_identity_key_bytes",
                     "No current session".into(),
                 )
@@ -752,11 +752,11 @@ impl SessionRecord {
             .local_identity_key_bytes()?)
     }
 
-    pub fn remote_identity_key_bytes(&self) -> Result<Option<Vec<u8>>, SignalProtocolError> {
+    pub fn remote_identity_key_bytes(&self) -> Result<Option<Vec<u8>>, MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState(
+                MochiProtocolError::InvalidState(
                     "remote_identity_key_bytes",
                     "No current session".into(),
                 )
@@ -764,18 +764,18 @@ impl SessionRecord {
             .remote_identity_key_bytes()?)
     }
 
-    pub fn has_usable_sender_chain(&self, now: SystemTime) -> Result<bool, SignalProtocolError> {
+    pub fn has_usable_sender_chain(&self, now: SystemTime) -> Result<bool, MochiProtocolError> {
         match &self.current_session {
             Some(session) => Ok(session.has_usable_sender_chain(now)?),
             None => Ok(false),
         }
     }
 
-    pub fn alice_base_key(&self) -> Result<&[u8], SignalProtocolError> {
+    pub fn alice_base_key(&self) -> Result<&[u8], MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState("alice_base_key", "No current session".into())
+                MochiProtocolError::InvalidState("alice_base_key", "No current session".into())
             })?
             .alice_base_key())
     }
@@ -783,11 +783,11 @@ impl SessionRecord {
     pub fn get_receiver_chain_key_bytes(
         &self,
         sender: &PublicKey,
-    ) -> Result<Option<Box<[u8]>>, SignalProtocolError> {
+    ) -> Result<Option<Box<[u8]>>, MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState(
+                MochiProtocolError::InvalidState(
                     "get_receiver_chain_key",
                     "No current session".into(),
                 )
@@ -796,11 +796,11 @@ impl SessionRecord {
             .map(|chain| chain.key()[..].into()))
     }
 
-    pub fn get_sender_chain_key_bytes(&self) -> Result<Vec<u8>, SignalProtocolError> {
+    pub fn get_sender_chain_key_bytes(&self) -> Result<Vec<u8>, MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState(
+                MochiProtocolError::InvalidState(
                     "get_sender_chain_key_bytes",
                     "No current session".into(),
                 )
@@ -811,18 +811,18 @@ impl SessionRecord {
     pub fn current_ratchet_key_matches(
         &self,
         key: &PublicKey,
-    ) -> Result<bool, SignalProtocolError> {
+    ) -> Result<bool, MochiProtocolError> {
         match &self.current_session {
             Some(session) => Ok(&session.sender_ratchet_key()? == key),
             None => Ok(false),
         }
     }
 
-    pub fn get_kyber_ciphertext(&self) -> Result<Option<&Vec<u8>>, SignalProtocolError> {
+    pub fn get_kyber_ciphertext(&self) -> Result<Option<&Vec<u8>>, MochiProtocolError> {
         Ok(self
             .session_state()
             .ok_or_else(|| {
-                SignalProtocolError::InvalidState(
+                MochiProtocolError::InvalidState(
                     "get_kyber_ciphertext",
                     "No current session".into(),
                 )

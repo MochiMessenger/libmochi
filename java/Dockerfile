@@ -1,5 +1,5 @@
 #
-# Copyright 2020 Signal Messenger, LLC.
+# Copyright 2020 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
@@ -25,15 +25,15 @@ ARG UID
 ARG GID
 
 # Create a user to map the host user to.
-RUN    groupadd -o -g "${GID}" libsignal \
-    && useradd -m -o -u "${UID}" -g "${GID}" -s /bin/bash libsignal
+RUN    groupadd -o -g "${GID}" libmochi \
+    && useradd -m -o -u "${UID}" -g "${GID}" -s /bin/bash libmochi
 
-USER libsignal
-ENV HOME /home/libsignal
-ENV USER libsignal
+USER libmochi
+ENV HOME /home/libmochi
+ENV USER libmochi
 ENV SHELL /bin/bash
 
-WORKDIR /home/libsignal
+WORKDIR /home/libmochi
 
 # Android SDK setup...
 ARG ANDROID_SDK_FILENAME=commandlinetools-linux-7583922_latest.zip
@@ -41,10 +41,10 @@ ARG ANDROID_SDK_SHA=124f2d5115eee365df6cf3228ffbca6fc3911d16f8025bebd5b1c6e2fcfa
 ARG ANDROID_API_LEVELS=android-34
 ARG ANDROID_BUILD_TOOLS_VERSION=34.0.0
 ARG NDK_VERSION=25.2.9519653
-ENV ANDROID_HOME /home/libsignal/android-sdk
+ENV ANDROID_HOME /home/libmochi/android-sdk
 ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/cmdline-tools/bin
 
-ADD --chown=libsignal --checksum=sha256:${ANDROID_SDK_SHA} \
+ADD --chown=libmochi --checksum=sha256:${ANDROID_SDK_SHA} \
     https://dl.google.com/android/repository/${ANDROID_SDK_FILENAME} ${ANDROID_SDK_FILENAME}
 
 RUN    unzip -q ${ANDROID_SDK_FILENAME} -d android-sdk \
@@ -61,9 +61,9 @@ RUN    ./gradlew --version
 
 COPY rust-toolchain rust-toolchain
 ARG RUSTUP_SHA=ad1f8b5199b3b9e231472ed7aa08d2e5d1d539198a15c5b1e53c746aad81d27b
-ENV PATH="/home/libsignal/.cargo/bin:${PATH}"
+ENV PATH="/home/libmochi/.cargo/bin:${PATH}"
 
-ADD --chown=libsignal --chmod=755 --checksum=sha256:${RUSTUP_SHA} \
+ADD --chown=libmochi --chmod=755 --checksum=sha256:${RUSTUP_SHA} \
     https://static.rust-lang.org/rustup/archive/1.21.1/x86_64-unknown-linux-gnu/rustup-init /tmp/rustup-init
 
 RUN    /tmp/rustup-init -y --profile minimal --default-toolchain "$(cat rust-toolchain)" \
@@ -84,7 +84,7 @@ RUN    apt-get install -y \
                libclang-dev \
                make \
                protobuf-compiler
-USER libsignal
+USER libmochi
 
 # Convert ssh to https for git dependency access without a key.
 RUN    git config --global url."https://github".insteadOf ssh://git@github

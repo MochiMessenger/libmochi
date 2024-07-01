@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,7 +10,7 @@ use crate::protocol::SENDERKEY_MESSAGE_CURRENT_VERSION;
 use crate::sender_keys::{SenderKeyState, SenderMessageKey};
 use crate::{
     consts, CiphertextMessageType, KeyPair, ProtocolAddress, Result, SenderKeyDistributionMessage,
-    SenderKeyMessage, SenderKeyRecord, SenderKeyStore, SignalProtocolError,
+    SenderKeyMessage, SenderKeyRecord, SenderKeyStore, MochiProtocolError,
 };
 
 pub async fn group_encrypt<R: Rng + CryptoRng>(
@@ -23,31 +23,31 @@ pub async fn group_encrypt<R: Rng + CryptoRng>(
     let mut record = sender_key_store
         .load_sender_key(sender, distribution_id)
         .await?
-        .ok_or(SignalProtocolError::NoSenderKeyState { distribution_id })?;
+        .ok_or(MochiProtocolError::NoSenderKeyState { distribution_id })?;
 
     let sender_key_state = record
         .sender_key_state_mut()
-        .map_err(|_| SignalProtocolError::InvalidSenderKeySession { distribution_id })?;
+        .map_err(|_| MochiProtocolError::InvalidSenderKeySession { distribution_id })?;
 
     let sender_chain_key = sender_key_state
         .sender_chain_key()
-        .ok_or(SignalProtocolError::InvalidSenderKeySession { distribution_id })?;
+        .ok_or(MochiProtocolError::InvalidSenderKeySession { distribution_id })?;
 
     let message_keys = sender_chain_key.sender_message_key();
 
     let ciphertext =
-        signal_crypto::aes_256_cbc_encrypt(plaintext, message_keys.cipher_key(), message_keys.iv())
+        mochi_crypto::aes_256_cbc_encrypt(plaintext, message_keys.cipher_key(), message_keys.iv())
             .map_err(|_| {
                 log::error!(
                     "outgoing sender key state corrupt for distribution ID {}",
                     distribution_id,
                 );
-                SignalProtocolError::InvalidSenderKeySession { distribution_id }
+                MochiProtocolError::InvalidSenderKeySession { distribution_id }
             })?;
 
     let signing_key = sender_key_state
         .signing_key_private()
-        .map_err(|_| SignalProtocolError::InvalidSenderKeySession { distribution_id })?;
+        .map_err(|_| MochiProtocolError::InvalidSenderKeySession { distribution_id })?;
 
     let skm = SenderKeyMessage::new(
         sender_key_state.message_version() as u8,
@@ -75,7 +75,7 @@ fn get_sender_key(
 ) -> Result<SenderMessageKey> {
     let sender_chain_key = state
         .sender_chain_key()
-        .ok_or(SignalProtocolError::InvalidSenderKeySession { distribution_id })?;
+        .ok_or(MochiProtocolError::InvalidSenderKeySession { distribution_id })?;
     let current_iteration = sender_chain_key.iteration();
 
     if current_iteration > iteration {
@@ -87,7 +87,7 @@ fn get_sender_key(
                 distribution_id,
                 iteration
             );
-            return Err(SignalProtocolError::DuplicatedMessage(
+            return Err(MochiProtocolError::DuplicatedMessage(
                 current_iteration,
                 iteration,
             ));
@@ -102,7 +102,7 @@ fn get_sender_key(
             consts::MAX_FORWARD_JUMPS,
             current_iteration
         );
-        return Err(SignalProtocolError::InvalidMessage(
+        return Err(MochiProtocolError::InvalidMessage(
             CiphertextMessageType::SenderKey,
             "message from too far into the future",
         ));
@@ -132,7 +132,7 @@ pub async fn group_decrypt(
     let mut record = sender_key_store
         .load_sender_key(sender, skm.distribution_id())
         .await?
-        .ok_or(SignalProtocolError::NoSenderKeyState { distribution_id })?;
+        .ok_or(MochiProtocolError::NoSenderKeyState { distribution_id })?;
 
     let sender_key_state = match record.sender_key_state_for_chain_id(chain_id) {
         Some(state) => state,
@@ -143,44 +143,44 @@ pub async fn group_decrypt(
                 chain_id,
                 record.chain_ids_for_logging().collect::<Vec<_>>(),
             );
-            return Err(SignalProtocolError::NoSenderKeyState { distribution_id });
+            return Err(MochiProtocolError::NoSenderKeyState { distribution_id });
         }
     };
 
     let message_version = skm.message_version() as u32;
     if message_version != sender_key_state.message_version() {
-        return Err(SignalProtocolError::UnrecognizedMessageVersion(
+        return Err(MochiProtocolError::UnrecognizedMessageVersion(
             message_version,
         ));
     }
 
     let signing_key = sender_key_state
         .signing_key_public()
-        .map_err(|_| SignalProtocolError::InvalidSenderKeySession { distribution_id })?;
+        .map_err(|_| MochiProtocolError::InvalidSenderKeySession { distribution_id })?;
     if !skm.verify_signature(&signing_key)? {
-        return Err(SignalProtocolError::SignatureValidationFailed);
+        return Err(MochiProtocolError::SignatureValidationFailed);
     }
 
     let sender_key = get_sender_key(sender_key_state, skm.iteration(), distribution_id)?;
 
-    let plaintext = match signal_crypto::aes_256_cbc_decrypt(
+    let plaintext = match mochi_crypto::aes_256_cbc_decrypt(
         skm.ciphertext(),
         sender_key.cipher_key(),
         sender_key.iv(),
     ) {
         Ok(plaintext) => plaintext,
-        Err(signal_crypto::DecryptionError::BadKeyOrIv) => {
+        Err(mochi_crypto::DecryptionError::BadKeyOrIv) => {
             log::error!(
                 "incoming sender key state corrupt for {}, distribution ID {}, chain ID {}",
                 sender,
                 distribution_id,
                 chain_id,
             );
-            return Err(SignalProtocolError::InvalidSenderKeySession { distribution_id });
+            return Err(MochiProtocolError::InvalidSenderKeySession { distribution_id });
         }
-        Err(signal_crypto::DecryptionError::BadCiphertext(msg)) => {
+        Err(mochi_crypto::DecryptionError::BadCiphertext(msg)) => {
             log::error!("sender key decryption failed: {}", msg);
-            return Err(SignalProtocolError::InvalidMessage(
+            return Err(MochiProtocolError::InvalidMessage(
                 CiphertextMessageType::SenderKey,
                 "decryption failed",
             ));
@@ -239,7 +239,7 @@ pub async fn create_sender_key_distribution_message<R: Rng + CryptoRng>(
     let sender_key_record = match sender_key_record {
         Some(record) => record,
         None => {
-            // libsignal-protocol-java uses 31-bit integers for sender key chain IDs
+            // libmochi-protocol-java uses 31-bit integers for sender key chain IDs
             let chain_id = (csprng.gen::<u32>()) >> 1;
             log::info!(
                 "Creating SenderKey for distribution {} with chain ID {}",
@@ -268,10 +268,10 @@ pub async fn create_sender_key_distribution_message<R: Rng + CryptoRng>(
 
     let state = sender_key_record
         .sender_key_state()
-        .map_err(|_| SignalProtocolError::InvalidSenderKeySession { distribution_id })?;
+        .map_err(|_| MochiProtocolError::InvalidSenderKeySession { distribution_id })?;
     let sender_chain_key = state
         .sender_chain_key()
-        .ok_or(SignalProtocolError::InvalidSenderKeySession { distribution_id })?;
+        .ok_or(MochiProtocolError::InvalidSenderKeySession { distribution_id })?;
 
     SenderKeyDistributionMessage::new(
         state.message_version() as u8,
@@ -281,6 +281,6 @@ pub async fn create_sender_key_distribution_message<R: Rng + CryptoRng>(
         sender_chain_key.seed().to_vec(),
         state
             .signing_key_public()
-            .map_err(|_| SignalProtocolError::InvalidSenderKeySession { distribution_id })?,
+            .map_err(|_| MochiProtocolError::InvalidSenderKeySession { distribution_id })?,
     )
 }

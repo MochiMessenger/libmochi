@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -976,13 +976,13 @@ mod test {
             host,
             nonzero!(443u16),
             HttpRequestDecoratorSeq::default(),
-            RootCertificates::Signal,
+            RootCertificates::Mochi,
         )
     }
 
     #[test_matrix([None, Some("x-pinky-promise")])]
     fn classify_errors(confirmation_header: Option<&'static str>) {
-        let connection_params = example_connection_params("example.signal.org");
+        let connection_params = example_connection_params("example.mochi.org");
         let connection_params = if let Some(header) = confirmation_header {
             connection_params.with_confirmation_header(http::HeaderName::from_static(header))
         } else {

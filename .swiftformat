@@ -1,4 +1,4 @@
-#--header "\nCopyright {created.year} Signal Messenger, LLC.\nSPDX-License-Identifier: AGPL-3.0-only\n"
+#--header "\nCopyright {created.year} Mochi Messenger, LLC.\nSPDX-License-Identifier: AGPL-3.0-only\n"
 --disable hoistPatternLet
 # Explicit self is better than implicit self.
 --self insert
@@ -6,7 +6,7 @@
 --stripunusedargs unnamed-only
 --wraparguments before-first
 --wrapcollections before-first
-# Libsignal is a collection of many languages, remembering specific of each one is hard. Make it explicit.
+# Libmochi is a collection of many languages, remembering specific of each one is hard. Make it explicit.
 --disable redundantinternal
 # Ranges look better without spaces
 --ranges no-space

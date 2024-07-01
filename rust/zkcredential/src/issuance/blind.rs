@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -446,7 +446,7 @@ impl BlindedIssuanceProofBuilder<'_> {
     ) -> BlindedIssuanceProof {
         self.finalize_public_attrs();
 
-        let mut sho = ShoHmacSha256::new(b"Signal_ZKCredential_BlindIssuance_20230410");
+        let mut sho = ShoHmacSha256::new(b"Mochi_ZKCredential_BlindIssuance_20230410");
         sho.absorb_and_ratchet(&randomness);
 
         let rprime = sho.get_scalar();

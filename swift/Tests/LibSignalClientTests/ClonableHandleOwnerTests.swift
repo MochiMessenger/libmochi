@@ -1,9 +1,9 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-@testable import LibSignalClient
+@testable import LibMochiClient
 import XCTest
 
 private struct FakeHandle {
@@ -14,13 +14,13 @@ private struct FakeHandle {
 }
 
 private class MockClonableHandleOwner: ClonableHandleOwner {
-    override class func cloneNativeHandle(_ newHandle: inout OpaquePointer?, currentHandle: OpaquePointer?) -> SignalFfiErrorRef? {
+    override class func cloneNativeHandle(_ newHandle: inout OpaquePointer?, currentHandle: OpaquePointer?) -> MochiFfiErrorRef? {
         XCTAssertFalse(UnsafePointer<Bool>(currentHandle!).pointee)
         newHandle = OpaquePointer(UnsafePointer<Bool>(currentHandle!) + 1)
         return nil
     }
 
-    override class func destroyNativeHandle(_ handle: OpaquePointer) -> SignalFfiErrorRef? {
+    override class func destroyNativeHandle(_ handle: OpaquePointer) -> MochiFfiErrorRef? {
         UnsafeMutablePointer<Bool>(handle).pointee = true
         return nil
     }

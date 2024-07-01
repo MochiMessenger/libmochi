@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,20 +7,20 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use assert_matches::assert_matches;
-use libsignal_net::infra::dns::DnsResolver;
-use libsignal_net::infra::ws::DefaultStream;
+use libmochi_net::infra::dns::DnsResolver;
+use libmochi_net::infra::ws::DefaultStream;
 use proptest::prelude::*;
 use proptest::test_runner::Config;
 use proptest_state_machine::{prop_state_machine, ReferenceStateMachine, StateMachineTest};
 use rand_core::OsRng;
 
-use libsignal_net::auth::Auth;
-use libsignal_net::enclave::{EnclaveEndpointConnection, Nitro, PpssSetup, Sgx, Tpm2Snp};
-use libsignal_net::env::Svr3Env;
-use libsignal_net::infra::tcp_ssl::DirectConnector as TcpSslTransportConnector;
-use libsignal_net::svr::SvrConnection;
-use libsignal_net::svr3::{Error, OpaqueMaskedShareSet, PpssOps as _};
-use libsignal_svr3::EvaluationResult;
+use libmochi_net::auth::Auth;
+use libmochi_net::enclave::{EnclaveEndpointConnection, Nitro, PpssSetup, Sgx, Tpm2Snp};
+use libmochi_net::env::Svr3Env;
+use libmochi_net::infra::tcp_ssl::DirectConnector as TcpSslTransportConnector;
+use libmochi_net::svr::SvrConnection;
+use libmochi_net::svr3::{Error, OpaqueMaskedShareSet, PpssOps as _};
+use libmochi_svr3::EvaluationResult;
 use support::*;
 
 const MAX_TRIES_LIMIT: u32 = 10;
@@ -299,8 +299,8 @@ impl StateMachineTest for Svr3Storage {
 impl Svr3Storage {
     fn new() -> Self {
         let enclave_secret = {
-            let b64 = std::env::var("LIBSIGNAL_TESTING_ENCLAVE_SECRET")
-                .expect("LIBSIGNAL_TESTING_ENCLAVE_SECRET should be set");
+            let b64 = std::env::var("LIBMOCHI_TESTING_ENCLAVE_SECRET")
+                .expect("LIBMOCHI_TESTING_ENCLAVE_SECRET should be set");
             parse_auth_secret(&b64)
         };
 
@@ -311,7 +311,7 @@ impl Svr3Storage {
             .expect("can build runtime");
         Self {
             runtime,
-            env: libsignal_net::env::STAGING.svr3,
+            env: libmochi_net::env::STAGING.svr3,
             current_uid: None,
             enclave_secret,
             share_sets: HashMap::default(),

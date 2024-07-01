@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -46,7 +46,7 @@ impl GroupSendDerivedKeyPair {
     /// Encapsulates the "tag info", or public attributes, of an endorsement, which is used to derive
     /// the appropriate signing key.
     fn tag_info(expiration: Timestamp) -> impl poksho::ShoApi + Clone {
-        let mut sho = poksho::ShoHmacSha256::new(b"20240215_Signal_GroupSendEndorsement");
+        let mut sho = poksho::ShoHmacSha256::new(b"20240215_Mochi_GroupSendEndorsement");
         sho.absorb_and_ratchet(&expiration.to_be_bytes());
         sho
     }
@@ -183,7 +183,7 @@ impl GroupSendEndorsementsResponse {
     /// parallelized.
     pub fn receive_with_service_ids_single_threaded(
         self,
-        user_ids: impl IntoIterator<Item = libsignal_core::ServiceId>,
+        user_ids: impl IntoIterator<Item = libmochi_core::ServiceId>,
         now: Timestamp,
         group_params: &GroupSecretParams,
         server_params: &ServerPublicParams,
@@ -242,7 +242,7 @@ impl GroupSendEndorsementsResponse {
         server_params: &ServerPublicParams,
     ) -> Result<Vec<ReceivedEndorsement>, ZkGroupVerificationFailure>
     where
-        T: rayon::iter::IntoParallelIterator<Item = libsignal_core::ServiceId>,
+        T: rayon::iter::IntoParallelIterator<Item = libmochi_core::ServiceId>,
         T::Iter: rayon::iter::IndexedParallelIterator,
     {
         let derived_key = self.derive_public_signing_key_from_expiration(now, server_params)?;
@@ -555,7 +555,7 @@ impl GroupSendFullToken {
     /// `key_pair`.
     pub fn verify(
         &self,
-        user_ids: impl IntoIterator<Item = libsignal_core::ServiceId>,
+        user_ids: impl IntoIterator<Item = libmochi_core::ServiceId>,
         now: Timestamp,
         key_pair: &GroupSendDerivedKeyPair,
     ) -> Result<(), ZkGroupVerificationFailure> {

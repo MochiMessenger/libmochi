@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2023 Signal Messenger, LLC.
+// Copyright (C) 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@ use std::fmt::Debug;
 
 use chat::ChatItemData;
 use derive_where::derive_where;
-use libsignal_protocol::Aci;
+use libmochi_protocol::Aci;
 
 pub(crate) use crate::backup::account_data::{AccountData, AccountDataError};
 use crate::backup::call::{AdHocCall, CallError};

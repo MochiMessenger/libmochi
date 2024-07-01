@@ -1,11 +1,11 @@
 //
-// Copyright 2022 Signal Messenger, LLC.
+// Copyright 2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import { assert, use } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
-import * as SignalClient from '../index';
+import * as MochiClient from '../index';
 import * as util from './util';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
@@ -25,7 +25,7 @@ describe('Cds2Client', () => {
   );
 
   it('create client', () => {
-    const cds2Client = SignalClient.Cds2Client.new(
+    const cds2Client = MochiClient.Cds2Client.new(
       mrenclave,
       attestationMessage,
       currentDate
@@ -36,7 +36,7 @@ describe('Cds2Client', () => {
   it('invalid mrenclave', () => {
     const invalidMrenclave = Buffer.from([]);
     try {
-      SignalClient.Cds2Client.new(
+      MochiClient.Cds2Client.new(
         invalidMrenclave,
         attestationMessage,
         currentDate
@@ -47,7 +47,7 @@ describe('Cds2Client', () => {
     }
   });
   it('complete handshake without initial request', () => {
-    const cds2Client = SignalClient.Cds2Client.new(
+    const cds2Client = MochiClient.Cds2Client.new(
       mrenclave,
       attestationMessage,
       currentDate
@@ -58,13 +58,13 @@ describe('Cds2Client', () => {
       assert.fail();
     } catch (e) {
       assert.instanceOf(e, Error);
-      assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-      const err = e as SignalClient.LibSignalError;
+      assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+      const err = e as MochiClient.LibMochiError;
       assert.equal(err.operation, 'SgxClientState_CompleteHandshake'); // the Rust entry point
     }
   });
   it('established send fails prior to establishment', () => {
-    const cds2Client = SignalClient.Cds2Client.new(
+    const cds2Client = MochiClient.Cds2Client.new(
       mrenclave,
       attestationMessage,
       currentDate
@@ -75,13 +75,13 @@ describe('Cds2Client', () => {
       assert.fail();
     } catch (e) {
       assert.instanceOf(e, Error);
-      assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-      const err = e as SignalClient.LibSignalError;
+      assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+      const err = e as MochiClient.LibMochiError;
       assert.equal(err.operation, 'SgxClientState_EstablishedSend'); // the Rust entry point
     }
   });
   it('established recv fails prior to establishment', () => {
-    const cds2Client = SignalClient.Cds2Client.new(
+    const cds2Client = MochiClient.Cds2Client.new(
       mrenclave,
       attestationMessage,
       currentDate
@@ -92,8 +92,8 @@ describe('Cds2Client', () => {
       assert.fail();
     } catch (e) {
       assert.instanceOf(e, Error);
-      assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-      const err = e as SignalClient.LibSignalError;
+      assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+      const err = e as MochiClient.LibMochiError;
       assert.equal(err.operation, 'SgxClientState_EstablishedRecv'); // the Rust entry point
     }
   });

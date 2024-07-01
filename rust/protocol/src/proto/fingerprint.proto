@@ -1,11 +1,11 @@
 syntax = "proto2";
 
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-package signal.proto.fingerprint;
+package mochi.proto.fingerprint;
 
 message LogicalFingerprint {
   optional bytes content = 1;

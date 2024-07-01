@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Signal Messenger, LLC.
+// Copyright (C) 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -30,7 +30,7 @@ pub enum UpdateMessage {
 #[derive(Debug)]
 #[cfg_attr(test, derive(PartialEq))]
 pub enum SimpleChatUpdate {
-    JoinedSignal,
+    JoinedMochi,
     IdentityUpdate,
     IdentityVerified,
     IdentityDefault,
@@ -64,7 +64,7 @@ impl<R: Contains<RecipientId>> TryFromWith<proto::ChatUpdateMessage, R> for Upda
                 use proto::simple_chat_update::Type;
                 match type_.enum_value_or_default() {
                     Type::UNKNOWN => return Err(ChatItemError::ChatUpdateUnknown),
-                    Type::JOINED_SIGNAL => SimpleChatUpdate::JoinedSignal,
+                    Type::JOINED_MOCHI => SimpleChatUpdate::JoinedMochi,
                     Type::IDENTITY_UPDATE => SimpleChatUpdate::IdentityUpdate,
                     Type::IDENTITY_VERIFIED => SimpleChatUpdate::IdentityVerified,
                     Type::IDENTITY_DEFAULT => SimpleChatUpdate::IdentityDefault,

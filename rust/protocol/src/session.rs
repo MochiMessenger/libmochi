@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,12 +7,12 @@ use std::time::SystemTime;
 
 use crate::{
     kem, Direction, IdentityKeyStore, KeyPair, KyberPreKeyId, KyberPreKeyStore, PreKeyBundle,
-    PreKeyId, PreKeySignalMessage, PreKeyStore, ProtocolAddress, Result, SessionRecord,
-    SessionStore, SignalProtocolError, SignedPreKeyStore,
+    PreKeyId, PreKeyMochiMessage, PreKeyStore, ProtocolAddress, Result, SessionRecord,
+    SessionStore, MochiProtocolError, SignedPreKeyStore,
 };
 
 use crate::ratchet;
-use crate::ratchet::{AliceSignalProtocolParameters, BobSignalProtocolParameters};
+use crate::ratchet::{AliceMochiProtocolParameters, BobMochiProtocolParameters};
 use crate::state::GenericSignedPreKey;
 use rand::{CryptoRng, Rng};
 
@@ -32,7 +32,7 @@ free standing.
  */
 
 pub async fn process_prekey(
-    message: &PreKeySignalMessage,
+    message: &PreKeyMochiMessage,
     remote_address: &ProtocolAddress,
     session_record: &mut SessionRecord,
     identity_store: &mut dyn IdentityKeyStore,
@@ -46,7 +46,7 @@ pub async fn process_prekey(
         .is_trusted_identity(remote_address, their_identity_key, Direction::Receiving)
         .await?
     {
-        return Err(SignalProtocolError::UntrustedIdentity(
+        return Err(MochiProtocolError::UntrustedIdentity(
             remote_address.clone(),
         ));
     }
@@ -70,7 +70,7 @@ pub async fn process_prekey(
 }
 
 async fn process_prekey_impl(
-    message: &PreKeySignalMessage,
+    message: &PreKeyMochiMessage,
     remote_address: &ProtocolAddress,
     session_record: &mut SessionRecord,
     signed_prekey_store: &dyn SignedPreKeyStore,
@@ -115,7 +115,7 @@ async fn process_prekey_impl(
         None
     };
 
-    let parameters = BobSignalProtocolParameters::new(
+    let parameters = BobMochiProtocolParameters::new(
         identity_store.get_identity_key_pair().await?,
         our_signed_pre_key_pair, // signed pre key
         our_one_time_pre_key_pair,
@@ -154,7 +154,7 @@ pub async fn process_prekey_bundle<R: Rng + CryptoRng>(
         .is_trusted_identity(remote_address, their_identity_key, Direction::Sending)
         .await?
     {
-        return Err(SignalProtocolError::UntrustedIdentity(
+        return Err(MochiProtocolError::UntrustedIdentity(
             remote_address.clone(),
         ));
     }
@@ -163,7 +163,7 @@ pub async fn process_prekey_bundle<R: Rng + CryptoRng>(
         &bundle.signed_pre_key_public()?.serialize(),
         bundle.signed_pre_key_signature()?,
     )? {
-        return Err(SignalProtocolError::SignatureValidationFailed);
+        return Err(MochiProtocolError::SignatureValidationFailed);
     }
 
     if let Some(kyber_public) = bundle.kyber_pre_key_public()? {
@@ -173,7 +173,7 @@ pub async fn process_prekey_bundle<R: Rng + CryptoRng>(
                 .kyber_pre_key_signature()?
                 .expect("signature must be present"),
         )? {
-            return Err(SignalProtocolError::SignatureValidationFailed);
+            return Err(MochiProtocolError::SignatureValidationFailed);
         }
     }
 
@@ -189,7 +189,7 @@ pub async fn process_prekey_bundle<R: Rng + CryptoRng>(
 
     let our_identity_key_pair = identity_store.get_identity_key_pair().await?;
 
-    let mut parameters = AliceSignalProtocolParameters::new(
+    let mut parameters = AliceMochiProtocolParameters::new(
         our_identity_key_pair,
         our_base_key_pair,
         *their_identity_key,

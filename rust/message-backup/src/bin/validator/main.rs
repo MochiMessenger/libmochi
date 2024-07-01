@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -9,15 +9,15 @@ use clap::{Args, Parser};
 use futures::io::AllowStdIo;
 use futures::AsyncRead;
 
-use libsignal_message_backup::args::{parse_aci, parse_hex_bytes};
-use libsignal_message_backup::backup::Purpose;
-use libsignal_message_backup::frame::{
+use libmochi_message_backup::args::{parse_aci, parse_hex_bytes};
+use libmochi_message_backup::backup::Purpose;
+use libmochi_message_backup::frame::{
     CursorFactory, FileReaderFactory, FramesReader, ReaderFactory, UnvalidatedHmacReader,
     VerifyHmac,
 };
-use libsignal_message_backup::key::{BackupKey, MessageBackupKey};
-use libsignal_message_backup::{BackupReader, Error, FoundUnknownField, ReadResult};
-use libsignal_protocol::Aci;
+use libmochi_message_backup::key::{BackupKey, MessageBackupKey};
+use libmochi_message_backup::{BackupReader, Error, FoundUnknownField, ReadResult};
+use libmochi_protocol::Aci;
 use mediasan_common::SeekSkipAdapter;
 
 use crate::args::ParseVerbosity;

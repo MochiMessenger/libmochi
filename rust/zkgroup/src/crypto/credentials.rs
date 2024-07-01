@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -249,7 +249,7 @@ impl SystemParams {
     #[cfg(test)]
     fn generate() -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Constant_Credentials_SystemParams_Generate",
+            b"Mochi_ZKGroup_20200424_Constant_Credentials_SystemParams_Generate",
             b"",
         );
         let G_w = sho.get_point();
@@ -495,9 +495,9 @@ mod tests {
 
         let uid_bytes = TEST_ARRAY_16;
         let redemption_time = Timestamp::from_epoch_seconds(37 * SECONDS_PER_DAY);
-        let aci = libsignal_core::Aci::from_uuid_bytes(uid_bytes);
+        let aci = libmochi_core::Aci::from_uuid_bytes(uid_bytes);
         let aci_struct = uid_struct::UidStruct::from_service_id(aci.into());
-        let pni = libsignal_core::Aci::from_uuid_bytes(uid_bytes);
+        let pni = libmochi_core::Aci::from_uuid_bytes(uid_bytes);
         let pni_struct = uid_struct::UidStruct::from_service_id(pni.into());
         let credential = keypair.create_auth_credential_with_pni(
             aci_struct,

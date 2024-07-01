@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'libsignal'
+rootProject.name = 'libmochi'
 
 include 'client', 'server', 'shared'
 

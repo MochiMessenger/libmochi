@@ -1,12 +1,12 @@
 #
-# Copyright (C) 2023 Signal Messenger, LLC.
+# Copyright (C) 2023 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 [package]
-name = "libsignal-message-backup"
+name = "libmochi-message-backup"
 version = "0.1.0"
 edition = "2021"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 license = "AGPL-3.0-only"
 
 [features]
@@ -22,9 +22,9 @@ name = "binproto_to_json"
 required-features = ["json"]
 
 [dependencies]
-libsignal-message-backup-macros = { path = "macros" }
-libsignal-protocol = { path = "../protocol" }
-signal-crypto = { path = "../crypto" }
+libmochi-message-backup-macros = { path = "macros" }
+libmochi-protocol = { path = "../protocol" }
+mochi-crypto = { path = "../crypto" }
 usernames = { path = "../usernames" }
 zkcredential = { path = "../zkcredential", features = ["rayon"] }
 zkgroup = { path = "../zkgroup" }
@@ -63,8 +63,8 @@ thiserror = "1.0.50"
 uuid = "1.1.2"
 
 [dev-dependencies]
-libsignal-message-backup = { path = "./", features = ["json"] }
-signal-crypto = { path = "../crypto" }
+libmochi-message-backup = { path = "./", features = ["json"] }
+mochi-crypto = { path = "../crypto" }
 
 array-concat = "0.5.2"
 assert_cmd = "2.0.13"

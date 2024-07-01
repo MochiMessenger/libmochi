@@ -1,4 +1,4 @@
-# Making a libsignal release
+# Making a libmochi release
 
 ## 0. Make sure all CI tests are passing on the latest commit
 
@@ -6,9 +6,9 @@ Check GitHub to see if the latest commit has all tests passing, including the ni
 
 ## 1. Update the library version
 
-The first version component should always be 0, to indicate that Signal does not promise stability between releases of the library.
+The first version component should always be 0, to indicate that Mochi does not promise stability between releases of the library.
 
-A change is "breaking" if it will require updates in any of the Signal client apps or server components, or in external Rust clients of libsignal-protocol, zkgroup, poksho, attest, device-transfer, or signal-crypto. If there are any breaking changes, increase the second version component and reset the third to 0. Otherwise, increase the third version component.
+A change is "breaking" if it will require updates in any of the Mochi client apps or server components, or in external Rust clients of libmochi-protocol, zkgroup, poksho, attest, device-transfer, or mochi-crypto. If there are any breaking changes, increase the second version component and reset the third to 0. Otherwise, increase the third version component.
 
 ```
 bin/update_versions.py 0.x.y
@@ -32,7 +32,7 @@ Take a look at a past release for examples of the format:
 ```
 v0.8.3
 
-- Fixed several issues running signal-crypto operations on 32-bit
+- Fixed several issues running mochi-crypto operations on 32-bit
   platforms.
 - Removed custom implementation of AES-GCM-SIV, AES, AES-CTR, and
   GHash in favor of the implementations from RustCrypto. The interface
@@ -51,14 +51,14 @@ Note that both the tag *and* the branch need to be pushed.
 
 ### Android and Server: Sonatype
 
-In the signalapp/libsignal repository on GitHub, run the "Upload Java libraries to Sonatype" action on the tag you just made. Then go to [Maven Central][] and wait for the build to show up (it can take up to an hour).
+In the mochimessenger/libmochi repository on GitHub, run the "Upload Java libraries to Sonatype" action on the tag you just made. Then go to [Maven Central][] and wait for the build to show up (it can take up to an hour).
 
-[Maven Central]: https://central.sonatype.com/artifact/org.signal/libsignal-client/versions
+[Maven Central]: https://central.sonatype.com/artifact/org.mochi/libmochi-client/versions
 
 ### Node: NPM
 
-In the signalapp/libsignal repository on GitHub, run the "Publish to NPM" action on the tag you just made. Leave the "NPM Tag" as "latest".
+In the mochimessenger/libmochi repository on GitHub, run the "Publish to NPM" action on the tag you just made. Leave the "NPM Tag" as "latest".
 
 ### iOS: Build Artifacts
 
-In the signalapp/libsignal repository on GitHub, run the "Build iOS Artifacts" action on the tag you just made. Share the resulting checksum with whoever will update the iOS app repository.
+In the mochimessenger/libmochi repository on GitHub, run the "Build iOS Artifacts" action on the tag you just made. Share the resulting checksum with whoever will update the iOS app repository.

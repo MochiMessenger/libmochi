@@ -1,16 +1,16 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use crate::net::chat::{ChatListener, MakeChatListener, ServerMessageAck};
 use crate::node::ResultTypeInfo;
-use libsignal_protocol::Timestamp;
+use libmochi_protocol::Timestamp;
 use neon::context::FunctionContext;
 use neon::event::Channel;
 use neon::handle::{Handle, Root};
 use neon::prelude::{Context, Finalize, JsObject, Object};
-use signal_neon_futures::call_method;
+use mochi_neon_futures::call_method;
 use std::sync::Arc;
 
 #[derive(Clone)]

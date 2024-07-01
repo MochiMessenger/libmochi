@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -12,8 +12,8 @@ use crate::ratchet::{ChainKey, MessageKeys};
 use crate::state::{InvalidSessionError, SessionState};
 use crate::{
     session, CiphertextMessage, CiphertextMessageType, Direction, IdentityKeyStore, KeyPair,
-    KyberPayload, KyberPreKeyStore, PreKeySignalMessage, PreKeyStore, ProtocolAddress, PublicKey,
-    Result, SessionRecord, SessionStore, SignalMessage, SignalProtocolError, SignedPreKeyStore,
+    KyberPayload, KyberPreKeyStore, PreKeyMochiMessage, PreKeyStore, ProtocolAddress, PublicKey,
+    Result, SessionRecord, SessionStore, MochiMessage, MochiProtocolError, SignedPreKeyStore,
 };
 
 pub async fn message_encrypt(
@@ -26,10 +26,10 @@ pub async fn message_encrypt(
     let mut session_record = session_store
         .load_session(remote_address)
         .await?
-        .ok_or_else(|| SignalProtocolError::SessionNotFound(remote_address.clone()))?;
+        .ok_or_else(|| MochiProtocolError::SessionNotFound(remote_address.clone()))?;
     let session_state = session_record
         .session_state_mut()
-        .ok_or_else(|| SignalProtocolError::SessionNotFound(remote_address.clone()))?;
+        .ok_or_else(|| MochiProtocolError::SessionNotFound(remote_address.clone()))?;
 
     let chain_key = session_state.get_sender_chain_key()?;
 
@@ -41,17 +41,17 @@ pub async fn message_encrypt(
 
     let local_identity_key = session_state.local_identity_key()?;
     let their_identity_key = session_state.remote_identity_key()?.ok_or_else(|| {
-        SignalProtocolError::InvalidState(
+        MochiProtocolError::InvalidState(
             "message_encrypt",
             format!("no remote identity key for {}", remote_address),
         )
     })?;
 
     let ctext =
-        signal_crypto::aes_256_cbc_encrypt(ptext, message_keys.cipher_key(), message_keys.iv())
+        mochi_crypto::aes_256_cbc_encrypt(ptext, message_keys.cipher_key(), message_keys.iv())
             .map_err(|_| {
                 log::error!("session state corrupt for {}", remote_address);
-                SignalProtocolError::InvalidSessionStructure("invalid sender chain message keys")
+                MochiProtocolError::InvalidSessionStructure("invalid sender chain message keys")
             })?;
 
     let message = if let Some(items) = session_state.unacknowledged_pre_key_message_items()? {
@@ -66,7 +66,7 @@ pub async fn message_encrypt(
                 remote_address,
                 timestamp_as_unix_time
             );
-            return Err(SignalProtocolError::SessionNotFound(remote_address.clone()));
+            return Err(MochiProtocolError::SessionNotFound(remote_address.clone()));
         }
 
         let local_registration_id = session_state.local_registration_id();
@@ -80,7 +80,7 @@ pub async fn message_encrypt(
             timestamp_as_unix_time,
         );
 
-        let message = SignalMessage::new(
+        let message = MochiMessage::new(
             session_version,
             message_keys.mac_key(),
             sender_ephemeral,
@@ -96,7 +96,7 @@ pub async fn message_encrypt(
             .zip(items.kyber_ciphertext())
             .map(|(id, ciphertext)| KyberPayload::new(id, ciphertext.into()));
 
-        CiphertextMessage::PreKeySignalMessage(PreKeySignalMessage::new(
+        CiphertextMessage::PreKeyMochiMessage(PreKeyMochiMessage::new(
             session_version,
             local_registration_id,
             items.pre_key_id(),
@@ -107,7 +107,7 @@ pub async fn message_encrypt(
             message,
         )?)
     } else {
-        CiphertextMessage::SignalMessage(SignalMessage::new(
+        CiphertextMessage::MochiMessage(MochiMessage::new(
             session_version,
             message_keys.mac_key(),
             sender_ephemeral,
@@ -134,7 +134,7 @@ pub async fn message_encrypt(
                 .map_or_else(|e| format!("<error: {}>", e), hex::encode),
             remote_address,
         );
-        return Err(SignalProtocolError::UntrustedIdentity(
+        return Err(MochiProtocolError::UntrustedIdentity(
             remote_address.clone(),
         ));
     }
@@ -162,10 +162,10 @@ pub async fn message_decrypt<R: Rng + CryptoRng>(
     csprng: &mut R,
 ) -> Result<Vec<u8>> {
     match ciphertext {
-        CiphertextMessage::SignalMessage(m) => {
-            message_decrypt_signal(m, remote_address, session_store, identity_store, csprng).await
+        CiphertextMessage::MochiMessage(m) => {
+            message_decrypt_mochi(m, remote_address, session_store, identity_store, csprng).await
         }
-        CiphertextMessage::PreKeySignalMessage(m) => {
+        CiphertextMessage::PreKeyMochiMessage(m) => {
             message_decrypt_prekey(
                 m,
                 remote_address,
@@ -178,7 +178,7 @@ pub async fn message_decrypt<R: Rng + CryptoRng>(
             )
             .await
         }
-        _ => Err(SignalProtocolError::InvalidArgument(format!(
+        _ => Err(MochiProtocolError::InvalidArgument(format!(
             "message_decrypt cannot be used to decrypt {:?} messages",
             ciphertext.message_type()
         ))),
@@ -187,7 +187,7 @@ pub async fn message_decrypt<R: Rng + CryptoRng>(
 
 #[allow(clippy::too_many_arguments)]
 pub async fn message_decrypt_prekey<R: Rng + CryptoRng>(
-    ciphertext: &PreKeySignalMessage,
+    ciphertext: &PreKeyMochiMessage,
     remote_address: &ProtocolAddress,
     session_store: &mut dyn SessionStore,
     identity_store: &mut dyn IdentityKeyStore,
@@ -256,8 +256,8 @@ pub async fn message_decrypt_prekey<R: Rng + CryptoRng>(
     Ok(ptext)
 }
 
-pub async fn message_decrypt_signal<R: Rng + CryptoRng>(
-    ciphertext: &SignalMessage,
+pub async fn message_decrypt_mochi<R: Rng + CryptoRng>(
+    ciphertext: &MochiMessage,
     remote_address: &ProtocolAddress,
     session_store: &mut dyn SessionStore,
     identity_store: &mut dyn IdentityKeyStore,
@@ -266,7 +266,7 @@ pub async fn message_decrypt_signal<R: Rng + CryptoRng>(
     let mut session_record = session_store
         .load_session(remote_address)
         .await?
-        .ok_or_else(|| SignalProtocolError::SessionNotFound(remote_address.clone()))?;
+        .ok_or_else(|| MochiProtocolError::SessionNotFound(remote_address.clone()))?;
 
     let ptext = decrypt_message_with_record(
         remote_address,
@@ -296,7 +296,7 @@ pub async fn message_decrypt_signal<R: Rng + CryptoRng>(
                 .map_or_else(|e| format!("<error: {}>", e), hex::encode),
             remote_address,
         );
-        return Err(SignalProtocolError::UntrustedIdentity(
+        return Err(MochiProtocolError::UntrustedIdentity(
             remote_address.clone(),
         ));
     }
@@ -314,15 +314,15 @@ pub async fn message_decrypt_signal<R: Rng + CryptoRng>(
 
 fn create_decryption_failure_log(
     remote_address: &ProtocolAddress,
-    mut errs: &[SignalProtocolError],
+    mut errs: &[MochiProtocolError],
     record: &SessionRecord,
-    ciphertext: &SignalMessage,
+    ciphertext: &MochiMessage,
 ) -> Result<String> {
     fn append_session_summary(
         lines: &mut Vec<String>,
         idx: usize,
         state: std::result::Result<&SessionState, InvalidSessionError>,
-        err: Option<&SignalProtocolError>,
+        err: Option<&MochiProtocolError>,
     ) {
         let chains = state.map(|state| state.all_receiver_chain_logging_info());
         match (err, &chains) {
@@ -408,7 +408,7 @@ fn create_decryption_failure_log(
 fn decrypt_message_with_record<R: Rng + CryptoRng>(
     remote_address: &ProtocolAddress,
     record: &mut SessionRecord,
-    ciphertext: &SignalMessage,
+    ciphertext: &MochiMessage,
     original_message_type: CiphertextMessageType,
     csprng: &mut R,
 ) -> Result<Vec<u8>> {
@@ -416,7 +416,7 @@ fn decrypt_message_with_record<R: Rng + CryptoRng>(
         original_message_type,
         CiphertextMessageType::Whisper | CiphertextMessageType::PreKey
     ));
-    let log_decryption_failure = |state: &SessionState, error: &SignalProtocolError| {
+    let log_decryption_failure = |state: &SessionState, error: &MochiProtocolError| {
         // A warning rather than an error because we try multiple sessions.
         log::warn!(
             "Failed to decrypt {:?} message with ratchet key: {} and counter: {}. \
@@ -462,7 +462,7 @@ fn decrypt_message_with_record<R: Rng + CryptoRng>(
                 record.set_session_state(current_state); // update the state
                 return Ok(ptext);
             }
-            Err(SignalProtocolError::DuplicatedMessage(_, _)) => {
+            Err(MochiProtocolError::DuplicatedMessage(_, _)) => {
                 return result;
             }
             Err(e) => {
@@ -500,7 +500,7 @@ fn decrypt_message_with_record<R: Rng + CryptoRng>(
                 updated_session = Some((ptext, idx, previous));
                 break;
             }
-            Err(SignalProtocolError::DuplicatedMessage(_, _)) => {
+            Err(MochiProtocolError::DuplicatedMessage(_, _)) => {
                 return result;
             }
             Err(e) => {
@@ -535,7 +535,7 @@ fn decrypt_message_with_record<R: Rng + CryptoRng>(
             "{}",
             create_decryption_failure_log(remote_address, &errs, record, ciphertext)?
         );
-        Err(SignalProtocolError::InvalidMessage(
+        Err(MochiProtocolError::InvalidMessage(
             original_message_type,
             "decryption failed",
         ))
@@ -560,14 +560,14 @@ impl std::fmt::Display for CurrentOrPrevious {
 fn decrypt_message_with_state<R: Rng + CryptoRng>(
     current_or_previous: CurrentOrPrevious,
     state: &mut SessionState,
-    ciphertext: &SignalMessage,
+    ciphertext: &MochiMessage,
     original_message_type: CiphertextMessageType,
     remote_address: &ProtocolAddress,
     csprng: &mut R,
 ) -> Result<Vec<u8>> {
     // Check for a completely empty or invalid session state before we do anything else.
     let _ = state.root_key().map_err(|_| {
-        SignalProtocolError::InvalidMessage(
+        MochiProtocolError::InvalidMessage(
             original_message_type,
             "No session available to decrypt",
         )
@@ -575,7 +575,7 @@ fn decrypt_message_with_state<R: Rng + CryptoRng>(
 
     let ciphertext_version = ciphertext.message_version() as u32;
     if ciphertext_version != state.session_version()? {
-        return Err(SignalProtocolError::UnrecognizedMessageVersion(
+        return Err(MochiProtocolError::UnrecognizedMessageVersion(
             ciphertext_version,
         ));
     }
@@ -595,7 +595,7 @@ fn decrypt_message_with_state<R: Rng + CryptoRng>(
     let their_identity_key =
         state
             .remote_identity_key()?
-            .ok_or(SignalProtocolError::InvalidSessionStructure(
+            .ok_or(MochiProtocolError::InvalidSessionStructure(
                 "cannot decrypt without remote identity key",
             ))?;
 
@@ -606,31 +606,31 @@ fn decrypt_message_with_state<R: Rng + CryptoRng>(
     )?;
 
     if !mac_valid {
-        return Err(SignalProtocolError::InvalidMessage(
+        return Err(MochiProtocolError::InvalidMessage(
             original_message_type,
             "MAC verification failed",
         ));
     }
 
-    let ptext = match signal_crypto::aes_256_cbc_decrypt(
+    let ptext = match mochi_crypto::aes_256_cbc_decrypt(
         ciphertext.body(),
         message_keys.cipher_key(),
         message_keys.iv(),
     ) {
         Ok(ptext) => ptext,
-        Err(signal_crypto::DecryptionError::BadKeyOrIv) => {
+        Err(mochi_crypto::DecryptionError::BadKeyOrIv) => {
             log::warn!(
                 "{} session state corrupt for {}",
                 current_or_previous,
                 remote_address,
             );
-            return Err(SignalProtocolError::InvalidSessionStructure(
+            return Err(MochiProtocolError::InvalidSessionStructure(
                 "invalid receiver chain message keys",
             ));
         }
-        Err(signal_crypto::DecryptionError::BadCiphertext(msg)) => {
+        Err(mochi_crypto::DecryptionError::BadCiphertext(msg)) => {
             log::warn!("failed to decrypt 1:1 message: {}", msg);
-            return Err(SignalProtocolError::InvalidMessage(
+            return Err(MochiProtocolError::InvalidMessage(
                 original_message_type,
                 "failed to decrypt",
             ));
@@ -697,7 +697,7 @@ fn get_or_create_message_key(
                     remote_address,
                     counter
                 );
-                Err(SignalProtocolError::DuplicatedMessage(chain_index, counter))
+                Err(MochiProtocolError::DuplicatedMessage(chain_index, counter))
             }
         };
     }
@@ -723,7 +723,7 @@ fn get_or_create_message_key(
                 chain_index,
                 counter
             );
-            return Err(SignalProtocolError::InvalidMessage(
+            return Err(MochiProtocolError::InvalidMessage(
                 original_message_type,
                 "message from too far into the future",
             ));

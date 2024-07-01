@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use http::uri::InvalidUri;
@@ -12,11 +12,11 @@ use jni::{JNIEnv, JavaVM};
 
 use attest::hsm_enclave::Error as HsmEnclaveError;
 use device_transfer::Error as DeviceTransferError;
-use libsignal_net::chat::ChatServiceError;
-use libsignal_net::infra::ws::{WebSocketConnectError, WebSocketServiceError};
-use libsignal_protocol::*;
-use signal_crypto::Error as SignalCryptoError;
-use signal_pin::Error as PinError;
+use libmochi_net::chat::ChatServiceError;
+use libmochi_net::infra::ws::{WebSocketConnectError, WebSocketServiceError};
+use libmochi_protocol::*;
+use mochi_crypto::Error as MochiCryptoError;
+use mochi_pin::Error as PinError;
 use usernames::{UsernameError, UsernameLinkError};
 use zkgroup::{ZkGroupDeserializationFailure, ZkGroupVerificationFailure};
 
@@ -27,10 +27,10 @@ use super::*;
 
 /// The top-level error type for when something goes wrong.
 #[derive(Debug, thiserror::Error)]
-pub enum SignalJniError {
-    Protocol(SignalProtocolError),
+pub enum MochiJniError {
+    Protocol(MochiProtocolError),
     DeviceTransfer(DeviceTransferError),
-    SignalCrypto(SignalCryptoError),
+    MochiCrypto(MochiCryptoError),
     HsmEnclave(HsmEnclaveError),
     Enclave(EnclaveError),
     Pin(PinError),
@@ -40,12 +40,12 @@ pub enum SignalJniError {
     UsernameProofError(usernames::ProofVerificationFailure),
     UsernameLinkError(UsernameLinkError),
     Io(IoError),
-    #[cfg(feature = "signal-media")]
-    Mp4SanitizeParse(signal_media::sanitize::mp4::ParseErrorReport),
-    #[cfg(feature = "signal-media")]
-    WebpSanitizeParse(signal_media::sanitize::webp::ParseErrorReport),
+    #[cfg(feature = "mochi-media")]
+    Mp4SanitizeParse(mochi_media::sanitize::mp4::ParseErrorReport),
+    #[cfg(feature = "mochi-media")]
+    WebpSanitizeParse(mochi_media::sanitize::webp::ParseErrorReport),
     Cdsi(CdsiError),
-    Svr3(libsignal_net::svr3::Error),
+    Svr3(libmochi_net::svr3::Error),
     WebSocket(#[from] WebSocketServiceError),
     ChatService(ChatServiceError),
     InvalidUri(InvalidUri),
@@ -73,33 +73,33 @@ pub enum BridgeLayerError {
     UnexpectedPanic(std::boxed::Box<dyn std::any::Any + std::marker::Send>),
 }
 
-impl fmt::Display for SignalJniError {
+impl fmt::Display for MochiJniError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            SignalJniError::Protocol(s) => write!(f, "{}", s),
-            SignalJniError::DeviceTransfer(s) => write!(f, "{}", s),
-            SignalJniError::HsmEnclave(e) => write!(f, "{}", e),
-            SignalJniError::Enclave(e) => write!(f, "{}", e),
-            SignalJniError::Pin(e) => write!(f, "{}", e),
-            SignalJniError::SignalCrypto(s) => write!(f, "{}", s),
-            SignalJniError::ZkGroupVerificationFailure(e) => write!(f, "{}", e),
-            SignalJniError::ZkGroupDeserializationFailure(e) => write!(f, "{}", e),
-            SignalJniError::UsernameError(e) => write!(f, "{}", e),
-            SignalJniError::UsernameProofError(e) => write!(f, "{}", e),
-            SignalJniError::UsernameLinkError(e) => write!(f, "{}", e),
-            SignalJniError::Io(e) => write!(f, "{}", e),
-            #[cfg(feature = "signal-media")]
-            SignalJniError::Mp4SanitizeParse(e) => write!(f, "{}", e),
-            #[cfg(feature = "signal-media")]
-            SignalJniError::WebpSanitizeParse(e) => write!(f, "{}", e),
-            SignalJniError::Cdsi(e) => write!(f, "{}", e),
-            SignalJniError::ChatService(e) => write!(f, "{}", e),
-            SignalJniError::InvalidUri(e) => write!(f, "{}", e),
-            SignalJniError::WebSocket(e) => write!(f, "{e}"),
-            SignalJniError::ConnectTimedOut => write!(f, "connect timed out"),
-            SignalJniError::Svr3(e) => write!(f, "{}", e),
-            SignalJniError::Bridge(e) => write!(f, "{}", e),
-            SignalJniError::TestingError { exception_class } => {
+            MochiJniError::Protocol(s) => write!(f, "{}", s),
+            MochiJniError::DeviceTransfer(s) => write!(f, "{}", s),
+            MochiJniError::HsmEnclave(e) => write!(f, "{}", e),
+            MochiJniError::Enclave(e) => write!(f, "{}", e),
+            MochiJniError::Pin(e) => write!(f, "{}", e),
+            MochiJniError::MochiCrypto(s) => write!(f, "{}", s),
+            MochiJniError::ZkGroupVerificationFailure(e) => write!(f, "{}", e),
+            MochiJniError::ZkGroupDeserializationFailure(e) => write!(f, "{}", e),
+            MochiJniError::UsernameError(e) => write!(f, "{}", e),
+            MochiJniError::UsernameProofError(e) => write!(f, "{}", e),
+            MochiJniError::UsernameLinkError(e) => write!(f, "{}", e),
+            MochiJniError::Io(e) => write!(f, "{}", e),
+            #[cfg(feature = "mochi-media")]
+            MochiJniError::Mp4SanitizeParse(e) => write!(f, "{}", e),
+            #[cfg(feature = "mochi-media")]
+            MochiJniError::WebpSanitizeParse(e) => write!(f, "{}", e),
+            MochiJniError::Cdsi(e) => write!(f, "{}", e),
+            MochiJniError::ChatService(e) => write!(f, "{}", e),
+            MochiJniError::InvalidUri(e) => write!(f, "{}", e),
+            MochiJniError::WebSocket(e) => write!(f, "{e}"),
+            MochiJniError::ConnectTimedOut => write!(f, "connect timed out"),
+            MochiJniError::Svr3(e) => write!(f, "{}", e),
+            MochiJniError::Bridge(e) => write!(f, "{}", e),
+            MochiJniError::TestingError { exception_class } => {
                 write!(f, "TestingError({})", exception_class)
             }
         }
@@ -139,94 +139,94 @@ impl fmt::Display for BridgeLayerError {
     }
 }
 
-impl From<SignalProtocolError> for SignalJniError {
-    fn from(e: SignalProtocolError) -> SignalJniError {
-        SignalJniError::Protocol(e)
+impl From<MochiProtocolError> for MochiJniError {
+    fn from(e: MochiProtocolError) -> MochiJniError {
+        MochiJniError::Protocol(e)
     }
 }
 
-impl From<DeviceTransferError> for SignalJniError {
-    fn from(e: DeviceTransferError) -> SignalJniError {
-        SignalJniError::DeviceTransfer(e)
+impl From<DeviceTransferError> for MochiJniError {
+    fn from(e: DeviceTransferError) -> MochiJniError {
+        MochiJniError::DeviceTransfer(e)
     }
 }
 
-impl From<HsmEnclaveError> for SignalJniError {
-    fn from(e: HsmEnclaveError) -> SignalJniError {
-        SignalJniError::HsmEnclave(e)
+impl From<HsmEnclaveError> for MochiJniError {
+    fn from(e: HsmEnclaveError) -> MochiJniError {
+        MochiJniError::HsmEnclave(e)
     }
 }
 
-impl From<EnclaveError> for SignalJniError {
-    fn from(e: EnclaveError) -> SignalJniError {
-        SignalJniError::Enclave(e)
+impl From<EnclaveError> for MochiJniError {
+    fn from(e: EnclaveError) -> MochiJniError {
+        MochiJniError::Enclave(e)
     }
 }
 
-impl From<PinError> for SignalJniError {
-    fn from(e: PinError) -> SignalJniError {
-        SignalJniError::Pin(e)
+impl From<PinError> for MochiJniError {
+    fn from(e: PinError) -> MochiJniError {
+        MochiJniError::Pin(e)
     }
 }
 
-impl From<SignalCryptoError> for SignalJniError {
-    fn from(e: SignalCryptoError) -> SignalJniError {
-        SignalJniError::SignalCrypto(e)
+impl From<MochiCryptoError> for MochiJniError {
+    fn from(e: MochiCryptoError) -> MochiJniError {
+        MochiJniError::MochiCrypto(e)
     }
 }
 
-impl From<ZkGroupVerificationFailure> for SignalJniError {
-    fn from(e: ZkGroupVerificationFailure) -> SignalJniError {
-        SignalJniError::ZkGroupVerificationFailure(e)
+impl From<ZkGroupVerificationFailure> for MochiJniError {
+    fn from(e: ZkGroupVerificationFailure) -> MochiJniError {
+        MochiJniError::ZkGroupVerificationFailure(e)
     }
 }
 
-impl From<ZkGroupDeserializationFailure> for SignalJniError {
-    fn from(e: ZkGroupDeserializationFailure) -> SignalJniError {
-        SignalJniError::ZkGroupDeserializationFailure(e)
+impl From<ZkGroupDeserializationFailure> for MochiJniError {
+    fn from(e: ZkGroupDeserializationFailure) -> MochiJniError {
+        MochiJniError::ZkGroupDeserializationFailure(e)
     }
 }
 
-impl From<UsernameError> for SignalJniError {
+impl From<UsernameError> for MochiJniError {
     fn from(e: UsernameError) -> Self {
-        SignalJniError::UsernameError(e)
+        MochiJniError::UsernameError(e)
     }
 }
 
-impl From<usernames::ProofVerificationFailure> for SignalJniError {
+impl From<usernames::ProofVerificationFailure> for MochiJniError {
     fn from(e: usernames::ProofVerificationFailure) -> Self {
-        SignalJniError::UsernameProofError(e)
+        MochiJniError::UsernameProofError(e)
     }
 }
 
-impl From<UsernameLinkError> for SignalJniError {
+impl From<UsernameLinkError> for MochiJniError {
     fn from(e: UsernameLinkError) -> Self {
-        SignalJniError::UsernameLinkError(e)
+        MochiJniError::UsernameLinkError(e)
     }
 }
 
-impl From<InvalidUri> for SignalJniError {
+impl From<InvalidUri> for MochiJniError {
     fn from(e: InvalidUri) -> Self {
-        SignalJniError::InvalidUri(e)
+        MochiJniError::InvalidUri(e)
     }
 }
 
-impl From<ChatServiceError> for SignalJniError {
+impl From<ChatServiceError> for MochiJniError {
     fn from(e: ChatServiceError) -> Self {
-        SignalJniError::ChatService(e)
+        MochiJniError::ChatService(e)
     }
 }
 
-impl From<IoError> for SignalJniError {
-    fn from(e: IoError) -> SignalJniError {
+impl From<IoError> for MochiJniError {
+    fn from(e: IoError) -> MochiJniError {
         Self::Io(e)
     }
 }
 
-#[cfg(feature = "signal-media")]
-impl From<signal_media::sanitize::mp4::Error> for SignalJniError {
-    fn from(e: signal_media::sanitize::mp4::Error) -> Self {
-        use signal_media::sanitize::mp4::Error;
+#[cfg(feature = "mochi-media")]
+impl From<mochi_media::sanitize::mp4::Error> for MochiJniError {
+    fn from(e: mochi_media::sanitize::mp4::Error) -> Self {
+        use mochi_media::sanitize::mp4::Error;
         match e {
             Error::Io(e) => Self::Io(e),
             Error::Parse(e) => Self::Mp4SanitizeParse(e),
@@ -234,10 +234,10 @@ impl From<signal_media::sanitize::mp4::Error> for SignalJniError {
     }
 }
 
-#[cfg(feature = "signal-media")]
-impl From<signal_media::sanitize::webp::Error> for SignalJniError {
-    fn from(e: signal_media::sanitize::webp::Error) -> Self {
-        use signal_media::sanitize::webp::Error;
+#[cfg(feature = "mochi-media")]
+impl From<mochi_media::sanitize::webp::Error> for MochiJniError {
+    fn from(e: mochi_media::sanitize::webp::Error) -> Self {
+        use mochi_media::sanitize::webp::Error;
         match e {
             Error::Io(e) => Self::Io(e),
             Error::Parse(e) => Self::WebpSanitizeParse(e),
@@ -245,16 +245,16 @@ impl From<signal_media::sanitize::webp::Error> for SignalJniError {
     }
 }
 
-impl From<libsignal_net::cdsi::LookupError> for SignalJniError {
-    fn from(e: libsignal_net::cdsi::LookupError) -> SignalJniError {
-        use libsignal_net::cdsi::LookupError;
-        SignalJniError::Cdsi(match e {
-            LookupError::ConnectionTimedOut => return SignalJniError::ConnectTimedOut,
+impl From<libmochi_net::cdsi::LookupError> for MochiJniError {
+    fn from(e: libmochi_net::cdsi::LookupError) -> MochiJniError {
+        use libmochi_net::cdsi::LookupError;
+        MochiJniError::Cdsi(match e {
+            LookupError::ConnectionTimedOut => return MochiJniError::ConnectTimedOut,
             LookupError::AttestationError(e) => return e.into(),
             LookupError::ConnectTransport(e) => return IoError::from(e).into(),
             LookupError::WebSocket(e) => return e.into(),
             LookupError::InvalidArgument { server_reason: _ } => {
-                return SignalJniError::Protocol(SignalProtocolError::InvalidArgument(
+                return MochiJniError::Protocol(MochiProtocolError::InvalidArgument(
                     e.to_string(),
                 ))
             }
@@ -272,9 +272,9 @@ impl From<libsignal_net::cdsi::LookupError> for SignalJniError {
     }
 }
 
-impl From<BridgeLayerError> for SignalJniError {
-    fn from(e: BridgeLayerError) -> SignalJniError {
-        SignalJniError::Bridge(e)
+impl From<BridgeLayerError> for MochiJniError {
+    fn from(e: BridgeLayerError) -> MochiJniError {
+        MochiJniError::Bridge(e)
     }
 }
 
@@ -284,54 +284,54 @@ impl From<jni::errors::Error> for BridgeLayerError {
     }
 }
 
-impl From<Svr3Error> for SignalJniError {
+impl From<Svr3Error> for MochiJniError {
     fn from(err: Svr3Error) -> Self {
         match err {
             Svr3Error::Connect(inner) => match inner {
-                WebSocketConnectError::Timeout => SignalJniError::ConnectTimedOut,
-                WebSocketConnectError::Transport(e) => SignalJniError::Io(e.into()),
+                WebSocketConnectError::Timeout => MochiJniError::ConnectTimedOut,
+                WebSocketConnectError::Transport(e) => MochiJniError::Io(e.into()),
                 WebSocketConnectError::WebSocketError(e) => WebSocketServiceError::from(e).into(),
                 WebSocketConnectError::RejectedByServer(response) => {
                     WebSocketServiceError::Http(response).into()
                 }
             },
-            Svr3Error::ConnectionTimedOut => SignalJniError::ConnectTimedOut,
+            Svr3Error::ConnectionTimedOut => MochiJniError::ConnectTimedOut,
             Svr3Error::Service(inner) => inner.into(),
             Svr3Error::AttestationError(inner) => inner.into(),
             Svr3Error::Protocol(_)
             | Svr3Error::RequestFailed(_)
             | Svr3Error::RestoreFailed(_)
-            | Svr3Error::DataMissing => SignalJniError::Svr3(err),
+            | Svr3Error::DataMissing => MochiJniError::Svr3(err),
         }
     }
 }
 
-impl From<jni::errors::Error> for SignalJniError {
-    fn from(e: jni::errors::Error) -> SignalJniError {
+impl From<jni::errors::Error> for MochiJniError {
+    fn from(e: jni::errors::Error) -> MochiJniError {
         BridgeLayerError::from(e).into()
     }
 }
 
-impl From<SignalJniError> for SignalProtocolError {
-    fn from(err: SignalJniError) -> SignalProtocolError {
+impl From<MochiJniError> for MochiProtocolError {
+    fn from(err: MochiJniError) -> MochiProtocolError {
         match err {
-            SignalJniError::Protocol(e) => e,
-            SignalJniError::Bridge(BridgeLayerError::BadJniParameter(m)) => {
-                SignalProtocolError::InvalidArgument(m.to_string())
+            MochiJniError::Protocol(e) => e,
+            MochiJniError::Bridge(BridgeLayerError::BadJniParameter(m)) => {
+                MochiProtocolError::InvalidArgument(m.to_string())
             }
-            SignalJniError::Bridge(BridgeLayerError::CallbackException(callback, exception)) => {
-                SignalProtocolError::ApplicationCallbackError(callback, Box::new(exception))
+            MochiJniError::Bridge(BridgeLayerError::CallbackException(callback, exception)) => {
+                MochiProtocolError::ApplicationCallbackError(callback, Box::new(exception))
             }
-            _ => SignalProtocolError::FfiBindingError(format!("{}", err)),
+            _ => MochiProtocolError::FfiBindingError(format!("{}", err)),
         }
     }
 }
 
-impl From<SignalJniError> for IoError {
-    fn from(err: SignalJniError) -> Self {
+impl From<MochiJniError> for IoError {
+    fn from(err: MochiJniError) -> Self {
         match err {
-            SignalJniError::Io(e) => e,
-            SignalJniError::Bridge(BridgeLayerError::CallbackException(
+            MochiJniError::Io(e) => e,
+            MochiJniError::Bridge(BridgeLayerError::CallbackException(
                 _method_name,
                 exception,
             )) => IoError::new(IoErrorKind::Other, exception),
@@ -340,7 +340,7 @@ impl From<SignalJniError> for IoError {
     }
 }
 
-pub type SignalJniResult<T> = Result<T, SignalJniError>;
+pub type MochiJniResult<T> = Result<T, MochiJniError>;
 
 /// A lifetime-less reference to a thrown Java exception that can be used as an [`Error`].
 ///

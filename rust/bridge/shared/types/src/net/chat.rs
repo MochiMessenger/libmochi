@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -14,9 +14,9 @@ use futures_util::StreamExt as _;
 use http::status::InvalidStatusCode;
 use http::uri::{InvalidUri, PathAndQuery};
 use http::{HeaderMap, HeaderName, HeaderValue};
-use libsignal_net::auth::Auth;
-use libsignal_net::chat::{self, DebugInfo as ChatServiceDebugInfo, Response as ChatResponse};
-use libsignal_protocol::Timestamp;
+use libmochi_net::auth::Auth;
+use libmochi_net::chat::{self, DebugInfo as ChatServiceDebugInfo, Response as ChatResponse};
+use libmochi_protocol::Timestamp;
 use tokio::sync::{mpsc, oneshot};
 
 use crate::net::{ConnectionManager, TokioAsyncContext};
@@ -59,7 +59,7 @@ pub struct Chat {
     >,
     listener: std::sync::Mutex<ChatListenerState>,
     pub synthetic_request_tx:
-        mpsc::Sender<chat::ws::ServerEvent<libsignal_net::infra::tcp_ssl::TcpSslConnectorStream>>,
+        mpsc::Sender<chat::ws::ServerEvent<libmochi_net::infra::tcp_ssl::TcpSslConnectorStream>>,
 }
 
 impl RefUnwindSafe for Chat {}
@@ -207,7 +207,7 @@ pub trait ChatListener: Send {
 }
 
 impl dyn ChatListener {
-    /// A helper to translate from the libsignal-net enum to the separate callback methods in this
+    /// A helper to translate from the libmochi-net enum to the separate callback methods in this
     /// trait.
     fn received_server_request(&mut self, request: chat::server_requests::ServerMessage) {
         match request {

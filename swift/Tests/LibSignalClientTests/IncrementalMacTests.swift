@@ -1,10 +1,10 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import Foundation
-import LibSignalClient
+import LibMochiClient
 import XCTest
 
 class IncrementalMacTests: TestCaseBase {
@@ -39,7 +39,7 @@ class IncrementalMacTests: TestCaseBase {
         do {
             _ = try mac.update(corruptInput[1])
             XCTFail("Should have failed")
-        } catch SignalError.verificationFailed {
+        } catch MochiError.verificationFailed {
         } catch {
             XCTFail("Unexpected error thrown")
         }
@@ -56,7 +56,7 @@ class IncrementalMacTests: TestCaseBase {
         do {
             _ = try mac.finalize()
             XCTFail("Should have failed")
-        } catch SignalError.verificationFailed {
+        } catch MochiError.verificationFailed {
         } catch {
             XCTFail("Unexpected error thrown")
         }

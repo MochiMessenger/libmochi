@@ -1,9 +1,9 @@
 //
-// Copyright (C) 2024 Signal Messenger, LLC.
+// Copyright (C) 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_protocol::Aci;
+use libmochi_protocol::Aci;
 
 use crate::backup::uuid_bytes_to_aci;
 use crate::proto::backup as proto;

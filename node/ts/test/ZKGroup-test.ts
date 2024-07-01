@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -60,7 +60,7 @@ import {
   BackupLevel,
 } from '../zkgroup/';
 import { Aci, Pni } from '../Address';
-import { LibSignalErrorBase, Uuid } from '..';
+import { LibMochiErrorBase, Uuid } from '..';
 
 const SECONDS_PER_DAY = 86400;
 
@@ -117,7 +117,7 @@ describe('ZKGroup', () => {
         () => {
           new constructor(Buffer.from('invalid contents'));
         },
-        LibSignalErrorBase,
+        LibMochiErrorBase,
         'Failed to deserialize'
       );
     }

@@ -1,9 +1,9 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-@testable import LibSignalClient
+@testable import LibMochiClient
 import XCTest
 
 class CryptoTests: TestCaseBase {
@@ -88,7 +88,7 @@ class CryptoTests: TestCaseBase {
         var encryptedWithBadTag = encryptedData
         encryptedWithBadTag[encryptedWithBadTag.count - 1] ^= 0xFF
         XCTAssertThrowsError(try Aes256GcmEncryptedData(concatenated: encryptedWithBadTag).decrypt(key: key)) {
-            guard case SignalError.invalidMessage(_) = $0 else {
+            guard case MochiError.invalidMessage(_) = $0 else {
                 XCTFail("wrong error: \($0)")
                 return
             }

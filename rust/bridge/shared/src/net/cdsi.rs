@@ -1,17 +1,17 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use std::convert::TryInto as _;
 
-use libsignal_bridge_macros::{bridge_fn, bridge_io};
-use libsignal_bridge_types::net::cdsi::{CdsiLookup, LookupRequest};
-use libsignal_bridge_types::net::{ConnectionManager, TokioAsyncContext};
-use libsignal_net::auth::Auth;
-use libsignal_net::cdsi::{self, AciAndAccessKey, LookupResponse, E164};
+use libmochi_bridge_macros::{bridge_fn, bridge_io};
+use libmochi_bridge_types::net::cdsi::{CdsiLookup, LookupRequest};
+use libmochi_bridge_types::net::{ConnectionManager, TokioAsyncContext};
+use libmochi_net::auth::Auth;
+use libmochi_net::cdsi::{self, AciAndAccessKey, LookupResponse, E164};
 
-use libsignal_protocol::{Aci, SignalProtocolError};
+use libmochi_protocol::{Aci, MochiProtocolError};
 
 use crate::support::*;
 use crate::*;
@@ -43,11 +43,11 @@ fn LookupRequest_addAciAndAccessKey(
     request: &LookupRequest,
     aci: Aci,
     access_key: &[u8],
-) -> Result<(), SignalProtocolError> {
+) -> Result<(), MochiProtocolError> {
     let access_key = access_key
         .try_into()
         .map_err(|_: std::array::TryFromSliceError| {
-            SignalProtocolError::InvalidArgument("access_key has wrong number of bytes".to_string())
+            MochiProtocolError::InvalidArgument("access_key has wrong number of bytes".to_string())
         })?;
     request
         .lock()

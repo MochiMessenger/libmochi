@@ -1,12 +1,12 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import { assert, expect, use } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as Native from '../../Native';
-import { ErrorCode, LibSignalError, LibSignalErrorBase } from '../Errors';
+import { ErrorCode, LibMochiError, LibMochiErrorBase } from '../Errors';
 import { TokioAsyncContext } from '../net';
 import { setTimeout } from 'timers/promises';
 
@@ -31,8 +31,8 @@ describe('Async runtime not on the Node executor', () => {
       assert.fail('should have thrown an error');
     } catch (e) {
       assert.instanceOf(e, Error);
-      assert.instanceOf(e, LibSignalErrorBase);
-      const err = e as LibSignalError;
+      assert.instanceOf(e, LibMochiErrorBase);
+      const err = e as LibMochiError;
       assert.equal(err.code, ErrorCode.Generic);
     }
   });
@@ -43,14 +43,14 @@ describe('TokioAsyncContext', () => {
     const runtime = new TokioAsyncContext(Native.TokioAsyncContext_new());
     const abortController = new AbortController();
     const pending = runtime.makeCancellable(
-      abortController.signal,
+      abortController.mochi,
       Native.TESTING_OnlyCompletesByCancellation(runtime)
     );
     const timeout = setTimeout(200, 'timed out');
     assert.equal('timed out', await Promise.race([pending, timeout]));
     abortController.abort();
     return expect(pending)
-      .to.eventually.be.rejectedWith(LibSignalErrorBase)
+      .to.eventually.be.rejectedWith(LibMochiErrorBase)
       .and.have.property('code', ErrorCode.Cancelled);
   });
 
@@ -59,11 +59,11 @@ describe('TokioAsyncContext', () => {
     const abortController = new AbortController();
     abortController.abort();
     const pending = runtime.makeCancellable(
-      abortController.signal,
+      abortController.mochi,
       Native.TESTING_OnlyCompletesByCancellation(runtime)
     );
     return expect(pending)
-      .to.eventually.be.rejectedWith(LibSignalErrorBase)
+      .to.eventually.be.rejectedWith(LibMochiErrorBase)
       .and.have.property('code', ErrorCode.Cancelled);
   });
 });

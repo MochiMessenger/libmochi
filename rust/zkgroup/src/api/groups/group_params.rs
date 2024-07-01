@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -49,7 +49,7 @@ const ENCRYPTED_BLOB_PADDING_LENGTH_SIZE: usize = std::mem::size_of::<u32>();
 impl GroupSecretParams {
     pub fn generate(randomness: RandomnessBytes) -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Random_GroupSecretParams_Generate",
+            b"Mochi_ZKGroup_20200424_Random_GroupSecretParams_Generate",
             &randomness,
         );
         let mut master_key: GroupMasterKey = Default::default();
@@ -61,7 +61,7 @@ impl GroupSecretParams {
 
     pub fn derive_from_master_key(master_key: GroupMasterKey) -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_GroupMasterKey_GroupSecretParams_DeriveFromMasterKey",
+            b"Mochi_ZKGroup_20200424_GroupMasterKey_GroupSecretParams_DeriveFromMasterKey",
             &master_key.bytes,
         );
         let mut group_id: GroupIdentifierBytes = Default::default();
@@ -101,7 +101,7 @@ impl GroupSecretParams {
 
     pub fn encrypt_service_id(
         &self,
-        service_id: libsignal_core::ServiceId,
+        service_id: libmochi_core::ServiceId,
     ) -> api::groups::UuidCiphertext {
         let uid = crypto::uid_struct::UidStruct::from_service_id(service_id);
         self.encrypt_uid_struct(uid)
@@ -121,7 +121,7 @@ impl GroupSecretParams {
     pub fn decrypt_service_id(
         &self,
         ciphertext: api::groups::UuidCiphertext,
-    ) -> Result<libsignal_core::ServiceId, ZkGroupVerificationFailure> {
+    ) -> Result<libmochi_core::ServiceId, ZkGroupVerificationFailure> {
         crypto::uid_encryption::UidEncryptionDomain::decrypt(
             &self.uid_enc_key_pair,
             &ciphertext.ciphertext,
@@ -131,7 +131,7 @@ impl GroupSecretParams {
     pub fn encrypt_profile_key(
         &self,
         profile_key: api::profiles::ProfileKey,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
     ) -> api::groups::ProfileKeyCiphertext {
         self.encrypt_profile_key_bytes(profile_key.bytes, user_id)
     }
@@ -139,7 +139,7 @@ impl GroupSecretParams {
     pub fn encrypt_profile_key_bytes(
         &self,
         profile_key_bytes: ProfileKeyBytes,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
     ) -> api::groups::ProfileKeyCiphertext {
         let profile_key = crypto::profile_key_struct::ProfileKeyStruct::new(
             profile_key_bytes,
@@ -155,7 +155,7 @@ impl GroupSecretParams {
     pub fn decrypt_profile_key(
         &self,
         ciphertext: api::groups::ProfileKeyCiphertext,
-        user_id: libsignal_core::Aci,
+        user_id: libmochi_core::Aci,
     ) -> Result<api::profiles::ProfileKey, ZkGroupVerificationFailure> {
         let profile_key_struct =
             crypto::profile_key_encryption::ProfileKeyEncryptionDomain::decrypt(
@@ -170,7 +170,7 @@ impl GroupSecretParams {
 
     pub fn encrypt_blob(&self, randomness: RandomnessBytes, plaintext: &[u8]) -> Vec<u8> {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Random_GroupSecretParams_EncryptBlob",
+            b"Mochi_ZKGroup_20200424_Random_GroupSecretParams_EncryptBlob",
             &randomness,
         );
         let nonce_vec = sho.squeeze(AESGCM_NONCE_LEN);

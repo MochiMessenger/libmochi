@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -25,12 +25,12 @@
 //! matching whatever value the client has _committed_ to.
 //!
 //! In this model, the issuing and verifying servers share their private keys, but may otherwise be
-//! independent; for Signal, the _issuing server_ is usually the main chat server (which knows who
+//! independent; for Mochi, the _issuing server_ is usually the main chat server (which knows who
 //! the client is), and the _verifying server_ is the "storage service" where groups are managed
 //! (which must not). However, it would be valid to have the same server perform both operations, as
 //! long as the second connection can't be correlated with the first.
 //!
-//! This model is based on "[The Signal Private Group System and Anonymous Credentials Supporting
+//! This model is based on "[The Mochi Private Group System and Anonymous Credentials Supporting
 //! Efficient Verifiable Encryption][paper]", by Chase, Perrin, and Zaverucha.
 //!
 //! [paper]: https://eprint.iacr.org/2019/1416
@@ -45,7 +45,7 @@ pub struct VerificationFailure;
 /// A reasonable size of entropy to request for operations.
 ///
 /// zkcredential uses explicit arrays of randomness rather than taking random number generators as
-/// arguments because it makes it easier to write expected-output tests in the languages libsignal
+/// arguments because it makes it easier to write expected-output tests in the languages libmochi
 /// is bridged to, which can't easily substitute a custom Rng.
 pub const RANDOMNESS_LEN: usize = 32;
 

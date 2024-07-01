@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 #
-# Copyright 2023 Signal Messenger, LLC
+# Copyright 2023 Mochi Messenger, LLC
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
 # This script is based on RingRTC's fetch-artifact.py,
-# but simplified for using only as a helper for LibSignalClient.podspec.
+# but simplified for using only as a helper for LibMochiClient.podspec.
 
 import argparse
 import hashlib

@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -21,10 +21,10 @@ use crate::infra::{
 };
 
 const DEFAULT_HTTPS_PORT: NonZeroU16 = nonzero!(443_u16);
-pub const TIMESTAMP_HEADER_NAME: &str = "x-signal-timestamp";
+pub const TIMESTAMP_HEADER_NAME: &str = "x-mochi-timestamp";
 
 const DOMAIN_CONFIG_CHAT: DomainConfig = DomainConfig {
-    hostname: "chat.signal.org",
+    hostname: "chat.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[
         ip_addr!(v4, "76.223.92.165"),
@@ -34,7 +34,7 @@ const DOMAIN_CONFIG_CHAT: DomainConfig = DomainConfig {
         ip_addr!(v6, "2600:9000:a507:ab6d:4ce3:2f58:25d7:9cbf"),
         ip_addr!(v6, "2600:9000:a61f:527c:d5eb:a431:5239:3232"),
     ],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/service",
     confirmation_header_name: Some(TIMESTAMP_HEADER_NAME),
     proxy_config_f: PROXY_CONFIG_F_PROD,
@@ -42,7 +42,7 @@ const DOMAIN_CONFIG_CHAT: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_CHAT_STAGING: DomainConfig = DomainConfig {
-    hostname: "chat.staging.signal.org",
+    hostname: "chat.staging.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[
         ip_addr!(v4, "76.223.72.142"),
@@ -52,7 +52,7 @@ const DOMAIN_CONFIG_CHAT_STAGING: DomainConfig = DomainConfig {
         ip_addr!(v6, "2600:9000:a507:ab6d:7b25:2580:8bd6:3b93"),
         ip_addr!(v6, "2600:9000:a61f:527c:2215:cd9:bac6:a2f8"),
     ],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/service-staging",
     confirmation_header_name: Some(TIMESTAMP_HEADER_NAME),
     proxy_config_f: PROXY_CONFIG_F_STAGING,
@@ -60,11 +60,11 @@ const DOMAIN_CONFIG_CHAT_STAGING: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_CDSI: DomainConfig = DomainConfig {
-    hostname: "cdsi.signal.org",
+    hostname: "cdsi.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "40.122.45.194")],
     ip_v6: &[ip_addr!(v6, "2603:1030:7::1")],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/cdsi",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_PROD,
@@ -72,11 +72,11 @@ const DOMAIN_CONFIG_CDSI: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_CDSI_STAGING: DomainConfig = DomainConfig {
-    hostname: "cdsi.staging.signal.org",
+    hostname: "cdsi.staging.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "104.43.162.137")],
     ip_v6: &[ip_addr!(v6, "2603:1030:7::732")],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/cdsi-staging",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_STAGING,
@@ -84,11 +84,11 @@ const DOMAIN_CONFIG_CDSI_STAGING: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_SVR2: DomainConfig = DomainConfig {
-    hostname: "svr2.signal.org",
+    hostname: "svr2.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "20.66.40.69")],
     ip_v6: &[],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/svr2",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_PROD,
@@ -96,11 +96,11 @@ const DOMAIN_CONFIG_SVR2: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_SVR2_STAGING: DomainConfig = DomainConfig {
-    hostname: "svr2.staging.signal.org",
+    hostname: "svr2.staging.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "20.253.229.239")],
     ip_v6: &[],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/svr2-staging",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_STAGING,
@@ -108,11 +108,11 @@ const DOMAIN_CONFIG_SVR2_STAGING: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_SVR3_SGX: DomainConfig = DomainConfig {
-    hostname: "backend1.svr3.signal.org",
+    hostname: "backend1.svr3.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "40.112.138.96")],
     ip_v6: &[],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/svr3-sgx",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_PROD,
@@ -120,11 +120,11 @@ const DOMAIN_CONFIG_SVR3_SGX: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_SVR3_SGX_STAGING: DomainConfig = DomainConfig {
-    hostname: "backend1.svr3.staging.signal.org",
+    hostname: "backend1.svr3.staging.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "13.88.63.29")],
     ip_v6: &[],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/svr3-sgx-staging",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_STAGING,
@@ -132,11 +132,11 @@ const DOMAIN_CONFIG_SVR3_SGX_STAGING: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_SVR3_NITRO: DomainConfig = DomainConfig {
-    hostname: "backend2.svr3.signal.org",
+    hostname: "backend2.svr3.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "75.2.91.98")],
     ip_v6: &[],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/svr3-nitro",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_PROD,
@@ -144,11 +144,11 @@ const DOMAIN_CONFIG_SVR3_NITRO: DomainConfig = DomainConfig {
 };
 
 const DOMAIN_CONFIG_SVR3_NITRO_STAGING: DomainConfig = DomainConfig {
-    hostname: "backend2.svr3.staging.signal.org",
+    hostname: "backend2.svr3.staging.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "75.2.86.85"), ip_addr!(v4, "99.83.239.137")],
     ip_v6: &[],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/svr3-nitro-staging",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_STAGING,
@@ -156,11 +156,11 @@ const DOMAIN_CONFIG_SVR3_NITRO_STAGING: DomainConfig = DomainConfig {
 };
 
 pub const DOMAIN_CONFIG_SVR3_TPM2SNP: DomainConfig = DomainConfig {
-    hostname: "backend3.svr3.signal.org",
+    hostname: "backend3.svr3.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "34.144.241.251")],
     ip_v6: &[],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/svr3-tpm2snp",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_PROD,
@@ -168,11 +168,11 @@ pub const DOMAIN_CONFIG_SVR3_TPM2SNP: DomainConfig = DomainConfig {
 };
 
 pub const DOMAIN_CONFIG_SVR3_TPM2SNP_STAGING: DomainConfig = DomainConfig {
-    hostname: "backend3.svr3.staging.signal.org",
+    hostname: "backend3.svr3.staging.mochi.org",
     port: DEFAULT_HTTPS_PORT,
     ip_v4: &[ip_addr!(v4, "13.88.30.76")],
     ip_v6: &[],
-    cert: RootCertificates::Signal,
+    cert: RootCertificates::Mochi,
     proxy_path: "/svr3-tpm2snp-staging",
     confirmation_header_name: None,
     proxy_config_f: PROXY_CONFIG_F_STAGING,
@@ -181,7 +181,7 @@ pub const DOMAIN_CONFIG_SVR3_TPM2SNP_STAGING: DomainConfig = DomainConfig {
 
 pub const PROXY_CONFIG_F_PROD: ProxyConfig = ProxyConfig {
     route_type: RouteType::ProxyF,
-    hostname: "reflector-signal.global.ssl.fastly.net",
+    hostname: "reflector-mochi.global.ssl.fastly.net",
     sni_list: &[
         "github.githubassets.com",
         "pinterest.com",
@@ -191,7 +191,7 @@ pub const PROXY_CONFIG_F_PROD: ProxyConfig = ProxyConfig {
 
 pub const PROXY_CONFIG_F_STAGING: ProxyConfig = ProxyConfig {
     route_type: RouteType::ProxyF,
-    hostname: "reflector-staging-signal.global.ssl.fastly.net",
+    hostname: "reflector-staging-mochi.global.ssl.fastly.net",
     sni_list: &[
         "github.githubassets.com",
         "pinterest.com",
@@ -311,7 +311,7 @@ pub fn add_user_agent_header(
     mut connection_params_list: Vec<ConnectionParams>,
     user_agent: &str,
 ) -> Vec<ConnectionParams> {
-    let with_lib_version = format!("{} libsignal/{}", user_agent, libsignal_core::VERSION);
+    let with_lib_version = format!("{} libmochi/{}", user_agent, libmochi_core::VERSION);
     connection_params_list.iter_mut().for_each(|cp| {
         cp.http_request_decorator.add(HttpRequestDecorator::Header(
             http::header::USER_AGENT,

@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -58,11 +58,11 @@ pub(crate) fn bridge_fn(
 
     Ok(quote! {
         #[cfg(feature = "ffi")]
-        #[export_name = concat!(env!("LIBSIGNAL_BRIDGE_FN_PREFIX_FFI"), #name)]
+        #[export_name = concat!(env!("LIBMOCHI_BRIDGE_FN_PREFIX_FFI"), #name)]
         pub unsafe extern "C" fn #wrapper_name(
             #implicit_args
             #(#input_args),*
-        ) -> *mut ffi::SignalFfiError {
+        ) -> *mut ffi::MochiFfiError {
             #body
         }
     })

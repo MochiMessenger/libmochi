@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -11,7 +11,7 @@ const chaiAsPromised = require('chai-as-promised');
 const { assert, expect } = chai;
 chai.use(chaiAsPromised);
 
-const native = require(process.env.SIGNAL_NEON_FUTURES_TEST_LIB);
+const native = require(process.env.MOCHI_NEON_FUTURES_TEST_LIB);
 
 function promisify(operation) {
   return function() {

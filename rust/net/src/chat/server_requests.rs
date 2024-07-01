@@ -1,11 +1,11 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use futures_util::future::BoxFuture;
 use futures_util::Stream;
-use libsignal_protocol::Timestamp;
+use libmochi_protocol::Timestamp;
 use tokio::sync::mpsc;
 use tokio_stream::wrappers::ReceiverStream;
 use tokio_stream::StreamExt as _;

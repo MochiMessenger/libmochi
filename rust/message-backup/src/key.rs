@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2023 Signal Messenger, LLC.
+// Copyright (C) 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -11,7 +11,7 @@
 //! SVR, so that a restorer can reconstruct the `BackupId`.
 
 use hkdf::Hkdf;
-use libsignal_protocol::Aci;
+use libmochi_protocol::Aci;
 use sha2::Sha256;
 
 /// Primary key for backups that is used to derive other keys.
@@ -25,7 +25,7 @@ impl BackupKey {
 
     /// Derive a `BackupKey` from the provided master key.
     pub fn derive_from_master_key(master_key: &[u8; Self::MASTER_KEY_LEN]) -> Self {
-        const INFO: &[u8] = b"20231003_Signal_Backups_GenerateBackupKey";
+        const INFO: &[u8] = b"20231003_Mochi_Backups_GenerateBackupKey";
 
         let mut key = [0; Self::LEN];
 
@@ -41,7 +41,7 @@ impl BackupKey {
 
     /// Derive the [`BackupId`] from a user's `BackupKey` and [`Aci`].
     pub fn derive_backup_id(&self, aci: &Aci) -> BackupId {
-        const INFO: &[u8] = b"20231003_Signal_Backups_GenerateBackupId";
+        const INFO: &[u8] = b"20231003_Mochi_Backups_GenerateBackupId";
         let mut bytes = [0; BackupId::LEN];
 
         Hkdf::<Sha256>::new(Some(&aci.service_id_binary()), &self.0)
@@ -83,7 +83,7 @@ impl MessageBackupKey {
 
     /// Derives a `MessageBackupKey` from a user's [`BackupKey`] and [`BackupId`].
     pub fn derive(backup_key: &BackupKey, backup_id: &BackupId) -> Self {
-        const INFO: &[u8] = b"20231003_Signal_Backups_EncryptMessageBackup";
+        const INFO: &[u8] = b"20231003_Mochi_Backups_EncryptMessageBackup";
         let mut full_bytes = [0; MessageBackupKey::LEN];
 
         Hkdf::<Sha256>::new(Some(&backup_id.0), &backup_key.0)

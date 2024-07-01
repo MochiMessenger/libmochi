@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@ import * as Mp4Sanitizer from '../Mp4Sanitizer';
 import * as WebpSanitizer from '../WebpSanitizer';
 import { SanitizedMetadata } from '../Mp4Sanitizer';
 import * as util from './util';
-import { ErrorCode, LibSignalErrorBase } from '../Errors';
+import { ErrorCode, LibMochiErrorBase } from '../Errors';
 import { ErrorInputStream, Uint8ArrayInputStream } from './ioutil';
 
 util.initLogger();
@@ -24,7 +24,7 @@ describe('Mp4Sanitizer', () => {
         );
         assert.fail('did not throw');
       } catch (e) {
-        assert(e instanceof LibSignalErrorBase);
+        assert(e instanceof LibMochiErrorBase);
         assert.equal(e.code, ErrorCode.InvalidMediaInput);
       }
     });
@@ -38,7 +38,7 @@ describe('Mp4Sanitizer', () => {
         );
         assert.fail('did not throw');
       } catch (e) {
-        assert(e instanceof LibSignalErrorBase);
+        assert(e instanceof LibMochiErrorBase);
         assert.equal(e.code, ErrorCode.InvalidMediaInput);
       }
     });
@@ -78,7 +78,7 @@ describe('Mp4Sanitizer', () => {
         await Mp4Sanitizer.sanitize(new ErrorInputStream(), 0n);
         assert.fail('did not throw');
       } catch (e) {
-        assert(e instanceof LibSignalErrorBase);
+        assert(e instanceof LibMochiErrorBase);
         assert.equal(e.code, ErrorCode.IoError);
       }
     });
@@ -93,7 +93,7 @@ describe('WebpSanitizer', () => {
         WebpSanitizer.sanitize(Buffer.from(input));
         assert.fail('did not throw');
       } catch (e) {
-        assert(e instanceof LibSignalErrorBase);
+        assert(e instanceof LibMochiErrorBase);
         assert.equal(e.code, ErrorCode.InvalidMediaInput);
       }
     });
@@ -104,7 +104,7 @@ describe('WebpSanitizer', () => {
         WebpSanitizer.sanitize(Buffer.from(input));
         assert.fail('did not throw');
       } catch (e) {
-        assert(e instanceof LibSignalErrorBase);
+        assert(e instanceof LibMochiErrorBase);
         assert.equal(e.code, ErrorCode.InvalidMediaInput);
       }
     });

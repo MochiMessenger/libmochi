@@ -1,7 +1,7 @@
 {
-  "name": "signal-neon-futures-tests",
+  "name": "mochi-neon-futures-tests",
   "version": "0.1.0",
-  "author": "Signal Messenger LLC",
+  "author": "Mochi Messenger LLC",
   "license": "AGPL-3.0-only",
   "dependencies": {},
   "scripts": {

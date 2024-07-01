@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -34,7 +34,7 @@ pub type Ciphertext = zkcredential::attributes::Ciphertext<UidEncryptionDomain>;
 impl SystemParams {
     pub fn generate() -> Self {
         let mut sho = Sho::new(
-            b"Signal_ZKGroup_20200424_Constant_UidEncryption_SystemParams_Generate",
+            b"Mochi_ZKGroup_20200424_Constant_UidEncryption_SystemParams_Generate",
             b"",
         );
         let G_a1 = sho.get_point();
@@ -59,7 +59,7 @@ pub struct UidEncryptionDomain;
 impl zkcredential::attributes::Domain for UidEncryptionDomain {
     type Attribute = uid_struct::UidStruct;
 
-    const ID: &'static str = "Signal_ZKGroup_20230419_UidEncryption";
+    const ID: &'static str = "Mochi_ZKGroup_20230419_UidEncryption";
 
     fn G_a() -> [RistrettoPoint; 2] {
         let system = SystemParams::get_hardcoded();
@@ -71,7 +71,7 @@ impl UidEncryptionDomain {
     pub(crate) fn decrypt(
         key_pair: &KeyPair,
         ciphertext: &Ciphertext,
-    ) -> Result<libsignal_core::ServiceId, ZkGroupVerificationFailure> {
+    ) -> Result<libmochi_core::ServiceId, ZkGroupVerificationFailure> {
         let M2 = key_pair
             .decrypt_to_second_point(ciphertext)
             .map_err(|_| ZkGroupVerificationFailure)?;
@@ -86,8 +86,8 @@ impl UidEncryptionDomain {
                 // the end, and which one is data-dependent. But it is constant-time.
                 let decoded_uuid = uuid::Uuid::from_bytes(bytes);
                 let decoded_service_ids = [
-                    libsignal_core::Aci::from(decoded_uuid).into(),
-                    libsignal_core::Pni::from(decoded_uuid).into(),
+                    libmochi_core::Aci::from(decoded_uuid).into(),
+                    libmochi_core::Pni::from(decoded_uuid).into(),
                 ];
                 let decoded_aci = &decoded_service_ids[0];
                 let decoded_pni = &decoded_service_ids[1];
@@ -132,7 +132,7 @@ mod tests {
         let key_pair2: KeyPair = bincode::deserialize(&key_pair_bytes).unwrap();
         assert!(key_pair == key_pair2);
 
-        let aci = libsignal_core::Aci::from_uuid_bytes(TEST_ARRAY_16);
+        let aci = libmochi_core::Aci::from_uuid_bytes(TEST_ARRAY_16);
         let uid = uid_struct::UidStruct::from_service_id(aci.into());
         let ciphertext = key_pair.encrypt(&uid);
 
@@ -154,7 +154,7 @@ mod tests {
         );
 
         let plaintext = UidEncryptionDomain::decrypt(&key_pair, &ciphertext2).unwrap();
-        assert!(matches!(plaintext, libsignal_core::ServiceId::Aci(_)));
+        assert!(matches!(plaintext, libmochi_core::ServiceId::Aci(_)));
         assert!(uid_struct::UidStruct::from_service_id(plaintext) == uid);
     }
 
@@ -163,7 +163,7 @@ mod tests {
         let mut sho = Sho::new(b"Test_Pni_Encryption", &[]);
         let key_pair = KeyPair::derive_from(sho.as_mut());
 
-        let pni = libsignal_core::Pni::from_uuid_bytes(TEST_ARRAY_16);
+        let pni = libmochi_core::Pni::from_uuid_bytes(TEST_ARRAY_16);
         let uid = uid_struct::UidStruct::from_service_id(pni.into());
         let ciphertext = key_pair.encrypt(&uid);
 
@@ -174,7 +174,7 @@ mod tests {
         assert!(ciphertext == ciphertext2);
 
         let plaintext = UidEncryptionDomain::decrypt(&key_pair, &ciphertext2).unwrap();
-        assert!(matches!(plaintext, libsignal_core::ServiceId::Pni(_)));
+        assert!(matches!(plaintext, libmochi_core::ServiceId::Pni(_)));
         assert!(uid_struct::UidStruct::from_service_id(plaintext) == uid);
     }
 }

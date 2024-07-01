@@ -1,9 +1,9 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-//! Traits defining several stores used throughout the Signal Protocol.
+//! Traits defining several stores used throughout the Mochi Protocol.
 
 use async_trait::async_trait;
 use uuid::Uuid;
@@ -17,7 +17,7 @@ use crate::state::{
 use crate::{IdentityKey, IdentityKeyPair, ProtocolAddress};
 
 // TODO: consider moving this enum into utils.rs?
-/// Each Signal message can be considered to have exactly two participants, a sender and receiver.
+/// Each Mochi message can be considered to have exactly two participants, a sender and receiver.
 ///
 /// [IdentityKeyStore::is_trusted_identity] uses this to ensure the identity provided is configured
 /// for the appropriate role.
@@ -31,7 +31,7 @@ pub enum Direction {
 
 /// Interface defining the identity store, which may be in-memory, on-disk, etc.
 ///
-/// Signal clients usually use the identity store in a [TOFU] manner, but this is not required.
+/// Mochi clients usually use the identity store in a [TOFU] manner, but this is not required.
 ///
 /// [TOFU]: https://en.wikipedia.org/wiki/Trust_on_first_use
 #[async_trait(?Send)]
@@ -104,7 +104,7 @@ pub trait SignedPreKeyStore {
 
 /// Interface for storing signed Kyber pre-keys downloaded from a server.
 ///
-/// NB: libsignal makes no distinction between one-time and last-resort pre-keys.
+/// NB: libmochi makes no distinction between one-time and last-resort pre-keys.
 #[async_trait(?Send)]
 pub trait KyberPreKeyStore {
     /// Look up the signed kyber pre-key corresponding to `kyber_prekey_id`.
@@ -122,13 +122,13 @@ pub trait KyberPreKeyStore {
     async fn mark_kyber_pre_key_used(&mut self, kyber_prekey_id: KyberPreKeyId) -> Result<()>;
 }
 
-/// Interface for a Signal client instance to store a session associated with another particular
-/// separate Signal client instance.
+/// Interface for a Mochi client instance to store a session associated with another particular
+/// separate Mochi client instance.
 ///
-/// This [SessionRecord] object between a pair of Signal clients is used to drive the state for the
+/// This [SessionRecord] object between a pair of Mochi clients is used to drive the state for the
 /// forward-secret message chain in the [Double Ratchet] protocol.
 ///
-/// [Double Ratchet]: https://signal.org/docs/specifications/doubleratchet/
+/// [Double Ratchet]: https://mochi.org/docs/specifications/doubleratchet/
 #[async_trait(?Send)]
 pub trait SessionStore {
     /// Look up the session corresponding to `address`.

@@ -1,9 +1,9 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_protocol_cross_version_testing::*;
+use libmochi_protocol_cross_version_testing::*;
 
 // Use this function to debug tests
 #[allow(dead_code)]
@@ -15,11 +15,11 @@ fn init_logger() {
 }
 
 fn try_all_combinations(
-    f: fn(&mut dyn LibSignalProtocolStore, &mut dyn LibSignalProtocolStore),
-    make_previous: &[fn() -> Box<dyn LibSignalProtocolStore>],
+    f: fn(&mut dyn LibMochiProtocolStore, &mut dyn LibMochiProtocolStore),
+    make_previous: &[fn() -> Box<dyn LibMochiProtocolStore>],
 ) {
-    let run = |alice_store: &mut dyn LibSignalProtocolStore,
-               bob_store: &mut dyn LibSignalProtocolStore| {
+    let run = |alice_store: &mut dyn LibMochiProtocolStore,
+               bob_store: &mut dyn LibMochiProtocolStore| {
         log::info!(
             "alice: {}, bob: {}",
             alice_store.version(),
@@ -30,13 +30,13 @@ fn try_all_combinations(
 
     // Current<->Current, to test that the test is correct.
     run(
-        &mut LibSignalProtocolCurrent::new(),
-        &mut LibSignalProtocolCurrent::new(),
+        &mut LibMochiProtocolCurrent::new(),
+        &mut LibMochiProtocolCurrent::new(),
     );
 
     // Current<->Previous
     for bob_store_maker in make_previous {
-        let mut alice_store = LibSignalProtocolCurrent::new();
+        let mut alice_store = LibMochiProtocolCurrent::new();
         let mut bob_store = bob_store_maker();
         run(&mut alice_store, &mut *bob_store);
     }
@@ -44,7 +44,7 @@ fn try_all_combinations(
     // Previous<->Current
     for alice_store_maker in make_previous {
         let mut alice_store = alice_store_maker();
-        let mut bob_store = LibSignalProtocolCurrent::new();
+        let mut bob_store = LibMochiProtocolCurrent::new();
         run(&mut *alice_store, &mut bob_store);
     }
 }
@@ -54,14 +54,14 @@ fn test_basic_prekey() {
     try_all_combinations(
         run,
         &[
-            || Box::new(LibSignalProtocolV21::new()),
-            || Box::new(LibSignalProtocolV12::new()),
+            || Box::new(LibMochiProtocolV21::new()),
+            || Box::new(LibMochiProtocolV12::new()),
         ],
     );
 
     fn run(
-        alice_store: &mut dyn LibSignalProtocolStore,
-        bob_store: &mut dyn LibSignalProtocolStore,
+        alice_store: &mut dyn LibMochiProtocolStore,
+        bob_store: &mut dyn LibMochiProtocolStore,
     ) {
         let alice_name = "alice";
         let bob_name = "bob";
@@ -89,9 +89,9 @@ fn test_basic_prekey() {
 }
 
 fn run_interaction(
-    alice_store: &mut dyn LibSignalProtocolStore,
+    alice_store: &mut dyn LibMochiProtocolStore,
     alice_name: &str,
-    bob_store: &mut dyn LibSignalProtocolStore,
+    bob_store: &mut dyn LibMochiProtocolStore,
     bob_name: &str,
 ) {
     let alice_ptext = b"It's rabbit season";

@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -61,8 +61,8 @@ fn test_integration_auth_with_pni() {
     let group_public_params = group_secret_params.get_public_params();
 
     // Random UID and issueTime
-    let aci = libsignal_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
-    let pni = libsignal_core::Pni::from_uuid_bytes(zkgroup::TEST_ARRAY_16_1);
+    let aci = libmochi_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
+    let pni = libmochi_core::Pni::from_uuid_bytes(zkgroup::TEST_ARRAY_16_1);
     let redemption_time = zkgroup::Timestamp::from_epoch_seconds(123456 * SECONDS_PER_DAY);
 
     // SERVER
@@ -180,8 +180,8 @@ fn test_integration_auth_zkc() {
     let group_public_params = group_secret_params.get_public_params();
 
     // Random UID and issueTime
-    let aci = libsignal_core::Aci::from(uuid::Uuid::from_bytes(zkgroup::TEST_ARRAY_16));
-    let pni = libsignal_core::Pni::from(uuid::Uuid::from_bytes(zkgroup::TEST_ARRAY_16_1));
+    let aci = libmochi_core::Aci::from(uuid::Uuid::from_bytes(zkgroup::TEST_ARRAY_16));
+    let pni = libmochi_core::Pni::from(uuid::Uuid::from_bytes(zkgroup::TEST_ARRAY_16_1));
     let redemption_time = zkgroup::Timestamp::from_epoch_seconds(123456 * SECONDS_PER_DAY);
 
     // SERVER
@@ -283,7 +283,7 @@ fn test_integration_expiring_profile() {
         zkgroup::groups::GroupSecretParams::derive_from_master_key(master_key);
     let group_public_params = group_secret_params.get_public_params();
 
-    let aci = libsignal_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
+    let aci = libmochi_core::Aci::from_uuid_bytes(zkgroup::TEST_ARRAY_16);
     let profile_key =
         zkgroup::profiles::ProfileKey::create(zkgroup::common::constants::TEST_ARRAY_32_1);
     let profile_key_commitment = profile_key.get_commitment(aci);

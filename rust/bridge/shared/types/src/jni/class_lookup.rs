@@ -1,5 +1,5 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 use jni::objects::{GlobalRef, JClass, JObject, JValue};
@@ -107,12 +107,12 @@ mod test {
     #[test]
     fn binary_name_conversion() {
         assert_eq!(
-            &jni_name_from_binary_name(ClassName("org.signal.libsignal.Native")),
-            "org/signal/libsignal/Native"
+            &jni_name_from_binary_name(ClassName("org.mochi.libmochi.Native")),
+            "org/mochi/libmochi/Native"
         );
         assert_eq!(
-            &jni_name_from_binary_name(ClassName("org.signal.libsignal.CdsiResponse$Entry")),
-            "org/signal/libsignal/CdsiResponse$Entry"
+            &jni_name_from_binary_name(ClassName("org.mochi.libmochi.CdsiResponse$Entry")),
+            "org/mochi/libmochi/CdsiResponse$Entry"
         );
     }
 }

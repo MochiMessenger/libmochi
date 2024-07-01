@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2023 Signal Messenger, LLC.
+// Copyright (C) 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -314,7 +314,7 @@ mod test {
 
         let mut iv = [0; AES_IV_SIZE];
         OsRng.fill_bytes(&mut iv);
-        let mut ctext = signal_crypto::aes_256_cbc_encrypt(&compressed, &key.aes_key, &iv)
+        let mut ctext = mochi_crypto::aes_256_cbc_encrypt(&compressed, &key.aes_key, &iv)
             .expect("can encrypt");
         drop(compressed);
 

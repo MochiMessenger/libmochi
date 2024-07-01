@@ -1,11 +1,11 @@
 //
-// Copyright 2021-2022 Signal Messenger, LLC.
+// Copyright 2021-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 /* eslint-disable @typescript-eslint/require-await */
 
-import * as SignalClient from '../index';
+import * as MochiClient from '../index';
 import * as util from './util';
 
 import { assert, use } from 'chai';
@@ -18,52 +18,52 @@ util.initLogger();
 
 const chance = Chance();
 
-class InMemorySessionStore extends SignalClient.SessionStore {
+class InMemorySessionStore extends MochiClient.SessionStore {
   private state = new Map<string, Buffer>();
   async saveSession(
-    name: SignalClient.ProtocolAddress,
-    record: SignalClient.SessionRecord
+    name: MochiClient.ProtocolAddress,
+    record: MochiClient.SessionRecord
   ): Promise<void> {
     const idx = `${name.name()}::${name.deviceId()}`;
     this.state.set(idx, record.serialize());
   }
   async getSession(
-    name: SignalClient.ProtocolAddress
-  ): Promise<SignalClient.SessionRecord | null> {
+    name: MochiClient.ProtocolAddress
+  ): Promise<MochiClient.SessionRecord | null> {
     const idx = `${name.name()}::${name.deviceId()}`;
     const serialized = this.state.get(idx);
     if (serialized) {
-      return SignalClient.SessionRecord.deserialize(serialized);
+      return MochiClient.SessionRecord.deserialize(serialized);
     } else {
       return null;
     }
   }
   async getExistingSessions(
-    addresses: SignalClient.ProtocolAddress[]
-  ): Promise<SignalClient.SessionRecord[]> {
+    addresses: MochiClient.ProtocolAddress[]
+  ): Promise<MochiClient.SessionRecord[]> {
     return addresses.map((address) => {
       const idx = `${address.name()}::${address.deviceId()}`;
       const serialized = this.state.get(idx);
       if (!serialized) {
         throw `no session for ${idx}`;
       }
-      return SignalClient.SessionRecord.deserialize(serialized);
+      return MochiClient.SessionRecord.deserialize(serialized);
     });
   }
 }
 
-class InMemoryIdentityKeyStore extends SignalClient.IdentityKeyStore {
-  private idKeys = new Map<string, SignalClient.PublicKey>();
+class InMemoryIdentityKeyStore extends MochiClient.IdentityKeyStore {
+  private idKeys = new Map<string, MochiClient.PublicKey>();
   private localRegistrationId: number;
-  private identityKey: SignalClient.PrivateKey;
+  private identityKey: MochiClient.PrivateKey;
 
   constructor(localRegistrationId?: number) {
     super();
-    this.identityKey = SignalClient.PrivateKey.generate();
+    this.identityKey = MochiClient.PrivateKey.generate();
     this.localRegistrationId = localRegistrationId ?? 5;
   }
 
-  async getIdentityKey(): Promise<SignalClient.PrivateKey> {
+  async getIdentityKey(): Promise<MochiClient.PrivateKey> {
     return this.identityKey;
   }
   async getLocalRegistrationId(): Promise<number> {
@@ -71,9 +71,9 @@ class InMemoryIdentityKeyStore extends SignalClient.IdentityKeyStore {
   }
 
   async isTrustedIdentity(
-    name: SignalClient.ProtocolAddress,
-    key: SignalClient.PublicKey,
-    _direction: SignalClient.Direction
+    name: MochiClient.ProtocolAddress,
+    key: MochiClient.PublicKey,
+    _direction: MochiClient.Direction
   ): Promise<boolean> {
     const idx = `${name.name()}::${name.deviceId()}`;
     const currentKey = this.idKeys.get(idx);
@@ -85,8 +85,8 @@ class InMemoryIdentityKeyStore extends SignalClient.IdentityKeyStore {
   }
 
   async saveIdentity(
-    name: SignalClient.ProtocolAddress,
-    key: SignalClient.PublicKey
+    name: MochiClient.ProtocolAddress,
+    key: MochiClient.PublicKey
   ): Promise<boolean> {
     const idx = `${name.name()}::${name.deviceId()}`;
     const currentKey = this.idKeys.get(idx);
@@ -100,65 +100,65 @@ class InMemoryIdentityKeyStore extends SignalClient.IdentityKeyStore {
     return false;
   }
   async getIdentity(
-    name: SignalClient.ProtocolAddress
-  ): Promise<SignalClient.PublicKey | null> {
+    name: MochiClient.ProtocolAddress
+  ): Promise<MochiClient.PublicKey | null> {
     const idx = `${name.name()}::${name.deviceId()}`;
     return this.idKeys.get(idx) ?? null;
   }
 }
 
-class InMemoryPreKeyStore extends SignalClient.PreKeyStore {
+class InMemoryPreKeyStore extends MochiClient.PreKeyStore {
   private state = new Map<number, Buffer>();
   async savePreKey(
     id: number,
-    record: SignalClient.PreKeyRecord
+    record: MochiClient.PreKeyRecord
   ): Promise<void> {
     this.state.set(id, record.serialize());
   }
-  async getPreKey(id: number): Promise<SignalClient.PreKeyRecord> {
+  async getPreKey(id: number): Promise<MochiClient.PreKeyRecord> {
     const record = this.state.get(id);
     if (!record) {
       throw new Error(`pre-key ${id} not found`);
     }
-    return SignalClient.PreKeyRecord.deserialize(record);
+    return MochiClient.PreKeyRecord.deserialize(record);
   }
   async removePreKey(id: number): Promise<void> {
     this.state.delete(id);
   }
 }
 
-class InMemorySignedPreKeyStore extends SignalClient.SignedPreKeyStore {
+class InMemorySignedPreKeyStore extends MochiClient.SignedPreKeyStore {
   private state = new Map<number, Buffer>();
   async saveSignedPreKey(
     id: number,
-    record: SignalClient.SignedPreKeyRecord
+    record: MochiClient.SignedPreKeyRecord
   ): Promise<void> {
     this.state.set(id, record.serialize());
   }
-  async getSignedPreKey(id: number): Promise<SignalClient.SignedPreKeyRecord> {
+  async getSignedPreKey(id: number): Promise<MochiClient.SignedPreKeyRecord> {
     const record = this.state.get(id);
     if (!record) {
       throw new Error(`pre-key ${id} not found`);
     }
-    return SignalClient.SignedPreKeyRecord.deserialize(record);
+    return MochiClient.SignedPreKeyRecord.deserialize(record);
   }
 }
 
-class InMemoryKyberPreKeyStore extends SignalClient.KyberPreKeyStore {
+class InMemoryKyberPreKeyStore extends MochiClient.KyberPreKeyStore {
   private state = new Map<number, Buffer>();
   private used = new Set<number>();
   async saveKyberPreKey(
     id: number,
-    record: SignalClient.KyberPreKeyRecord
+    record: MochiClient.KyberPreKeyRecord
   ): Promise<void> {
     this.state.set(id, record.serialize());
   }
-  async getKyberPreKey(id: number): Promise<SignalClient.KyberPreKeyRecord> {
+  async getKyberPreKey(id: number): Promise<MochiClient.KyberPreKeyRecord> {
     const record = this.state.get(id);
     if (!record) {
       throw new Error(`kyber pre-key ${id} not found`);
     }
-    return SignalClient.KyberPreKeyRecord.deserialize(record);
+    return MochiClient.KyberPreKeyRecord.deserialize(record);
   }
   async markKyberPreKeyUsed(id: number): Promise<void> {
     this.used.add(id);
@@ -168,20 +168,20 @@ class InMemoryKyberPreKeyStore extends SignalClient.KyberPreKeyStore {
   }
 }
 
-class InMemorySenderKeyStore extends SignalClient.SenderKeyStore {
-  private state = new Map<string, SignalClient.SenderKeyRecord>();
+class InMemorySenderKeyStore extends MochiClient.SenderKeyStore {
+  private state = new Map<string, MochiClient.SenderKeyRecord>();
   async saveSenderKey(
-    sender: SignalClient.ProtocolAddress,
-    distributionId: SignalClient.Uuid,
-    record: SignalClient.SenderKeyRecord
+    sender: MochiClient.ProtocolAddress,
+    distributionId: MochiClient.Uuid,
+    record: MochiClient.SenderKeyRecord
   ): Promise<void> {
     const idx = `${distributionId}::${sender.name()}::${sender.deviceId()}`;
     this.state.set(idx, record);
   }
   async getSenderKey(
-    sender: SignalClient.ProtocolAddress,
-    distributionId: SignalClient.Uuid
-  ): Promise<SignalClient.SenderKeyRecord | null> {
+    sender: MochiClient.ProtocolAddress,
+    distributionId: MochiClient.Uuid
+  ): Promise<MochiClient.SenderKeyRecord | null> {
     const idx = `${distributionId}::${sender.name()}::${sender.deviceId()}`;
     return this.state.get(idx) ?? null;
   }
@@ -206,26 +206,26 @@ class TestStores {
 }
 
 async function makeX3DHBundle(
-  address: SignalClient.ProtocolAddress,
+  address: MochiClient.ProtocolAddress,
   stores: TestStores
-): Promise<SignalClient.PreKeyBundle> {
+): Promise<MochiClient.PreKeyBundle> {
   const identityKey = await stores.identity.getIdentityKey();
   const prekeyId = chance.natural({ max: 10000 });
-  const prekey = SignalClient.PrivateKey.generate();
+  const prekey = MochiClient.PrivateKey.generate();
   const signedPrekeyId = chance.natural({ max: 10000 });
-  const signedPrekey = SignalClient.PrivateKey.generate();
+  const signedPrekey = MochiClient.PrivateKey.generate();
   const signedPrekeySignature = identityKey.sign(
     signedPrekey.getPublicKey().serialize()
   );
 
   await stores.prekey.savePreKey(
     prekeyId,
-    SignalClient.PreKeyRecord.new(prekeyId, prekey.getPublicKey(), prekey)
+    MochiClient.PreKeyRecord.new(prekeyId, prekey.getPublicKey(), prekey)
   );
 
   await stores.signed.saveSignedPreKey(
     signedPrekeyId,
-    SignalClient.SignedPreKeyRecord.new(
+    MochiClient.SignedPreKeyRecord.new(
       signedPrekeyId,
       chance.timestamp(),
       signedPrekey.getPublicKey(),
@@ -234,7 +234,7 @@ async function makeX3DHBundle(
     )
   );
 
-  return SignalClient.PreKeyBundle.new(
+  return MochiClient.PreKeyBundle.new(
     await stores.identity.getLocalRegistrationId(),
     address.deviceId(),
     prekeyId,
@@ -247,31 +247,31 @@ async function makeX3DHBundle(
 }
 
 async function makePQXDHBundle(
-  address: SignalClient.ProtocolAddress,
+  address: MochiClient.ProtocolAddress,
   stores: TestStores
-): Promise<SignalClient.PreKeyBundle> {
+): Promise<MochiClient.PreKeyBundle> {
   const identityKey = await stores.identity.getIdentityKey();
   const prekeyId = chance.natural({ max: 10000 });
-  const prekey = SignalClient.PrivateKey.generate();
+  const prekey = MochiClient.PrivateKey.generate();
   const signedPrekeyId = chance.natural({ max: 10000 });
-  const signedPrekey = SignalClient.PrivateKey.generate();
+  const signedPrekey = MochiClient.PrivateKey.generate();
   const signedPrekeySignature = identityKey.sign(
     signedPrekey.getPublicKey().serialize()
   );
   const kyberPrekeyId = chance.natural({ max: 10000 });
-  const kyberKeyPair = SignalClient.KEMKeyPair.generate();
+  const kyberKeyPair = MochiClient.KEMKeyPair.generate();
   const kyberPrekeySignature = identityKey.sign(
     kyberKeyPair.getPublicKey().serialize()
   );
 
   await stores.prekey.savePreKey(
     prekeyId,
-    SignalClient.PreKeyRecord.new(prekeyId, prekey.getPublicKey(), prekey)
+    MochiClient.PreKeyRecord.new(prekeyId, prekey.getPublicKey(), prekey)
   );
 
   await stores.signed.saveSignedPreKey(
     signedPrekeyId,
-    SignalClient.SignedPreKeyRecord.new(
+    MochiClient.SignedPreKeyRecord.new(
       signedPrekeyId,
       chance.timestamp(),
       signedPrekey.getPublicKey(),
@@ -282,7 +282,7 @@ async function makePQXDHBundle(
 
   await stores.kyber.saveKyberPreKey(
     kyberPrekeyId,
-    SignalClient.KyberPreKeyRecord.new(
+    MochiClient.KyberPreKeyRecord.new(
       kyberPrekeyId,
       chance.timestamp(),
       kyberKeyPair,
@@ -290,7 +290,7 @@ async function makePQXDHBundle(
     )
   );
 
-  return SignalClient.PreKeyBundle.new(
+  return MochiClient.PreKeyBundle.new(
     await stores.identity.getLocalRegistrationId(),
     address.deviceId(),
     prekeyId,
@@ -310,7 +310,7 @@ const sessionVersionTestCases = [
   { suffix: 'v4', makeBundle: makePQXDHBundle, expectedVersion: 4 },
 ];
 
-describe('SignalClient', () => {
+describe('MochiClient', () => {
   it('HKDF test vector', () => {
     const secret = Buffer.from(
       '0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B',
@@ -319,12 +319,12 @@ describe('SignalClient', () => {
     const empty = Buffer.from('', 'hex');
 
     assert.deepEqual(
-      SignalClient.hkdf(42, secret, empty, empty).toString('hex'),
+      MochiClient.hkdf(42, secret, empty, empty).toString('hex'),
       '8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8'
     );
 
     assert.deepEqual(
-      SignalClient.hkdf(42, secret, empty, null).toString('hex'),
+      MochiClient.hkdf(42, secret, empty, null).toString('hex'),
       '8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8'
     );
 
@@ -332,7 +332,7 @@ describe('SignalClient', () => {
     const label = Buffer.from('F0F1F2F3F4F5F6F7F8F9', 'hex');
 
     assert.deepEqual(
-      SignalClient.hkdf(42, secret, label, salt).toString('hex'),
+      MochiClient.hkdf(42, secret, label, salt).toString('hex'),
       '3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865'
     );
   });
@@ -340,12 +340,12 @@ describe('SignalClient', () => {
     const testingUuid = '8c78cd2a-16ff-427d-83dc-1a5e36ce713d';
 
     it('handles ACIs', () => {
-      const aci = SignalClient.Aci.fromUuid(testingUuid);
-      assert.instanceOf(aci, SignalClient.Aci);
+      const aci = MochiClient.Aci.fromUuid(testingUuid);
+      assert.instanceOf(aci, MochiClient.Aci);
       assert.isTrue(
-        aci.isEqual(SignalClient.Aci.fromUuidBytes(uuid.parse(testingUuid)))
+        aci.isEqual(MochiClient.Aci.fromUuidBytes(uuid.parse(testingUuid)))
       );
-      assert.isFalse(aci.isEqual(SignalClient.Pni.fromUuid(testingUuid)));
+      assert.isFalse(aci.isEqual(MochiClient.Pni.fromUuid(testingUuid)));
 
       assert.deepEqual(testingUuid, aci.getRawUuid());
       assert.deepEqual(uuid.parse(testingUuid), aci.getRawUuidBytes());
@@ -354,36 +354,36 @@ describe('SignalClient', () => {
       assert.deepEqual(`<ACI:${testingUuid}>`, `${aci}`);
 
       {
-        const aciServiceId = SignalClient.ServiceId.parseFromServiceIdString(
+        const aciServiceId = MochiClient.ServiceId.parseFromServiceIdString(
           aci.getServiceIdString()
         );
-        assert.instanceOf(aciServiceId, SignalClient.Aci);
+        assert.instanceOf(aciServiceId, MochiClient.Aci);
         assert.deepEqual(aci, aciServiceId);
 
-        const _: SignalClient.Aci = SignalClient.Aci.parseFromServiceIdString(
+        const _: MochiClient.Aci = MochiClient.Aci.parseFromServiceIdString(
           aci.getServiceIdString()
         );
       }
 
       {
-        const aciServiceId = SignalClient.ServiceId.parseFromServiceIdBinary(
+        const aciServiceId = MochiClient.ServiceId.parseFromServiceIdBinary(
           aci.getServiceIdBinary()
         );
-        assert.instanceOf(aciServiceId, SignalClient.Aci);
+        assert.instanceOf(aciServiceId, MochiClient.Aci);
         assert.deepEqual(aci, aciServiceId);
 
-        const _: SignalClient.Aci = SignalClient.Aci.parseFromServiceIdBinary(
+        const _: MochiClient.Aci = MochiClient.Aci.parseFromServiceIdBinary(
           aci.getServiceIdBinary()
         );
       }
     });
     it('handles PNIs', () => {
-      const pni = SignalClient.Pni.fromUuid(testingUuid);
-      assert.instanceOf(pni, SignalClient.Pni);
+      const pni = MochiClient.Pni.fromUuid(testingUuid);
+      assert.instanceOf(pni, MochiClient.Pni);
       assert.isTrue(
-        pni.isEqual(SignalClient.Pni.fromUuidBytes(uuid.parse(testingUuid)))
+        pni.isEqual(MochiClient.Pni.fromUuidBytes(uuid.parse(testingUuid)))
       );
-      assert.isFalse(pni.isEqual(SignalClient.Aci.fromUuid(testingUuid)));
+      assert.isFalse(pni.isEqual(MochiClient.Aci.fromUuid(testingUuid)));
 
       assert.deepEqual(testingUuid, pni.getRawUuid());
       assert.deepEqual(uuid.parse(testingUuid), pni.getRawUuidBytes());
@@ -395,77 +395,77 @@ describe('SignalClient', () => {
       assert.deepEqual(`<PNI:${testingUuid}>`, `${pni}`);
 
       {
-        const pniServiceId = SignalClient.ServiceId.parseFromServiceIdString(
+        const pniServiceId = MochiClient.ServiceId.parseFromServiceIdString(
           pni.getServiceIdString()
         );
-        assert.instanceOf(pniServiceId, SignalClient.Pni);
+        assert.instanceOf(pniServiceId, MochiClient.Pni);
         assert.deepEqual(pni, pniServiceId);
 
-        const _: SignalClient.Pni = SignalClient.Pni.parseFromServiceIdString(
+        const _: MochiClient.Pni = MochiClient.Pni.parseFromServiceIdString(
           pni.getServiceIdString()
         );
       }
 
       {
-        const pniServiceId = SignalClient.ServiceId.parseFromServiceIdBinary(
+        const pniServiceId = MochiClient.ServiceId.parseFromServiceIdBinary(
           pni.getServiceIdBinary()
         );
-        assert.instanceOf(pniServiceId, SignalClient.Pni);
+        assert.instanceOf(pniServiceId, MochiClient.Pni);
         assert.deepEqual(pni, pniServiceId);
 
-        const _: SignalClient.Pni = SignalClient.Pni.parseFromServiceIdBinary(
+        const _: MochiClient.Pni = MochiClient.Pni.parseFromServiceIdBinary(
           pni.getServiceIdBinary()
         );
       }
     });
     it('accepts the null UUID', () => {
-      SignalClient.ServiceId.parseFromServiceIdString(uuid.NIL);
+      MochiClient.ServiceId.parseFromServiceIdString(uuid.NIL);
     });
     it('rejects invalid values', () => {
       assert.throws(() =>
-        SignalClient.ServiceId.parseFromServiceIdBinary(Buffer.of())
+        MochiClient.ServiceId.parseFromServiceIdBinary(Buffer.of())
       );
-      assert.throws(() => SignalClient.ServiceId.parseFromServiceIdString(''));
+      assert.throws(() => MochiClient.ServiceId.parseFromServiceIdString(''));
     });
     it('follows the standard ordering', () => {
       const original = [
-        SignalClient.Aci.fromUuid(uuid.NIL),
-        SignalClient.Aci.fromUuid(testingUuid),
-        SignalClient.Pni.fromUuid(uuid.NIL),
-        SignalClient.Pni.fromUuid(testingUuid),
+        MochiClient.Aci.fromUuid(uuid.NIL),
+        MochiClient.Aci.fromUuid(testingUuid),
+        MochiClient.Pni.fromUuid(uuid.NIL),
+        MochiClient.Pni.fromUuid(testingUuid),
       ];
       const ids = util.shuffled(original);
-      ids.sort(SignalClient.ServiceId.comparator);
+      ids.sort(MochiClient.ServiceId.comparator);
       assert.deepEqual(ids, original);
     });
   });
   describe('ProtocolAddress', () => {
     it('can hold arbitrary data', () => {
-      const addr = SignalClient.ProtocolAddress.new('name', 42);
+      const addr = MochiClient.ProtocolAddress.new('name', 42);
       assert.deepEqual(addr.name(), 'name');
       assert.deepEqual(addr.deviceId(), 42);
     });
     it('can round-trip ServiceIds', () => {
       const newUuid = uuid.v4();
-      const aci = SignalClient.Aci.fromUuid(newUuid);
-      const pni = SignalClient.Pni.fromUuid(newUuid);
+      const aci = MochiClient.Aci.fromUuid(newUuid);
+      const pni = MochiClient.Pni.fromUuid(newUuid);
 
-      const aciAddr = SignalClient.ProtocolAddress.new(aci, 1);
-      const pniAddr = SignalClient.ProtocolAddress.new(pni, 1);
+      const aciAddr = MochiClient.ProtocolAddress.new(aci, 1);
+      const pniAddr = MochiClient.ProtocolAddress.new(pni, 1);
       assert.notEqual(aciAddr.toString(), pniAddr.toString());
       assert.isTrue(aciAddr.serviceId()?.isEqual(aci));
       assert.isTrue(pniAddr.serviceId()?.isEqual(pni));
     });
   });
   it('Fingerprint', () => {
-    const aliceKey = SignalClient.PublicKey.deserialize(
+    const aliceKey = MochiClient.PublicKey.deserialize(
       Buffer.from(
         '0506863bc66d02b40d27b8d49ca7c09e9239236f9d7d25d6fcca5ce13c7064d868',
         'hex'
       )
     );
     const aliceIdentifier = Buffer.from('+14152222222', 'utf8');
-    const bobKey = SignalClient.PublicKey.deserialize(
+    const bobKey = MochiClient.PublicKey.deserialize(
       Buffer.from(
         '05f781b6fb32fed9ba1cf2de978d4d5da28dc34046ae814402b5c0dbd96fda907b',
         'hex'
@@ -473,7 +473,7 @@ describe('SignalClient', () => {
     );
     const bobIdentifier = Buffer.from('+14153333333', 'utf8');
     const iterations = 5200;
-    const aFprint1 = SignalClient.Fingerprint.new(
+    const aFprint1 = MochiClient.Fingerprint.new(
       iterations,
       1,
       aliceIdentifier,
@@ -492,7 +492,7 @@ describe('SignalClient', () => {
       '300354477692869396892869876765458257569162576843440918079131'
     );
 
-    const bFprint1 = SignalClient.Fingerprint.new(
+    const bFprint1 = MochiClient.Fingerprint.new(
       iterations,
       1,
       bobIdentifier,
@@ -525,12 +525,12 @@ describe('SignalClient', () => {
     );
   });
   it('SenderCertificate', () => {
-    const trustRoot = SignalClient.PrivateKey.generate();
-    const serverKey = SignalClient.PrivateKey.generate();
+    const trustRoot = MochiClient.PrivateKey.generate();
+    const serverKey = MochiClient.PrivateKey.generate();
 
     const keyId = 23;
 
-    const serverCert = SignalClient.ServerCertificate.new(
+    const serverCert = MochiClient.ServerCertificate.new(
       keyId,
       serverKey.getPublicKey(),
       trustRoot
@@ -538,7 +538,7 @@ describe('SignalClient', () => {
     assert.deepEqual(serverCert.keyId(), keyId);
     assert.deepEqual(serverCert.key(), serverKey.getPublicKey());
 
-    const serverCertFromBytes = SignalClient.ServerCertificate.deserialize(
+    const serverCertFromBytes = MochiClient.ServerCertificate.deserialize(
       serverCert.serialize()
     );
     assert.deepEqual(serverCert, serverCertFromBytes);
@@ -546,10 +546,10 @@ describe('SignalClient', () => {
     const senderUuid = 'fedfe51e-2b91-4156-8710-7cc1bdd57cd8';
     const senderE164 = '555-123-4567';
     const senderDeviceId = 9;
-    const senderKey = SignalClient.PrivateKey.generate();
+    const senderKey = MochiClient.PrivateKey.generate();
     const expiration = 2114398800; // Jan 1, 2037
 
-    const senderCert = SignalClient.SenderCertificate.new(
+    const senderCert = MochiClient.SenderCertificate.new(
       senderUuid,
       senderE164,
       senderDeviceId,
@@ -565,7 +565,7 @@ describe('SignalClient', () => {
     assert.deepEqual(senderCert.senderE164(), senderE164);
     assert.deepEqual(senderCert.senderDeviceId(), senderDeviceId);
 
-    const senderCertFromBytes = SignalClient.SenderCertificate.deserialize(
+    const senderCertFromBytes = MochiClient.SenderCertificate.deserialize(
       senderCert.serialize()
     );
     assert.deepEqual(senderCert, senderCertFromBytes);
@@ -573,7 +573,7 @@ describe('SignalClient', () => {
     assert(senderCert.validate(trustRoot.getPublicKey(), expiration - 1000));
     assert(!senderCert.validate(trustRoot.getPublicKey(), expiration + 10)); // expired
 
-    const senderCertWithoutE164 = SignalClient.SenderCertificate.new(
+    const senderCertWithoutE164 = MochiClient.SenderCertificate.new(
       senderUuid,
       null,
       senderDeviceId,
@@ -597,9 +597,9 @@ describe('SignalClient', () => {
     const chainId = 9;
     const iteration = 101;
     const ciphertext = Buffer.alloc(32, 0xfe);
-    const pk = SignalClient.PrivateKey.generate();
+    const pk = MochiClient.PrivateKey.generate();
 
-    const skm = SignalClient.SenderKeyMessage._new(
+    const skm = MochiClient.SenderKeyMessage._new(
       3,
       distributionId,
       chainId,
@@ -614,7 +614,7 @@ describe('SignalClient', () => {
 
     assert(skm.verifySignature(pk.getPublicKey()));
 
-    const skmFromBytes = SignalClient.SenderKeyMessage.deserialize(
+    const skmFromBytes = MochiClient.SenderKeyMessage.deserialize(
       skm.serialize()
     );
     assert.deepEqual(skm, skmFromBytes);
@@ -624,9 +624,9 @@ describe('SignalClient', () => {
     const chainId = 9;
     const iteration = 101;
     const chainKey = Buffer.alloc(32, 0xfe);
-    const pk = SignalClient.PrivateKey.generate();
+    const pk = MochiClient.PrivateKey.generate();
 
-    const skdm = SignalClient.SenderKeyDistributionMessage._new(
+    const skdm = MochiClient.SenderKeyDistributionMessage._new(
       3,
       distributionId,
       chainId,
@@ -639,17 +639,17 @@ describe('SignalClient', () => {
     assert.deepEqual(skdm.iteration(), iteration);
     assert.deepEqual(skdm.chainKey(), chainKey);
 
-    const skdmFromBytes = SignalClient.SenderKeyDistributionMessage.deserialize(
+    const skdmFromBytes = MochiClient.SenderKeyDistributionMessage.deserialize(
       skdm.serialize()
     );
     assert.deepEqual(skdm, skdmFromBytes);
   });
   describe('SenderKeyDistributionMessage Store API', () => {
     it('can encrypt and decrypt', async () => {
-      const sender = SignalClient.ProtocolAddress.new('sender', 1);
+      const sender = MochiClient.ProtocolAddress.new('sender', 1);
       const distributionId = 'd1d1d1d1-7000-11eb-b32a-33b8a8a487a6';
       const aSenderKeyStore = new InMemorySenderKeyStore();
-      const skdm = await SignalClient.SenderKeyDistributionMessage.create(
+      const skdm = await MochiClient.SenderKeyDistributionMessage.create(
         sender,
         distributionId,
         aSenderKeyStore
@@ -658,7 +658,7 @@ describe('SignalClient', () => {
       assert.equal(0, skdm.iteration());
 
       const bSenderKeyStore = new InMemorySenderKeyStore();
-      await SignalClient.processSenderKeyDistributionMessage(
+      await MochiClient.processSenderKeyDistributionMessage(
         sender,
         skdm,
         bSenderKeyStore
@@ -666,14 +666,14 @@ describe('SignalClient', () => {
 
       const message = Buffer.from('0a0b0c', 'hex');
 
-      const aCtext = await SignalClient.groupEncrypt(
+      const aCtext = await MochiClient.groupEncrypt(
         sender,
         distributionId,
         aSenderKeyStore,
         message
       );
 
-      const bPtext = await SignalClient.groupDecrypt(
+      const bPtext = await MochiClient.groupDecrypt(
         sender,
         bSenderKeyStore,
         aCtext.serialize()
@@ -682,7 +682,7 @@ describe('SignalClient', () => {
       assert.deepEqual(message, bPtext);
 
       const anotherSkdm =
-        await SignalClient.SenderKeyDistributionMessage.create(
+        await MochiClient.SenderKeyDistributionMessage.create(
           sender,
           distributionId,
           aSenderKeyStore
@@ -692,19 +692,19 @@ describe('SignalClient', () => {
     });
 
     it("does not panic if there's an error", async () => {
-      const sender = SignalClient.ProtocolAddress.new('sender', 1);
+      const sender = MochiClient.ProtocolAddress.new('sender', 1);
       const distributionId = 'd1d1d1d1-7000-11eb-b32a-33b8a8a487a6';
       const aSenderKeyStore = new InMemorySenderKeyStore();
 
-      const messagePromise = SignalClient.SenderKeyDistributionMessage.create(
+      const messagePromise = MochiClient.SenderKeyDistributionMessage.create(
         sender,
         distributionId,
-        undefined as unknown as SignalClient.SenderKeyStore
+        undefined as unknown as MochiClient.SenderKeyStore
       );
       await assert.isRejected(messagePromise, TypeError);
 
-      const messagePromise2 = SignalClient.SenderKeyDistributionMessage.create(
-        {} as unknown as SignalClient.ProtocolAddress,
+      const messagePromise2 = MochiClient.SenderKeyDistributionMessage.create(
+        {} as unknown as MochiClient.ProtocolAddress,
         distributionId,
         aSenderKeyStore
       );
@@ -716,15 +716,15 @@ describe('SignalClient', () => {
     const registrationId = 5;
     const deviceId = 23;
     const prekeyId = 42;
-    const prekey = SignalClient.PrivateKey.generate().getPublicKey();
+    const prekey = MochiClient.PrivateKey.generate().getPublicKey();
     const signedPrekeyId = 2300;
-    const signedPrekey = SignalClient.PrivateKey.generate().getPublicKey();
-    const signedPrekeySignature = SignalClient.PrivateKey.generate().sign(
+    const signedPrekey = MochiClient.PrivateKey.generate().getPublicKey();
+    const signedPrekeySignature = MochiClient.PrivateKey.generate().sign(
       Buffer.from('010203', 'hex')
     );
-    const identityKey = SignalClient.PrivateKey.generate().getPublicKey();
+    const identityKey = MochiClient.PrivateKey.generate().getPublicKey();
 
-    const pkb = SignalClient.PreKeyBundle.new(
+    const pkb = MochiClient.PreKeyBundle.new(
       registrationId,
       deviceId,
       prekeyId,
@@ -745,7 +745,7 @@ describe('SignalClient', () => {
     assert.deepEqual(pkb.identityKey(), identityKey);
 
     // null handling:
-    const pkb2 = SignalClient.PreKeyBundle.new(
+    const pkb2 = MochiClient.PreKeyBundle.new(
       registrationId,
       deviceId,
       null,
@@ -767,20 +767,20 @@ describe('SignalClient', () => {
   });
 
   it('PublicKeyBundle Kyber', () => {
-    const signingKey = SignalClient.PrivateKey.generate();
+    const signingKey = MochiClient.PrivateKey.generate();
     const registrationId = 5;
     const deviceId = 23;
     const prekeyId = 42;
-    const prekey = SignalClient.PrivateKey.generate().getPublicKey();
+    const prekey = MochiClient.PrivateKey.generate().getPublicKey();
     const signedPrekeyId = 2300;
-    const signedPrekey = SignalClient.PrivateKey.generate().getPublicKey();
+    const signedPrekey = MochiClient.PrivateKey.generate().getPublicKey();
     const signedPrekeySignature = signingKey.sign(signedPrekey.serialize());
-    const identityKey = SignalClient.PrivateKey.generate().getPublicKey();
+    const identityKey = MochiClient.PrivateKey.generate().getPublicKey();
     const kyberPrekeyId = 8888;
-    const kyberPrekey = SignalClient.KEMKeyPair.generate().getPublicKey();
+    const kyberPrekey = MochiClient.KEMKeyPair.generate().getPublicKey();
     const kyberPrekeySignature = signingKey.sign(kyberPrekey.serialize());
 
-    const pkb = SignalClient.PreKeyBundle.new(
+    const pkb = MochiClient.PreKeyBundle.new(
       registrationId,
       deviceId,
       prekeyId,
@@ -807,7 +807,7 @@ describe('SignalClient', () => {
     assert.deepEqual(pkb.kyberPreKeySignature(), kyberPrekeySignature);
 
     // optional kyber keys
-    const pkb2 = SignalClient.PreKeyBundle.new(
+    const pkb2 = MochiClient.PreKeyBundle.new(
       registrationId,
       deviceId,
       prekeyId,
@@ -822,7 +822,7 @@ describe('SignalClient', () => {
     assert.deepEqual(pkb2.kyberPreKeyPublic(), null);
     assert.deepEqual(pkb2.kyberPreKeySignature(), null);
 
-    const pkb3 = SignalClient.PreKeyBundle.new(
+    const pkb3 = MochiClient.PreKeyBundle.new(
       registrationId,
       deviceId,
       prekeyId,
@@ -842,26 +842,26 @@ describe('SignalClient', () => {
   });
 
   it('PreKeyRecord', () => {
-    const privKey = SignalClient.PrivateKey.generate();
+    const privKey = MochiClient.PrivateKey.generate();
     const pubKey = privKey.getPublicKey();
-    const pkr = SignalClient.PreKeyRecord.new(23, pubKey, privKey);
+    const pkr = MochiClient.PreKeyRecord.new(23, pubKey, privKey);
 
     assert.deepEqual(pkr.id(), 23);
     assert.deepEqual(pkr.publicKey(), pubKey);
     assert.deepEqual(pkr.privateKey(), privKey);
 
-    const pkr2 = SignalClient.PreKeyRecord.deserialize(pkr.serialize());
+    const pkr2 = MochiClient.PreKeyRecord.deserialize(pkr.serialize());
     assert.deepEqual(pkr2.id(), 23);
     assert.deepEqual(pkr2.publicKey(), pubKey);
     assert.deepEqual(pkr2.privateKey(), privKey);
   });
   it('SignedPreKeyRecord', () => {
-    const privKey = SignalClient.PrivateKey.generate();
+    const privKey = MochiClient.PrivateKey.generate();
     const pubKey = privKey.getPublicKey();
     const timestamp = 9000;
     const keyId = 23;
     const signature = Buffer.alloc(64, 64);
-    const spkr = SignalClient.SignedPreKeyRecord.new(
+    const spkr = MochiClient.SignedPreKeyRecord.new(
       keyId,
       timestamp,
       pubKey,
@@ -875,20 +875,20 @@ describe('SignalClient', () => {
     assert.deepEqual(spkr.privateKey(), privKey);
     assert.deepEqual(spkr.signature(), signature);
 
-    const spkrFromBytes = SignalClient.SignedPreKeyRecord.deserialize(
+    const spkrFromBytes = MochiClient.SignedPreKeyRecord.deserialize(
       spkr.serialize()
     );
     assert.deepEqual(spkrFromBytes, spkr);
   });
 
   it('KyberPreKeyRecord', () => {
-    const keyPair = SignalClient.KEMKeyPair.generate();
+    const keyPair = MochiClient.KEMKeyPair.generate();
     const publicKey = keyPair.getPublicKey();
     const secretKey = keyPair.getSecretKey();
     const timestamp = 9000;
     const keyId = 23;
     const signature = Buffer.alloc(64, 64);
-    const record = SignalClient.KyberPreKeyRecord.new(
+    const record = MochiClient.KyberPreKeyRecord.new(
       keyId,
       timestamp,
       keyPair,
@@ -902,24 +902,24 @@ describe('SignalClient', () => {
     assert.deepEqual(record.secretKey(), secretKey);
     assert.deepEqual(record.signature(), signature);
 
-    const recordFromBytes = SignalClient.KyberPreKeyRecord.deserialize(
+    const recordFromBytes = MochiClient.KyberPreKeyRecord.deserialize(
       record.serialize()
     );
     assert.deepEqual(recordFromBytes, record);
   });
 
-  it('SignalMessage and PreKeySignalMessage', () => {
+  it('MochiMessage and PreKeyMochiMessage', () => {
     const messageVersion = 3;
     const macKey = Buffer.alloc(32, 0xab);
-    const senderRatchetKey = SignalClient.PrivateKey.generate().getPublicKey();
+    const senderRatchetKey = MochiClient.PrivateKey.generate().getPublicKey();
     const counter = 9;
     const previousCounter = 8;
-    const senderIdentityKey = SignalClient.PrivateKey.generate().getPublicKey();
+    const senderIdentityKey = MochiClient.PrivateKey.generate().getPublicKey();
     const receiverIdentityKey =
-      SignalClient.PrivateKey.generate().getPublicKey();
+      MochiClient.PrivateKey.generate().getPublicKey();
     const ciphertext = Buffer.from('01020304', 'hex');
 
-    const sm = SignalClient.SignalMessage._new(
+    const sm = MochiClient.MochiMessage._new(
       messageVersion,
       macKey,
       senderRatchetKey,
@@ -935,17 +935,17 @@ describe('SignalClient', () => {
 
     const sm_bytes = sm.serialize();
 
-    const sm2 = SignalClient.SignalMessage.deserialize(sm_bytes);
+    const sm2 = MochiClient.MochiMessage.deserialize(sm_bytes);
 
     assert.deepEqual(sm.body(), sm2.body());
 
     const registrationId = 9;
     const preKeyId = 23;
     const signedPreKeyId = 802;
-    const baseKey = SignalClient.PrivateKey.generate().getPublicKey();
-    const identityKey = SignalClient.PrivateKey.generate().getPublicKey();
+    const baseKey = MochiClient.PrivateKey.generate().getPublicKey();
+    const identityKey = MochiClient.PrivateKey.generate().getPublicKey();
 
-    const pkm = SignalClient.PreKeySignalMessage._new(
+    const pkm = MochiClient.PreKeyMochiMessage._new(
       messageVersion,
       registrationId,
       preKeyId,
@@ -961,7 +961,7 @@ describe('SignalClient', () => {
 
     const pkm_bytes = pkm.serialize();
 
-    const pkm2 = SignalClient.PreKeySignalMessage.deserialize(pkm_bytes);
+    const pkm2 = MochiClient.PreKeyMochiMessage.deserialize(pkm_bytes);
 
     assert.deepEqual(pkm2.serialize(), pkm_bytes);
   });
@@ -972,12 +972,12 @@ describe('SignalClient', () => {
         const aliceStores = new TestStores();
         const bobStores = new TestStores();
 
-        const aAddress = SignalClient.ProtocolAddress.new('+14151111111', 1);
-        const bAddress = SignalClient.ProtocolAddress.new('+19192222222', 1);
+        const aAddress = MochiClient.ProtocolAddress.new('+14151111111', 1);
+        const bAddress = MochiClient.ProtocolAddress.new('+19192222222', 1);
 
         const bPreKeyBundle = await testCase.makeBundle(bAddress, bobStores);
 
-        await SignalClient.processPreKeyBundle(
+        await MochiClient.processPreKeyBundle(
           bPreKeyBundle,
           bAddress,
           aliceStores.session,
@@ -985,7 +985,7 @@ describe('SignalClient', () => {
         );
         const aMessage = Buffer.from('Greetings hoo-man', 'utf8');
 
-        const aCiphertext = await SignalClient.signalEncrypt(
+        const aCiphertext = await MochiClient.mochiEncrypt(
           aMessage,
           bAddress,
           aliceStores.session,
@@ -994,14 +994,14 @@ describe('SignalClient', () => {
 
         assert.deepEqual(
           aCiphertext.type(),
-          SignalClient.CiphertextMessageType.PreKey
+          MochiClient.CiphertextMessageType.PreKey
         );
 
-        const aCiphertextR = SignalClient.PreKeySignalMessage.deserialize(
+        const aCiphertextR = MochiClient.PreKeyMochiMessage.deserialize(
           aCiphertext.serialize()
         );
 
-        const bDPlaintext = await SignalClient.signalDecryptPreKey(
+        const bDPlaintext = await MochiClient.mochiDecryptPreKey(
           aCiphertextR,
           aAddress,
           bobStores.session,
@@ -1017,7 +1017,7 @@ describe('SignalClient', () => {
           'utf8'
         );
 
-        const bCiphertext = await SignalClient.signalEncrypt(
+        const bCiphertext = await MochiClient.mochiEncrypt(
           bMessage,
           aAddress,
           bobStores.session,
@@ -1026,14 +1026,14 @@ describe('SignalClient', () => {
 
         assert.deepEqual(
           bCiphertext.type(),
-          SignalClient.CiphertextMessageType.Whisper
+          MochiClient.CiphertextMessageType.Whisper
         );
 
-        const bCiphertextR = SignalClient.SignalMessage.deserialize(
+        const bCiphertextR = MochiClient.MochiMessage.deserialize(
           bCiphertext.serialize()
         );
 
-        const aDPlaintext = await SignalClient.signalDecrypt(
+        const aDPlaintext = await MochiClient.mochiDecrypt(
           bCiphertextR,
           bAddress,
           aliceStores.session,
@@ -1051,7 +1051,7 @@ describe('SignalClient', () => {
         assert(session.hasCurrentState());
         assert(
           !session.currentRatchetKeyMatches(
-            SignalClient.PrivateKey.generate().getPublicKey()
+            MochiClient.PrivateKey.generate().getPublicKey()
           )
         );
 
@@ -1059,7 +1059,7 @@ describe('SignalClient', () => {
         assert(!session.hasCurrentState());
         assert(
           !session.currentRatchetKeyMatches(
-            SignalClient.PrivateKey.generate().getPublicKey()
+            MochiClient.PrivateKey.generate().getPublicKey()
           )
         );
       });
@@ -1068,12 +1068,12 @@ describe('SignalClient', () => {
         const aliceStores = new TestStores();
         const bobStores = new TestStores();
 
-        const aAddress = SignalClient.ProtocolAddress.new('+14151111111', 1);
-        const bAddress = SignalClient.ProtocolAddress.new('+19192222222', 1);
+        const aAddress = MochiClient.ProtocolAddress.new('+14151111111', 1);
+        const bAddress = MochiClient.ProtocolAddress.new('+19192222222', 1);
 
         const bPreKeyBundle = await testCase.makeBundle(bAddress, bobStores);
 
-        await SignalClient.processPreKeyBundle(
+        await MochiClient.processPreKeyBundle(
           bPreKeyBundle,
           bAddress,
           aliceStores.session,
@@ -1081,7 +1081,7 @@ describe('SignalClient', () => {
         );
         const aMessage = Buffer.from('Greetings hoo-man', 'utf8');
 
-        const aCiphertext = await SignalClient.signalEncrypt(
+        const aCiphertext = await MochiClient.mochiEncrypt(
           aMessage,
           bAddress,
           aliceStores.session,
@@ -1090,14 +1090,14 @@ describe('SignalClient', () => {
 
         assert.deepEqual(
           aCiphertext.type(),
-          SignalClient.CiphertextMessageType.PreKey
+          MochiClient.CiphertextMessageType.PreKey
         );
 
-        const aCiphertextR = SignalClient.PreKeySignalMessage.deserialize(
+        const aCiphertextR = MochiClient.PreKeyMochiMessage.deserialize(
           aCiphertext.serialize()
         );
 
-        const bDPlaintext = await SignalClient.signalDecryptPreKey(
+        const bDPlaintext = await MochiClient.mochiDecryptPreKey(
           aCiphertextR,
           aAddress,
           bobStores.session,
@@ -1109,7 +1109,7 @@ describe('SignalClient', () => {
         assert.deepEqual(bDPlaintext, aMessage);
 
         try {
-          await SignalClient.signalDecryptPreKey(
+          await MochiClient.mochiDecryptPreKey(
             aCiphertextR,
             aAddress,
             bobStores.session,
@@ -1121,13 +1121,13 @@ describe('SignalClient', () => {
           assert.fail();
         } catch (e) {
           assert.instanceOf(e, Error);
-          assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-          const err = e as SignalClient.LibSignalError;
+          assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+          const err = e as MochiClient.LibMochiError;
           assert.equal(err.name, 'DuplicatedMessage');
-          assert.equal(err.code, SignalClient.ErrorCode.DuplicatedMessage);
+          assert.equal(err.code, MochiClient.ErrorCode.DuplicatedMessage);
           assert.equal(
             err.operation,
-            'SessionCipher_DecryptPreKeySignalMessage'
+            'SessionCipher_DecryptPreKeyMochiMessage'
           ); // the Rust entry point
           assert.exists(err.stack); // Make sure we're still getting the benefits of Error.
         }
@@ -1137,7 +1137,7 @@ describe('SignalClient', () => {
           'utf8'
         );
 
-        const bCiphertext = await SignalClient.signalEncrypt(
+        const bCiphertext = await MochiClient.mochiEncrypt(
           bMessage,
           aAddress,
           bobStores.session,
@@ -1146,14 +1146,14 @@ describe('SignalClient', () => {
 
         assert.deepEqual(
           bCiphertext.type(),
-          SignalClient.CiphertextMessageType.Whisper
+          MochiClient.CiphertextMessageType.Whisper
         );
 
-        const bCiphertextR = SignalClient.SignalMessage.deserialize(
+        const bCiphertextR = MochiClient.MochiMessage.deserialize(
           bCiphertext.serialize()
         );
 
-        const aDPlaintext = await SignalClient.signalDecrypt(
+        const aDPlaintext = await MochiClient.mochiDecrypt(
           bCiphertextR,
           bAddress,
           aliceStores.session,
@@ -1163,7 +1163,7 @@ describe('SignalClient', () => {
         assert.deepEqual(aDPlaintext, bMessage);
 
         try {
-          await SignalClient.signalDecrypt(
+          await MochiClient.mochiDecrypt(
             bCiphertextR,
             bAddress,
             aliceStores.session,
@@ -1172,11 +1172,11 @@ describe('SignalClient', () => {
           assert.fail();
         } catch (e) {
           assert.instanceOf(e, Error);
-          assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-          const err = e as SignalClient.LibSignalError;
+          assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+          const err = e as MochiClient.LibMochiError;
           assert.equal(err.name, 'DuplicatedMessage');
-          assert.equal(err.code, SignalClient.ErrorCode.DuplicatedMessage);
-          assert.equal(err.operation, 'SessionCipher_DecryptSignalMessage'); // the Rust entry point
+          assert.equal(err.code, MochiClient.ErrorCode.DuplicatedMessage);
+          assert.equal(err.operation, 'SessionCipher_DecryptMochiMessage'); // the Rust entry point
           assert.exists(err.stack); // Make sure we're still getting the benefits of Error.
         }
       });
@@ -1185,11 +1185,11 @@ describe('SignalClient', () => {
         const aliceStores = new TestStores();
         const bobStores = new TestStores();
 
-        const bAddress = SignalClient.ProtocolAddress.new('+19192222222', 1);
+        const bAddress = MochiClient.ProtocolAddress.new('+19192222222', 1);
 
         const bPreKeyBundle = await testCase.makeBundle(bAddress, bobStores);
 
-        await SignalClient.processPreKeyBundle(
+        await MochiClient.processPreKeyBundle(
           bPreKeyBundle,
           bAddress,
           aliceStores.session,
@@ -1202,7 +1202,7 @@ describe('SignalClient', () => {
         assert.isFalse(initialSession?.hasCurrentState(new Date('2023-01-01')));
 
         const aMessage = Buffer.from('Greetings hoo-man', 'utf8');
-        const aCiphertext = await SignalClient.signalEncrypt(
+        const aCiphertext = await MochiClient.mochiEncrypt(
           aMessage,
           bAddress,
           aliceStores.session,
@@ -1212,7 +1212,7 @@ describe('SignalClient', () => {
 
         assert.deepEqual(
           aCiphertext.type(),
-          SignalClient.CiphertextMessageType.PreKey
+          MochiClient.CiphertextMessageType.PreKey
         );
 
         const updatedSession = await aliceStores.session.getSession(bAddress);
@@ -1220,7 +1220,7 @@ describe('SignalClient', () => {
         assert.isFalse(updatedSession?.hasCurrentState(new Date('2023-01-01')));
 
         await assert.isRejected(
-          SignalClient.signalEncrypt(
+          MochiClient.mochiEncrypt(
             aMessage,
             bAddress,
             aliceStores.session,
@@ -1244,8 +1244,8 @@ describe('SignalClient', () => {
       const bSPreK = new InMemorySignedPreKeyStore();
       const kyberStore = new InMemoryKyberPreKeyStore();
 
-      const bPreKey = SignalClient.PrivateKey.generate();
-      const bSPreKey = SignalClient.PrivateKey.generate();
+      const bPreKey = MochiClient.PrivateKey.generate();
+      const bSPreKey = MochiClient.PrivateKey.generate();
 
       const aIdentityKey = await aKeys.getIdentityKey();
       const bIdentityKey = await bKeys.getIdentityKey();
@@ -1259,17 +1259,17 @@ describe('SignalClient', () => {
       const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
       const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
-      const trustRoot = SignalClient.PrivateKey.generate();
-      const serverKey = SignalClient.PrivateKey.generate();
+      const trustRoot = MochiClient.PrivateKey.generate();
+      const serverKey = MochiClient.PrivateKey.generate();
 
-      const serverCert = SignalClient.ServerCertificate.new(
+      const serverCert = MochiClient.ServerCertificate.new(
         1,
         serverKey.getPublicKey(),
         trustRoot
       );
 
       const expires = 1605722925;
-      const senderCert = SignalClient.SenderCertificate.new(
+      const senderCert = MochiClient.SenderCertificate.new(
         aUuid,
         aE164,
         aDeviceId,
@@ -1287,7 +1287,7 @@ describe('SignalClient', () => {
         bSPreKey.getPublicKey().serialize()
       );
 
-      const bPreKeyBundle = SignalClient.PreKeyBundle.new(
+      const bPreKeyBundle = MochiClient.PreKeyBundle.new(
         bRegistrationId,
         bDeviceId,
         bPreKeyId,
@@ -1298,14 +1298,14 @@ describe('SignalClient', () => {
         bIdentityKey.getPublicKey()
       );
 
-      const bPreKeyRecord = SignalClient.PreKeyRecord.new(
+      const bPreKeyRecord = MochiClient.PreKeyRecord.new(
         bPreKeyId,
         bPreKey.getPublicKey(),
         bPreKey
       );
       await bPreK.savePreKey(bPreKeyId, bPreKeyRecord);
 
-      const bSPreKeyRecord = SignalClient.SignedPreKeyRecord.new(
+      const bSPreKeyRecord = MochiClient.SignedPreKeyRecord.new(
         bSignedPreKeyId,
         42, // timestamp
         bSPreKey.getPublicKey(),
@@ -1314,8 +1314,8 @@ describe('SignalClient', () => {
       );
       await bSPreK.saveSignedPreKey(bSignedPreKeyId, bSPreKeyRecord);
 
-      const bAddress = SignalClient.ProtocolAddress.new(bUuid, bDeviceId);
-      await SignalClient.processPreKeyBundle(
+      const bAddress = MochiClient.ProtocolAddress.new(bUuid, bDeviceId);
+      await MochiClient.processPreKeyBundle(
         bPreKeyBundle,
         bAddress,
         aSess,
@@ -1324,7 +1324,7 @@ describe('SignalClient', () => {
 
       const aPlaintext = Buffer.from('hi there', 'utf8');
 
-      const aCiphertext = await SignalClient.sealedSenderEncryptMessage(
+      const aCiphertext = await MochiClient.sealedSenderEncryptMessage(
         aPlaintext,
         bAddress,
         senderCert,
@@ -1332,7 +1332,7 @@ describe('SignalClient', () => {
         aKeys
       );
 
-      const bPlaintext = await SignalClient.sealedSenderDecryptMessage(
+      const bPlaintext = await MochiClient.sealedSenderDecryptMessage(
         aCiphertext,
         trustRoot.getPublicKey(),
         43, // timestamp,
@@ -1353,7 +1353,7 @@ describe('SignalClient', () => {
       assert.deepEqual(bPlaintext.senderAci()?.getServiceIdString(), aUuid);
       assert.deepEqual(bPlaintext.deviceId(), aDeviceId);
 
-      const innerMessage = await SignalClient.signalEncrypt(
+      const innerMessage = await MochiClient.mochiEncrypt(
         aPlaintext,
         bAddress,
         aSess,
@@ -1362,22 +1362,22 @@ describe('SignalClient', () => {
 
       for (const hint of [
         200,
-        SignalClient.ContentHint.Default,
-        SignalClient.ContentHint.Resendable,
-        SignalClient.ContentHint.Implicit,
+        MochiClient.ContentHint.Default,
+        MochiClient.ContentHint.Resendable,
+        MochiClient.ContentHint.Implicit,
       ]) {
-        const content = SignalClient.UnidentifiedSenderMessageContent.new(
+        const content = MochiClient.UnidentifiedSenderMessageContent.new(
           innerMessage,
           senderCert,
           hint,
           null
         );
-        const ciphertext = await SignalClient.sealedSenderEncrypt(
+        const ciphertext = await MochiClient.sealedSenderEncrypt(
           content,
           bAddress,
           aKeys
         );
-        const decryptedContent = await SignalClient.sealedSenderDecryptToUsmc(
+        const decryptedContent = await MochiClient.sealedSenderDecryptToUsmc(
           ciphertext,
           bKeys
         );
@@ -1395,8 +1395,8 @@ describe('SignalClient', () => {
       const bSPreK = new InMemorySignedPreKeyStore();
       const kyberStore = new InMemoryKyberPreKeyStore();
 
-      const bPreKey = SignalClient.PrivateKey.generate();
-      const bSPreKey = SignalClient.PrivateKey.generate();
+      const bPreKey = MochiClient.PrivateKey.generate();
+      const bSPreKey = MochiClient.PrivateKey.generate();
 
       const sharedIdentityKey = await sharedKeys.getIdentityKey();
 
@@ -1406,17 +1406,17 @@ describe('SignalClient', () => {
 
       const sharedUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
 
-      const trustRoot = SignalClient.PrivateKey.generate();
-      const serverKey = SignalClient.PrivateKey.generate();
+      const trustRoot = MochiClient.PrivateKey.generate();
+      const serverKey = MochiClient.PrivateKey.generate();
 
-      const serverCert = SignalClient.ServerCertificate.new(
+      const serverCert = MochiClient.ServerCertificate.new(
         1,
         serverKey.getPublicKey(),
         trustRoot
       );
 
       const expires = 1605722925;
-      const senderCert = SignalClient.SenderCertificate.new(
+      const senderCert = MochiClient.SenderCertificate.new(
         sharedUuid,
         aE164,
         sharedDeviceId,
@@ -1434,7 +1434,7 @@ describe('SignalClient', () => {
         bSPreKey.getPublicKey().serialize()
       );
 
-      const bPreKeyBundle = SignalClient.PreKeyBundle.new(
+      const bPreKeyBundle = MochiClient.PreKeyBundle.new(
         sharedRegistrationId,
         sharedDeviceId,
         bPreKeyId,
@@ -1445,14 +1445,14 @@ describe('SignalClient', () => {
         sharedIdentityKey.getPublicKey()
       );
 
-      const bPreKeyRecord = SignalClient.PreKeyRecord.new(
+      const bPreKeyRecord = MochiClient.PreKeyRecord.new(
         bPreKeyId,
         bPreKey.getPublicKey(),
         bPreKey
       );
       await bPreK.savePreKey(bPreKeyId, bPreKeyRecord);
 
-      const bSPreKeyRecord = SignalClient.SignedPreKeyRecord.new(
+      const bSPreKeyRecord = MochiClient.SignedPreKeyRecord.new(
         bSignedPreKeyId,
         42, // timestamp
         bSPreKey.getPublicKey(),
@@ -1461,11 +1461,11 @@ describe('SignalClient', () => {
       );
       await bSPreK.saveSignedPreKey(bSignedPreKeyId, bSPreKeyRecord);
 
-      const sharedAddress = SignalClient.ProtocolAddress.new(
+      const sharedAddress = MochiClient.ProtocolAddress.new(
         sharedUuid,
         sharedDeviceId
       );
-      await SignalClient.processPreKeyBundle(
+      await MochiClient.processPreKeyBundle(
         bPreKeyBundle,
         sharedAddress,
         aSess,
@@ -1474,7 +1474,7 @@ describe('SignalClient', () => {
 
       const aPlaintext = Buffer.from('hi there', 'utf8');
 
-      const aCiphertext = await SignalClient.sealedSenderEncryptMessage(
+      const aCiphertext = await MochiClient.sealedSenderEncryptMessage(
         aPlaintext,
         sharedAddress,
         senderCert,
@@ -1483,7 +1483,7 @@ describe('SignalClient', () => {
       );
 
       try {
-        await SignalClient.sealedSenderDecryptMessage(
+        await MochiClient.sealedSenderDecryptMessage(
           aCiphertext,
           trustRoot.getPublicKey(),
           43, // timestamp,
@@ -1499,10 +1499,10 @@ describe('SignalClient', () => {
         assert.fail();
       } catch (e) {
         assert.instanceOf(e, Error);
-        assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-        const err = e as SignalClient.LibSignalError;
+        assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+        const err = e as MochiClient.LibMochiError;
         assert.equal(err.name, 'SealedSenderSelfSend');
-        assert.equal(err.code, SignalClient.ErrorCode.SealedSenderSelfSend);
+        assert.equal(err.code, MochiClient.ErrorCode.SealedSenderSelfSend);
         assert.equal(err.operation, 'SealedSender_DecryptMessage'); // the Rust entry point
         assert.exists(err.stack); // Make sure we're still getting the benefits of Error.
       }
@@ -1517,8 +1517,8 @@ describe('SignalClient', () => {
       const bPreK = new InMemoryPreKeyStore();
       const bSPreK = new InMemorySignedPreKeyStore();
 
-      const bPreKey = SignalClient.PrivateKey.generate();
-      const bSPreKey = SignalClient.PrivateKey.generate();
+      const bPreKey = MochiClient.PrivateKey.generate();
+      const bSPreKey = MochiClient.PrivateKey.generate();
 
       const aIdentityKey = await aKeys.getIdentityKey();
       const bIdentityKey = await bKeys.getIdentityKey();
@@ -1531,17 +1531,17 @@ describe('SignalClient', () => {
       const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
       const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
-      const trustRoot = SignalClient.PrivateKey.generate();
-      const serverKey = SignalClient.PrivateKey.generate();
+      const trustRoot = MochiClient.PrivateKey.generate();
+      const serverKey = MochiClient.PrivateKey.generate();
 
-      const serverCert = SignalClient.ServerCertificate.new(
+      const serverCert = MochiClient.ServerCertificate.new(
         1,
         serverKey.getPublicKey(),
         trustRoot
       );
 
       const expires = 1605722925;
-      const senderCert = SignalClient.SenderCertificate.new(
+      const senderCert = MochiClient.SenderCertificate.new(
         aUuid,
         aE164,
         aDeviceId,
@@ -1559,7 +1559,7 @@ describe('SignalClient', () => {
         bSPreKey.getPublicKey().serialize()
       );
 
-      const bPreKeyBundle = SignalClient.PreKeyBundle.new(
+      const bPreKeyBundle = MochiClient.PreKeyBundle.new(
         bRegistrationId,
         bDeviceId,
         bPreKeyId,
@@ -1570,14 +1570,14 @@ describe('SignalClient', () => {
         bIdentityKey.getPublicKey()
       );
 
-      const bPreKeyRecord = SignalClient.PreKeyRecord.new(
+      const bPreKeyRecord = MochiClient.PreKeyRecord.new(
         bPreKeyId,
         bPreKey.getPublicKey(),
         bPreKey
       );
       await bPreK.savePreKey(bPreKeyId, bPreKeyRecord);
 
-      const bSPreKeyRecord = SignalClient.SignedPreKeyRecord.new(
+      const bSPreKeyRecord = MochiClient.SignedPreKeyRecord.new(
         bSignedPreKeyId,
         42, // timestamp
         bSPreKey.getPublicKey(),
@@ -1586,26 +1586,26 @@ describe('SignalClient', () => {
       );
       await bSPreK.saveSignedPreKey(bSignedPreKeyId, bSPreKeyRecord);
 
-      const bAddress = SignalClient.ProtocolAddress.new(bUuid, bDeviceId);
-      await SignalClient.processPreKeyBundle(
+      const bAddress = MochiClient.ProtocolAddress.new(bUuid, bDeviceId);
+      await MochiClient.processPreKeyBundle(
         bPreKeyBundle,
         bAddress,
         aSess,
         aKeys
       );
 
-      const aAddress = SignalClient.ProtocolAddress.new(aUuid, aDeviceId);
+      const aAddress = MochiClient.ProtocolAddress.new(aUuid, aDeviceId);
 
       const distributionId = 'd1d1d1d1-7000-11eb-b32a-33b8a8a487a6';
       const aSenderKeyStore = new InMemorySenderKeyStore();
-      const skdm = await SignalClient.SenderKeyDistributionMessage.create(
+      const skdm = await MochiClient.SenderKeyDistributionMessage.create(
         aAddress,
         distributionId,
         aSenderKeyStore
       );
 
       const bSenderKeyStore = new InMemorySenderKeyStore();
-      await SignalClient.processSenderKeyDistributionMessage(
+      await MochiClient.processSenderKeyDistributionMessage(
         aAddress,
         skdm,
         bSenderKeyStore
@@ -1613,22 +1613,22 @@ describe('SignalClient', () => {
 
       const message = Buffer.from('0a0b0c', 'hex');
 
-      const aCtext = await SignalClient.groupEncrypt(
+      const aCtext = await MochiClient.groupEncrypt(
         aAddress,
         distributionId,
         aSenderKeyStore,
         message
       );
 
-      const aUsmc = SignalClient.UnidentifiedSenderMessageContent.new(
+      const aUsmc = MochiClient.UnidentifiedSenderMessageContent.new(
         aCtext,
         senderCert,
-        SignalClient.ContentHint.Implicit,
+        MochiClient.ContentHint.Implicit,
         Buffer.from([42])
       );
 
       const aSealedSenderMessage =
-        await SignalClient.sealedSenderMultiRecipientEncrypt(
+        await MochiClient.sealedSenderMultiRecipientEncrypt(
           aUsmc,
           [bAddress],
           aKeys,
@@ -1636,11 +1636,11 @@ describe('SignalClient', () => {
         );
 
       const bSealedSenderMessage =
-        SignalClient.sealedSenderMultiRecipientMessageForSingleRecipient(
+        MochiClient.sealedSenderMultiRecipientMessageForSingleRecipient(
           aSealedSenderMessage
         );
 
-      const bUsmc = await SignalClient.sealedSenderDecryptToUsmc(
+      const bUsmc = await MochiClient.sealedSenderDecryptToUsmc(
         bSealedSenderMessage,
         bKeys
       );
@@ -1648,10 +1648,10 @@ describe('SignalClient', () => {
       assert.deepEqual(bUsmc.senderCertificate().senderE164(), aE164);
       assert.deepEqual(bUsmc.senderCertificate().senderUuid(), aUuid);
       assert.deepEqual(bUsmc.senderCertificate().senderDeviceId(), aDeviceId);
-      assert.deepEqual(bUsmc.contentHint(), SignalClient.ContentHint.Implicit);
+      assert.deepEqual(bUsmc.contentHint(), MochiClient.ContentHint.Implicit);
       assert.deepEqual(bUsmc.groupId(), Buffer.from([42]));
 
-      const bPtext = await SignalClient.groupDecrypt(
+      const bPtext = await MochiClient.groupDecrypt(
         aAddress,
         bSenderKeyStore,
         bUsmc.contents()
@@ -1661,7 +1661,7 @@ describe('SignalClient', () => {
 
       // Make sure the option-based syntax does the same thing.
       const aSealedSenderMessageViaOptions =
-        await SignalClient.sealedSenderMultiRecipientEncrypt({
+        await MochiClient.sealedSenderMultiRecipientEncrypt({
           content: aUsmc,
           recipients: [bAddress],
           identityStore: aKeys,
@@ -1669,11 +1669,11 @@ describe('SignalClient', () => {
         });
 
       const bSealedSenderMessageViaOptions =
-        SignalClient.sealedSenderMultiRecipientMessageForSingleRecipient(
+        MochiClient.sealedSenderMultiRecipientMessageForSingleRecipient(
           aSealedSenderMessageViaOptions
         );
 
-      const bUsmcViaOptions = await SignalClient.sealedSenderDecryptToUsmc(
+      const bUsmcViaOptions = await MochiClient.sealedSenderDecryptToUsmc(
         bSealedSenderMessageViaOptions,
         bKeys
       );
@@ -1687,8 +1687,8 @@ describe('SignalClient', () => {
 
       const aSess = new InMemorySessionStore();
 
-      const bPreKey = SignalClient.PrivateKey.generate();
-      const bSPreKey = SignalClient.PrivateKey.generate();
+      const bPreKey = MochiClient.PrivateKey.generate();
+      const bSPreKey = MochiClient.PrivateKey.generate();
 
       const aIdentityKey = await aKeys.getIdentityKey();
       const bIdentityKey = await bKeys.getIdentityKey();
@@ -1701,17 +1701,17 @@ describe('SignalClient', () => {
       const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
       const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
-      const trustRoot = SignalClient.PrivateKey.generate();
-      const serverKey = SignalClient.PrivateKey.generate();
+      const trustRoot = MochiClient.PrivateKey.generate();
+      const serverKey = MochiClient.PrivateKey.generate();
 
-      const serverCert = SignalClient.ServerCertificate.new(
+      const serverCert = MochiClient.ServerCertificate.new(
         1,
         serverKey.getPublicKey(),
         trustRoot
       );
 
       const expires = 1605722925;
-      const senderCert = SignalClient.SenderCertificate.new(
+      const senderCert = MochiClient.SenderCertificate.new(
         aUuid,
         aE164,
         aDeviceId,
@@ -1728,7 +1728,7 @@ describe('SignalClient', () => {
         bSPreKey.getPublicKey().serialize()
       );
 
-      const bPreKeyBundle = SignalClient.PreKeyBundle.new(
+      const bPreKeyBundle = MochiClient.PreKeyBundle.new(
         0x4000,
         bDeviceId,
         bPreKeyId,
@@ -1739,19 +1739,19 @@ describe('SignalClient', () => {
         bIdentityKey.getPublicKey()
       );
 
-      const bAddress = SignalClient.ProtocolAddress.new(bUuid, bDeviceId);
-      await SignalClient.processPreKeyBundle(
+      const bAddress = MochiClient.ProtocolAddress.new(bUuid, bDeviceId);
+      await MochiClient.processPreKeyBundle(
         bPreKeyBundle,
         bAddress,
         aSess,
         aKeys
       );
 
-      const aAddress = SignalClient.ProtocolAddress.new(aUuid, aDeviceId);
+      const aAddress = MochiClient.ProtocolAddress.new(aUuid, aDeviceId);
 
       const distributionId = 'd1d1d1d1-7000-11eb-b32a-33b8a8a487a6';
       const aSenderKeyStore = new InMemorySenderKeyStore();
-      await SignalClient.SenderKeyDistributionMessage.create(
+      await MochiClient.SenderKeyDistributionMessage.create(
         aAddress,
         distributionId,
         aSenderKeyStore
@@ -1759,22 +1759,22 @@ describe('SignalClient', () => {
 
       const message = Buffer.from('0a0b0c', 'hex');
 
-      const aCtext = await SignalClient.groupEncrypt(
+      const aCtext = await MochiClient.groupEncrypt(
         aAddress,
         distributionId,
         aSenderKeyStore,
         message
       );
 
-      const aUsmc = SignalClient.UnidentifiedSenderMessageContent.new(
+      const aUsmc = MochiClient.UnidentifiedSenderMessageContent.new(
         aCtext,
         senderCert,
-        SignalClient.ContentHint.Implicit,
+        MochiClient.ContentHint.Implicit,
         Buffer.from([42])
       );
 
       try {
-        await SignalClient.sealedSenderMultiRecipientEncrypt(
+        await MochiClient.sealedSenderMultiRecipientEncrypt(
           aUsmc,
           [bAddress],
           aKeys,
@@ -1783,13 +1783,13 @@ describe('SignalClient', () => {
         assert.fail('should have thrown');
       } catch (e) {
         assert.instanceOf(e, Error);
-        assert.instanceOf(e, SignalClient.LibSignalErrorBase);
-        const err = e as SignalClient.LibSignalError;
+        assert.instanceOf(e, MochiClient.LibMochiErrorBase);
+        const err = e as MochiClient.LibMochiError;
         assert.equal(err.name, 'InvalidRegistrationId');
-        assert.equal(err.code, SignalClient.ErrorCode.InvalidRegistrationId);
+        assert.equal(err.code, MochiClient.ErrorCode.InvalidRegistrationId);
         assert.exists(err.stack); // Make sure we're still getting the benefits of Error.
         const registrationIdErr =
-          err as SignalClient.InvalidRegistrationIdError;
+          err as MochiClient.InvalidRegistrationIdError;
         assert.equal(registrationIdErr.addr.name(), bAddress.name());
         assert.equal(registrationIdErr.addr.deviceId(), bAddress.deviceId());
       }
@@ -1801,8 +1801,8 @@ describe('SignalClient', () => {
 
       const aSess = new InMemorySessionStore();
 
-      const bPreKey = SignalClient.PrivateKey.generate();
-      const bSPreKey = SignalClient.PrivateKey.generate();
+      const bPreKey = MochiClient.PrivateKey.generate();
+      const bSPreKey = MochiClient.PrivateKey.generate();
 
       const aIdentityKey = await aKeys.getIdentityKey();
       const bIdentityKey = await bKeys.getIdentityKey();
@@ -1817,17 +1817,17 @@ describe('SignalClient', () => {
       const eUuid = '3f0f4734-e331-4434-bd4f-6d8f6ea6dcc7';
       const mUuid = '5d088142-6fd7-4dbd-af00-fdda1b3ce988';
 
-      const trustRoot = SignalClient.PrivateKey.generate();
-      const serverKey = SignalClient.PrivateKey.generate();
+      const trustRoot = MochiClient.PrivateKey.generate();
+      const serverKey = MochiClient.PrivateKey.generate();
 
-      const serverCert = SignalClient.ServerCertificate.new(
+      const serverCert = MochiClient.ServerCertificate.new(
         1,
         serverKey.getPublicKey(),
         trustRoot
       );
 
       const expires = 1605722925;
-      const senderCert = SignalClient.SenderCertificate.new(
+      const senderCert = MochiClient.SenderCertificate.new(
         aUuid,
         aE164,
         aDeviceId,
@@ -1844,7 +1844,7 @@ describe('SignalClient', () => {
         bSPreKey.getPublicKey().serialize()
       );
 
-      const bPreKeyBundle = SignalClient.PreKeyBundle.new(
+      const bPreKeyBundle = MochiClient.PreKeyBundle.new(
         0x2000,
         bDeviceId,
         bPreKeyId,
@@ -1855,19 +1855,19 @@ describe('SignalClient', () => {
         bIdentityKey.getPublicKey()
       );
 
-      const bAddress = SignalClient.ProtocolAddress.new(bUuid, bDeviceId);
-      await SignalClient.processPreKeyBundle(
+      const bAddress = MochiClient.ProtocolAddress.new(bUuid, bDeviceId);
+      await MochiClient.processPreKeyBundle(
         bPreKeyBundle,
         bAddress,
         aSess,
         aKeys
       );
 
-      const aAddress = SignalClient.ProtocolAddress.new(aUuid, aDeviceId);
+      const aAddress = MochiClient.ProtocolAddress.new(aUuid, aDeviceId);
 
       const distributionId = 'd1d1d1d1-7000-11eb-b32a-33b8a8a487a6';
       const aSenderKeyStore = new InMemorySenderKeyStore();
-      await SignalClient.SenderKeyDistributionMessage.create(
+      await MochiClient.SenderKeyDistributionMessage.create(
         aAddress,
         distributionId,
         aSenderKeyStore
@@ -1875,27 +1875,27 @@ describe('SignalClient', () => {
 
       const message = Buffer.from('0a0b0c', 'hex');
 
-      const aCtext = await SignalClient.groupEncrypt(
+      const aCtext = await MochiClient.groupEncrypt(
         aAddress,
         distributionId,
         aSenderKeyStore,
         message
       );
 
-      const aUsmc = SignalClient.UnidentifiedSenderMessageContent.new(
+      const aUsmc = MochiClient.UnidentifiedSenderMessageContent.new(
         aCtext,
         senderCert,
-        SignalClient.ContentHint.Implicit,
+        MochiClient.ContentHint.Implicit,
         Buffer.from([42])
       );
 
-      const aSentMessage = await SignalClient.sealedSenderMultiRecipientEncrypt(
+      const aSentMessage = await MochiClient.sealedSenderMultiRecipientEncrypt(
         {
           content: aUsmc,
           recipients: [bAddress],
           excludedRecipients: [
-            SignalClient.ServiceId.parseFromServiceIdString(eUuid),
-            SignalClient.ServiceId.parseFromServiceIdString(mUuid),
+            MochiClient.ServiceId.parseFromServiceIdString(eUuid),
+            MochiClient.ServiceId.parseFromServiceIdString(mUuid),
           ],
           identityStore: aKeys,
           sessionStore: aSess,
@@ -1907,7 +1907,7 @@ describe('SignalClient', () => {
       const hexEncodedSentMessage = aSentMessage.toString('hex');
 
       const indexOfE = hexEncodedSentMessage.indexOf(
-        SignalClient.ServiceId.parseFromServiceIdString(eUuid)
+        MochiClient.ServiceId.parseFromServiceIdString(eUuid)
           .getServiceIdFixedWidthBinary()
           .toString('hex')
       );
@@ -1915,7 +1915,7 @@ describe('SignalClient', () => {
       assert.equal(aSentMessage[indexOfE / 2 + 17], 0);
 
       const indexOfM = hexEncodedSentMessage.indexOf(
-        SignalClient.ServiceId.parseFromServiceIdString(mUuid)
+        MochiClient.ServiceId.parseFromServiceIdString(mUuid)
           .getServiceIdFixedWidthBinary()
           .toString('hex')
       );
@@ -1935,8 +1935,8 @@ describe('SignalClient', () => {
     const bSPreK = new InMemorySignedPreKeyStore();
     const kyberStore = new InMemoryKyberPreKeyStore();
 
-    const bPreKey = SignalClient.PrivateKey.generate();
-    const bSPreKey = SignalClient.PrivateKey.generate();
+    const bPreKey = MochiClient.PrivateKey.generate();
+    const bSPreKey = MochiClient.PrivateKey.generate();
 
     const aIdentityKey = await aKeys.getIdentityKey();
     const bIdentityKey = await bKeys.getIdentityKey();
@@ -1949,17 +1949,17 @@ describe('SignalClient', () => {
     const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
     const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
-    const trustRoot = SignalClient.PrivateKey.generate();
-    const serverKey = SignalClient.PrivateKey.generate();
+    const trustRoot = MochiClient.PrivateKey.generate();
+    const serverKey = MochiClient.PrivateKey.generate();
 
-    const serverCert = SignalClient.ServerCertificate.new(
+    const serverCert = MochiClient.ServerCertificate.new(
       1,
       serverKey.getPublicKey(),
       trustRoot
     );
 
     const expires = 1605722925;
-    const senderCert = SignalClient.SenderCertificate.new(
+    const senderCert = MochiClient.SenderCertificate.new(
       aUuid,
       aE164,
       aDeviceId,
@@ -1977,7 +1977,7 @@ describe('SignalClient', () => {
       bSPreKey.getPublicKey().serialize()
     );
 
-    const bPreKeyBundle = SignalClient.PreKeyBundle.new(
+    const bPreKeyBundle = MochiClient.PreKeyBundle.new(
       bRegistrationId,
       bDeviceId,
       bPreKeyId,
@@ -1988,14 +1988,14 @@ describe('SignalClient', () => {
       bIdentityKey.getPublicKey()
     );
 
-    const bPreKeyRecord = SignalClient.PreKeyRecord.new(
+    const bPreKeyRecord = MochiClient.PreKeyRecord.new(
       bPreKeyId,
       bPreKey.getPublicKey(),
       bPreKey
     );
     await bPreK.savePreKey(bPreKeyId, bPreKeyRecord);
 
-    const bSPreKeyRecord = SignalClient.SignedPreKeyRecord.new(
+    const bSPreKeyRecord = MochiClient.SignedPreKeyRecord.new(
       bSignedPreKeyId,
       42, // timestamp
       bSPreKey.getPublicKey(),
@@ -2006,8 +2006,8 @@ describe('SignalClient', () => {
 
     // Set up the session with a message from A to B.
 
-    const bAddress = SignalClient.ProtocolAddress.new(bUuid, bDeviceId);
-    await SignalClient.processPreKeyBundle(
+    const bAddress = MochiClient.ProtocolAddress.new(bUuid, bDeviceId);
+    await MochiClient.processPreKeyBundle(
       bPreKeyBundle,
       bAddress,
       aSess,
@@ -2016,7 +2016,7 @@ describe('SignalClient', () => {
 
     const aPlaintext = Buffer.from('hi there', 'utf8');
 
-    const aCiphertext = await SignalClient.sealedSenderEncryptMessage(
+    const aCiphertext = await MochiClient.sealedSenderEncryptMessage(
       aPlaintext,
       bAddress,
       senderCert,
@@ -2024,7 +2024,7 @@ describe('SignalClient', () => {
       aKeys
     );
 
-    await SignalClient.sealedSenderDecryptMessage(
+    await MochiClient.sealedSenderDecryptMessage(
       aCiphertext,
       trustRoot.getPublicKey(),
       43, // timestamp,
@@ -2039,46 +2039,46 @@ describe('SignalClient', () => {
     );
 
     // Pretend to send a message from B back to A that "fails".
-    const aAddress = SignalClient.ProtocolAddress.new(aUuid, aDeviceId);
-    const bCiphertext = await SignalClient.signalEncrypt(
+    const aAddress = MochiClient.ProtocolAddress.new(aUuid, aDeviceId);
+    const bCiphertext = await MochiClient.mochiEncrypt(
       Buffer.from('reply', 'utf8'),
       aAddress,
       bSess,
       bKeys
     );
 
-    const errorMessage = SignalClient.DecryptionErrorMessage.forOriginal(
+    const errorMessage = MochiClient.DecryptionErrorMessage.forOriginal(
       bCiphertext.serialize(),
       bCiphertext.type(),
       45, // timestamp
       bAddress.deviceId()
     );
-    const errorContent = SignalClient.PlaintextContent.from(errorMessage);
-    const errorUSMC = SignalClient.UnidentifiedSenderMessageContent.new(
-      SignalClient.CiphertextMessage.from(errorContent),
+    const errorContent = MochiClient.PlaintextContent.from(errorMessage);
+    const errorUSMC = MochiClient.UnidentifiedSenderMessageContent.new(
+      MochiClient.CiphertextMessage.from(errorContent),
       senderCert,
-      SignalClient.ContentHint.Implicit,
+      MochiClient.ContentHint.Implicit,
       null // group ID
     );
-    const errorSealedSenderMessage = await SignalClient.sealedSenderEncrypt(
+    const errorSealedSenderMessage = await MochiClient.sealedSenderEncrypt(
       errorUSMC,
       bAddress,
       aKeys
     );
 
-    const bErrorUSMC = await SignalClient.sealedSenderDecryptToUsmc(
+    const bErrorUSMC = await MochiClient.sealedSenderDecryptToUsmc(
       errorSealedSenderMessage,
       bKeys
     );
     assert.equal(
       bErrorUSMC.msgType(),
-      SignalClient.CiphertextMessageType.Plaintext
+      MochiClient.CiphertextMessageType.Plaintext
     );
-    const bErrorContent = SignalClient.PlaintextContent.deserialize(
+    const bErrorContent = MochiClient.PlaintextContent.deserialize(
       bErrorUSMC.contents()
     );
     const bErrorMessage =
-      SignalClient.DecryptionErrorMessage.extractFromSerializedBody(
+      MochiClient.DecryptionErrorMessage.extractFromSerializedBody(
         bErrorContent.body()
       );
     assert.equal(bErrorMessage.timestamp(), 45);
@@ -2100,7 +2100,7 @@ describe('SignalClient', () => {
       'hex'
     );
 
-    const aes_gcm_siv = SignalClient.Aes256GcmSiv.new(key);
+    const aes_gcm_siv = MochiClient.Aes256GcmSiv.new(key);
 
     const nonce = Buffer.from('030000000000000000000000', 'hex');
     const aad = Buffer.from('010000000000000000000000', 'hex');
@@ -2118,8 +2118,8 @@ describe('SignalClient', () => {
     assert.deepEqual(decrypted.toString('hex'), '02000000');
   });
   it('ECC signatures work', () => {
-    const priv_a = SignalClient.PrivateKey.generate();
-    const priv_b = SignalClient.PrivateKey.generate();
+    const priv_a = MochiClient.PrivateKey.generate();
+    const priv_b = MochiClient.PrivateKey.generate();
     assert.lengthOf(priv_a.serialize(), 32, 'private key serialization length');
     assert.deepEqual(priv_a.serialize(), priv_a.serialize(), 'repeatable');
     assert.notDeepEqual(
@@ -2147,8 +2147,8 @@ describe('SignalClient', () => {
   });
 
   it('ECC key agreement work', () => {
-    const priv_a = SignalClient.PrivateKey.generate();
-    const priv_b = SignalClient.PrivateKey.generate();
+    const priv_a = MochiClient.PrivateKey.generate();
+    const priv_b = MochiClient.PrivateKey.generate();
 
     const pub_a = priv_a.getPublicKey();
     const pub_b = priv_b.getPublicKey();
@@ -2161,21 +2161,21 @@ describe('SignalClient', () => {
 
   it('ECC keys roundtrip through serialization', () => {
     const key = Buffer.alloc(32, 0x40);
-    const priv = SignalClient.PrivateKey.deserialize(key);
+    const priv = MochiClient.PrivateKey.deserialize(key);
     assert(key.equals(priv.serialize()));
 
     const pub = priv.getPublicKey();
     const pub_bytes = pub.serialize();
     assert.lengthOf(pub_bytes, 32 + 1);
 
-    const pub2 = SignalClient.PublicKey.deserialize(pub_bytes);
+    const pub2 = MochiClient.PublicKey.deserialize(pub_bytes);
 
     assert.deepEqual(pub.serialize(), pub2.serialize());
 
     assert.deepEqual(pub.compare(pub2), 0);
     assert.deepEqual(pub2.compare(pub), 0);
 
-    const anotherKey = SignalClient.PrivateKey.deserialize(
+    const anotherKey = MochiClient.PrivateKey.deserialize(
       Buffer.alloc(32, 0xcd)
     ).getPublicKey();
     assert.deepEqual(pub.compare(anotherKey), 1);
@@ -2183,10 +2183,10 @@ describe('SignalClient', () => {
 
     assert.lengthOf(pub.getPublicKeyBytes(), 32);
 
-    const keyPair = new SignalClient.IdentityKeyPair(pub, priv);
+    const keyPair = new MochiClient.IdentityKeyPair(pub, priv);
     const keyPairBytes = keyPair.serialize();
     const roundTripKeyPair =
-      SignalClient.IdentityKeyPair.deserialize(keyPairBytes);
+      MochiClient.IdentityKeyPair.deserialize(keyPairBytes);
     assert.equal(roundTripKeyPair.publicKey.compare(pub), 0);
     const roundTripKeyPairBytes = roundTripKeyPair.serialize();
     assert.deepEqual(keyPairBytes, roundTripKeyPairBytes);
@@ -2196,18 +2196,18 @@ describe('SignalClient', () => {
     const invalid_key = Buffer.alloc(33, 0xab);
 
     assert.throws(() => {
-      SignalClient.PrivateKey.deserialize(invalid_key);
+      MochiClient.PrivateKey.deserialize(invalid_key);
     }, 'bad key length <33> for key with type <Djb>');
 
     assert.throws(() => {
-      SignalClient.PublicKey.deserialize(invalid_key);
+      MochiClient.PublicKey.deserialize(invalid_key);
     }, 'bad key type <0xab>');
   });
 
   it('can sign and verify alternate identity keys', () => {
-    const primary = SignalClient.IdentityKeyPair.generate();
-    const secondary = SignalClient.IdentityKeyPair.generate();
-    const signature = secondary.signAlternateIdentity(primary.publicKey);
+    const primary = MochiClient.IdentityKeyPair.generate();
+    const secondary = MochiClient.IdentityKeyPair.generate();
+    const signature = secondary.mochiternateIdentity(primary.publicKey);
     assert(
       secondary.publicKey.verifyAlternateIdentity(primary.publicKey, signature)
     );

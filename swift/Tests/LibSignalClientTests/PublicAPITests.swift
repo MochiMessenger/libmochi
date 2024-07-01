@@ -1,9 +1,9 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-import LibSignalClient
+import LibMochiClient
 import XCTest
 
 class PublicAPITests: TestCaseBase {
@@ -328,7 +328,7 @@ class PublicAPITests: TestCaseBase {
         let sender = try! ProtocolAddress(name: "+14159999111", deviceId: 4)
         let distribution_id = UUID(uuidString: "d1d1d1d1-7000-11eb-b32a-33b8a8a487a6")!
 
-        let a_store = InMemorySignalProtocolStore()
+        let a_store = InMemoryMochiProtocolStore()
 
         let skdm = try! SenderKeyDistributionMessage(from: sender, distributionId: distribution_id, store: a_store, context: NullContext())
 
@@ -338,7 +338,7 @@ class PublicAPITests: TestCaseBase {
 
         let a_ctext = try! groupEncrypt([1, 2, 3], from: sender, distributionId: distribution_id, store: a_store, context: NullContext()).serialize()
 
-        let b_store = InMemorySignalProtocolStore()
+        let b_store = InMemoryMochiProtocolStore()
         try! processSenderKeyDistributionMessage(
             skdm_r,
             from: sender,
@@ -351,7 +351,7 @@ class PublicAPITests: TestCaseBase {
     }
 
     func testGroupCipherWithContext() {
-        class ContextUsingStore: InMemorySignalProtocolStore {
+        class ContextUsingStore: InMemoryMochiProtocolStore {
             var expectedContext: StoreContext & AnyObject
 
             init(expectedContext: StoreContext & AnyObject) {
@@ -480,10 +480,10 @@ class PublicAPITests: TestCaseBase {
         }
     }
 
-    func testSignAlternateIdentity() {
+    func testMochiternateIdentity() {
         let primary = IdentityKeyPair.generate()
         let secondary = IdentityKeyPair.generate()
-        let signature = secondary.signAlternateIdentity(primary.identityKey)
+        let signature = secondary.mochiternateIdentity(primary.identityKey)
         XCTAssert(try! secondary.identityKey.verifyAlternateIdentity(primary.identityKey, signature: signature))
     }
 

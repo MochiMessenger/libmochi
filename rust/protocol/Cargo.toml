@@ -1,18 +1,18 @@
 #
-# Copyright (C) 2020-2022 Signal Messenger, LLC.
+# Copyright (C) 2020-2022 Mochi Messenger, LLC.
 # SPDX-License-Identifier: AGPL-3.0-only
 #
 
 [package]
-name = "libsignal-protocol"
+name = "libmochi-protocol"
 version = "0.1.0"
-authors = ["Signal Messenger LLC"]
+authors = ["Mochi Messenger LLC"]
 edition = "2021"
 license = "AGPL-3.0-only"
 
 [dependencies]
-libsignal-core = { path = "../core" }
-signal-crypto = { path = "../crypto" }
+libmochi-core = { path = "../core" }
+mochi-crypto = { path = "../crypto" }
 
 aes = { version = "0.8.3", features = ["zeroize"] }
 aes-gcm-siv = "0.11.1"
@@ -49,7 +49,7 @@ pqcrypto-ml-kem = { version = "0.8.0", default-features = false, features = ["st
 kyber768 = []
 # ML-KEM matches the NIST standard version of Kyber. It may still change
 # incompatibly until the final version of the standard is published and
-# libsignal will update to match.
+# libmochi will update to match.
 mlkem1024 = ["pqcrypto-ml-kem"]
 
 [dev-dependencies]

@@ -1,11 +1,11 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-/// An implementation of [`log::Log::enabled`] suitable for production Signal apps.
+/// An implementation of [`log::Log::enabled`] suitable for production Mochi apps.
 ///
-/// Apps may apply additional logging filters on top of what libsignal reports.
+/// Apps may apply additional logging filters on top of what libmochi reports.
 pub fn log_enabled_in_apps(metadata: &log::Metadata) -> bool {
     let target = metadata.target();
     if target.is_empty() {
@@ -23,11 +23,11 @@ pub fn log_enabled_in_apps(metadata: &log::Metadata) -> bool {
     // (The compiler can optimize some switches on strings, but it's hard to convince it to do
     // something smart for checking prefixes *and* exact matches.)
     match target.as_bytes()[0] {
-        // libsignal naming patterns:
-        b'l' => target.starts_with("libsignal_"),
-        b's' => target.starts_with("signal_"),
+        // libmochi naming patterns:
+        b'l' => target.starts_with("libmochi_"),
+        b's' => target.starts_with("mochi_"),
 
-        // Other libsignal crates:
+        // Other libmochi crates:
         b'a' => check("attest"),
         b'd' => check("device_transfer"),
         b'p' => check("poksho"),
@@ -50,8 +50,8 @@ mod tests {
     use test_case::test_matrix;
 
     #[test_matrix([
-        "libsignal_foo",
-        "signal_foo",
+        "libmochi_foo",
+        "mochi_foo",
         "attest",
         "device_transfer",
         "poksho",

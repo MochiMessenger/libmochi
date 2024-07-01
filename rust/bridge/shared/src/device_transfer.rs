@@ -1,10 +1,10 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use ::device_transfer::{self, KeyFormat};
-use libsignal_bridge_macros::*;
+use libmochi_bridge_macros::*;
 
 // Not used by the Java bridge.
 #[allow(unused_imports)]

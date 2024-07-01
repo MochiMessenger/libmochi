@@ -1,5 +1,5 @@
 //
-// Copyright 2021 Signal Messenger, LLC.
+// Copyright 2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -30,7 +30,7 @@ fn bridge_fn_body(orig_name: &Ident, input_args: &[(&Ident, &Type)]) -> TokenStr
                 Ok(node::ResultTypeInfo::convert_into(success, &mut cx)?.upcast()),
             Err(failure) => {
                 let module = cx.this()?;
-                node::SignalNodeError::throw(failure, &mut cx, module, stringify!(#orig_name))
+                node::MochiNodeError::throw(failure, &mut cx, module, stringify!(#orig_name))
             }
         }
     }

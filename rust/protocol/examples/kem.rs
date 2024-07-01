@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,7 +7,7 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 
 use clap::Parser;
-use libsignal_protocol::kem::*;
+use libmochi_protocol::kem::*;
 
 #[derive(clap::Parser)]
 struct Cli {
@@ -23,7 +23,7 @@ enum KeyType {
     MlKem,
 }
 
-impl From<KeyType> for libsignal_protocol::kem::KeyType {
+impl From<KeyType> for libmochi_protocol::kem::KeyType {
     fn from(value: KeyType) -> Self {
         match value {
             KeyType::Kyber => Self::Kyber1024,

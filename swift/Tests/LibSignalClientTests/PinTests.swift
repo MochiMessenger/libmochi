@@ -1,16 +1,16 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 import Foundation
-import LibSignalClient
+import LibMochiClient
 import XCTest
 
 class PinTests: TestCaseBase {
     func testBadSaltLength() {
         XCTAssertThrowsError(try PinHash(normalizedPin: Array("password".utf8), salt: [0xFF])) {
-            guard case SignalError.invalidType(_) = $0 else {
+            guard case MochiError.invalidType(_) = $0 else {
                 XCTFail("wrong error: \($0)")
                 return
             }
@@ -19,7 +19,7 @@ class PinTests: TestCaseBase {
 
     func testBadEncodedHash() {
         XCTAssertThrowsError(try verifyLocalPin(Array("password".utf8), againstEncodedHash: "not-a-hash")) {
-            guard case SignalError.invalidArgument(_) = $0 else {
+            guard case MochiError.invalidArgument(_) = $0 else {
                 XCTFail("wrong error: \($0)")
                 return
             }

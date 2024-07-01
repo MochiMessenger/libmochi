@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package org.signal.cds2;
+package org.mochi.cds2;
 
 // Part of the CDSi specification.
 

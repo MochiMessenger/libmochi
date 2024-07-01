@@ -90,7 +90,7 @@ jobs:
     - name: Upload library
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
       with:
-        name: libsignal_client (${{matrix.os}})
+        name: libmochi_client (${{matrix.os}})
         path: node/prebuilds/*
 
   build-docker:
@@ -110,7 +110,7 @@ jobs:
     - name: Upload library
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
       with:
-        name: libsignal_client (ubuntu-docker)
+        name: libmochi_client (ubuntu-docker)
         path: node/prebuilds/*
 
   verify-rust:

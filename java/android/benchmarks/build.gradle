@@ -20,7 +20,7 @@ android {
         testInstrumentationRunner "androidx.benchmark.junit4.AndroidBenchmarkRunner"
 
         // Uncomment this to build 32-bit-only benchmarks.
-        // (Gradle will still build a 64-bit libsignal,
+        // (Gradle will still build a 64-bit libmochi,
         // but it won't be included in the benchmark APK.)
         // ndk {
         //     abiFilters 'armeabi-v7a'
@@ -35,7 +35,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    namespace "org.signal.libsignal.benchmarks"
+    namespace "org.mochi.libmochi.benchmarks"
 }
 
 dependencies {

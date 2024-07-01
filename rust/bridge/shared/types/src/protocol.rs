@@ -1,9 +1,9 @@
 //
-// Copyright 2021-2022 Signal Messenger, LLC.
+// Copyright 2021-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use static_assertions::const_assert_eq;
 
 // Will be unused when building for Node only.
@@ -25,7 +25,7 @@ bridge_as_handle!(Fingerprint, jni = NumericFingerprintGenerator);
 bridge_as_handle!(PlaintextContent);
 bridge_as_handle!(PreKeyBundle);
 bridge_as_handle!(PreKeyRecord);
-bridge_as_handle!(PreKeySignalMessage);
+bridge_as_handle!(PreKeyMochiMessage);
 bridge_as_handle!(PrivateKey, ffi = privatekey, jni = ECPrivateKey);
 bridge_as_handle!(ProtocolAddress, ffi = address);
 bridge_as_handle!(PublicKey, ffi = publickey, jni = ECPublicKey);
@@ -35,7 +35,7 @@ bridge_as_handle!(SenderKeyMessage);
 bridge_as_handle!(SenderKeyRecord);
 bridge_as_handle!(ServerCertificate);
 bridge_as_handle!(SessionRecord, mut = true);
-bridge_as_handle!(SignalMessage, ffi = message);
+bridge_as_handle!(MochiMessage, ffi = message);
 bridge_as_handle!(SignedPreKeyRecord);
 bridge_as_handle!(KyberPreKeyRecord);
 bridge_as_handle!(UnidentifiedSenderMessageContent);
@@ -44,7 +44,7 @@ bridge_as_handle!(KyberKeyPair);
 bridge_as_handle!(KyberPublicKey);
 bridge_as_handle!(KyberSecretKey);
 
-pub use libsignal_protocol::Timestamp;
+pub use libmochi_protocol::Timestamp;
 
 #[derive(Debug)]
 #[repr(C)]

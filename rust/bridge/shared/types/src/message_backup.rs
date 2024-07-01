@@ -1,13 +1,13 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use libsignal_message_backup::frame::ValidationError as FrameValidationError;
-use libsignal_message_backup::key::{BackupKey, MessageBackupKey as MessageBackupKeyInner};
-use libsignal_message_backup::parse::ParseError;
-use libsignal_message_backup::{Error, FoundUnknownField};
-use libsignal_protocol::Aci;
+use libmochi_message_backup::frame::ValidationError as FrameValidationError;
+use libmochi_message_backup::key::{BackupKey, MessageBackupKey as MessageBackupKeyInner};
+use libmochi_message_backup::parse::ParseError;
+use libmochi_message_backup::{Error, FoundUnknownField};
+use libmochi_protocol::Aci;
 
 use crate::*;
 

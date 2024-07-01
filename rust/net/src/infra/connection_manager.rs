@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -365,16 +365,16 @@ mod test {
 
     use super::*;
 
-    const ROUTE_THAT_TIMES_OUT: &str = "timeout.signal.org";
+    const ROUTE_THAT_TIMES_OUT: &str = "timeout.mochi.org";
 
-    const ROUTE_1: &str = "route1.signal.org";
+    const ROUTE_1: &str = "route1.mochi.org";
 
-    const ROUTE_2: &str = "route2.signal.org";
+    const ROUTE_2: &str = "route2.mochi.org";
 
     #[tokio::test]
     async fn single_route_successfull_attempts() {
         let manager = SingleRouteThrottlingConnectionManager::new(
-            example_connection_params("chat.staging.signal.org"),
+            example_connection_params("chat.staging.mochi.org"),
             TIMEOUT_DURATION,
         );
         for _ in 0..FEW_ATTEMPTS {
@@ -387,7 +387,7 @@ mod test {
     #[tokio::test]
     async fn single_route_alternating() {
         let manager = SingleRouteThrottlingConnectionManager::new(
-            example_connection_params("chat.staging.signal.org"),
+            example_connection_params("chat.staging.mochi.org"),
             TIMEOUT_DURATION,
         );
         for _ in 0..FEW_ATTEMPTS {
@@ -408,7 +408,7 @@ mod test {
     async fn single_route_manager_times_out_on_long_connection() {
         let time_over_timeout = TIMEOUT_DURATION * 2;
         let manager = SingleRouteThrottlingConnectionManager::new(
-            example_connection_params("chat.staging.signal.org"),
+            example_connection_params("chat.staging.mochi.org"),
             TIMEOUT_DURATION,
         );
         time::advance(TIME_ADVANCE_VALUE).await;
@@ -443,7 +443,7 @@ mod test {
     #[tokio::test(flavor = "current_thread", start_paused = true)]
     async fn single_route_manager_handles_too_many_failed_attempts() {
         let manager = SingleRouteThrottlingConnectionManager::new(
-            example_connection_params("chat.staging.signal.org"),
+            example_connection_params("chat.staging.mochi.org"),
             TIMEOUT_DURATION,
         );
         for _ in 0..MANY_ATTEMPTS {
@@ -754,7 +754,7 @@ mod test {
             host,
             nonzero!(443u16),
             HttpRequestDecoratorSeq::default(),
-            RootCertificates::Signal,
+            RootCertificates::Mochi,
         )
     }
 

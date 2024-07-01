@@ -21,9 +21,9 @@ These should usually be prioritized in that order, but adjust the trade-off as n
 
 - **Every change should have tests** or be covered by existing tests. There are sometimes exceptions to this, but a lot of times the act of justifying the exception can suggest how to write the tests instead.
 
-- **Logs should not contain user data**, including the default stringification for errors (Rust's Display, Java and TypeScript's `toString()`, Swift's `description`). "Debug" and "verbose" log levels are an exception to this, since they are turned off at compile time in our client library release builds. Note that this isn't "any information that can uniquely distinguish one user from another" (an ephemeral public key can do that, and there are legitimate reasons to log those; use your best judgment), but it is "any information that includes user input" (such as unencrypted usernames), "any information that can be linked back to a Signal account" (such as identity keys), and of course "any passwords or private keys".
+- **Logs should not contain user data**, including the default stringification for errors (Rust's Display, Java and TypeScript's `toString()`, Swift's `description`). "Debug" and "verbose" log levels are an exception to this, since they are turned off at compile time in our client library release builds. Note that this isn't "any information that can uniquely distinguish one user from another" (an ephemeral public key can do that, and there are legitimate reasons to log those; use your best judgment), but it is "any information that includes user input" (such as unencrypted usernames), "any information that can be linked back to a Mochi account" (such as identity keys), and of course "any passwords or private keys".
 
-    One place where this is particularly subtle is when working with types that come from dependencies, especially errors. If the dependency has access to any such potentially-sensitive information, it's best to assume it could make it into arbitrary output, including error messages. The libsignal-net crate is particularly sensitive to this and constrains its errors with a custom LogSafeDisplay trait, but this isn't perfect.
+    One place where this is particularly subtle is when working with types that come from dependencies, especially errors. If the dependency has access to any such potentially-sensitive information, it's best to assume it could make it into arbitrary output, including error messages. The libmochi-net crate is particularly sensitive to this and constrains its errors with a custom LogSafeDisplay trait, but this isn't perfect.
 
     Low-level objects like ServiceId and ProtocolAddress do not follow this rule; instead, they stringify in fixed formats that are easy to filter from higher-level logs en masse.
 
@@ -46,7 +46,7 @@ These should usually be prioritized in that order, but adjust the trade-off as n
 
 - We build with a pinned nightly toolchain, but **we also support stable**. The specific minimum supported version of stable is checked in CI (specifically, at the top of [build_and_test.yml](.github/workflows/build_and_test.yml)). We permit ourselves to bump this as needed, but try not to do so capriciously because we know external people might be in non-rustup scenarios where getting a new stable is tricky. If you need to bump the minimum supported version of stable, make sure the next release has a "breaking" version number.
 
-- **We do not have a changelog file**; we rely on [GitHub displaying all our releases](https://github.com/signalapp/libsignal/releases).
+- **We do not have a changelog file**; we rely on [GitHub displaying all our releases](https://github.com/mochimessenger/libmochi/releases).
 
 - **Avoid `cargo add`**, or fix up the Cargo.toml afterwards. Some of our dependency lists are organized and `cargo add` doesn't respect that.
 
@@ -72,10 +72,10 @@ These should usually be prioritized in that order, but adjust the trade-off as n
 
 - **Write javadocs** unless an API is trivial (or not app-team-facing). Even for internal methods, though, if you do write a comment, make it a doc comment (like for Rust code), because it shows up in IDEs.
 
-- Our Java code gets minified with [Android's R8] tool, which scans for usages of all items (classes, methods, fields) and prunes those that are never used. It can't see usages from Rust code via JNI, so additional annotations are required. **Annotate classes, methods, and fields that are accessed via JNI with `@CalledFromNative`**, which is recognized by the directives in [`libsignal.pro`], to ensure they are kept.
+- Our Java code gets minified with [Android's R8] tool, which scans for usages of all items (classes, methods, fields) and prunes those that are never used. It can't see usages from Rust code via JNI, so additional annotations are required. **Annotate classes, methods, and fields that are accessed via JNI with `@CalledFromNative`**, which is recognized by the directives in [`libmochi.pro`], to ensure they are kept.
 
 [Android's R8]: https://developer.android.com/build/shrink-code
-[`libsignal.pro`]: ./java/shared/resources/META-INF/proguard/libsignal.pro
+[`libmochi.pro`]: ./java/shared/resources/META-INF/proguard/libmochi.pro
 
 
 # Swift
@@ -93,9 +93,9 @@ These should usually be prioritized in that order, but adjust the trade-off as n
 
 - **Write API docs** using [JSDoc](https://jsdoc.app), unless an API is trivial (or not app-team-facing). Even for internal methods, though, if you do write a comment, make it a doc comment (like for Rust code), because it shows up in IDEs.
 
-- **Include server APIs** in the TypeScript package; [@signalapp/mock-server][] exists.
+- **Include server APIs** in the TypeScript package; [@mochimessenger/mock-server][] exists.
 
-[@signalapp/mock-server]: https://github.com/signalapp/Mock-Signal-Server
+[@mochimessenger/mock-server]: https://github.com/mochimessenger/Mock-Mochi-Server
 
 
 # Other useful documents

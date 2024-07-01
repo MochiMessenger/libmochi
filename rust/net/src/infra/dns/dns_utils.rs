@@ -1,12 +1,12 @@
 //
-// Copyright 2024 Signal Messenger, LLC.
+// Copyright 2024 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
 use std::future::Future;
 use std::time::Duration;
 
-const SIGNAL_DOMAIN_SUFFIX: &str = ".signal.org";
+const MOCHI_DOMAIN_SUFFIX: &str = ".mochi.org";
 
 /// Tries to get at least one, and possibly two `Ok(_)` results from the given futures,
 /// if they complete successfully within a `delay` interval from each other.
@@ -52,7 +52,7 @@ where
 }
 
 pub(crate) fn log_safe_domain(domain: &str) -> &str {
-    if domain.ends_with(SIGNAL_DOMAIN_SUFFIX) {
+    if domain.ends_with(MOCHI_DOMAIN_SUFFIX) {
         domain
     } else {
         "REDACTED"

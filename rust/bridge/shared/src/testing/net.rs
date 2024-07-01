@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -7,15 +7,15 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use http::{HeaderMap, HeaderName, HeaderValue, StatusCode};
-use libsignal_bridge_macros::*;
-use libsignal_bridge_types::net::chat::{HttpRequest, ResponseAndDebugInfo};
-use libsignal_bridge_types::net::TokioAsyncContext;
-use libsignal_net::cdsi::{LookupError, LookupResponse, LookupResponseEntry, E164};
-use libsignal_net::chat::{
+use libmochi_bridge_macros::*;
+use libmochi_bridge_types::net::chat::{HttpRequest, ResponseAndDebugInfo};
+use libmochi_bridge_types::net::TokioAsyncContext;
+use libmochi_net::cdsi::{LookupError, LookupResponse, LookupResponseEntry, E164};
+use libmochi_net::chat::{
     ChatServiceError, DebugInfo as ChatServiceDebugInfo, Response as ChatResponse,
 };
-use libsignal_net::infra::IpType;
-use libsignal_protocol::{Aci, Pni};
+use libmochi_net::infra::IpType;
+use libmochi_protocol::{Aci, Pni};
 use nonzero_ext::nonzero;
 use uuid::Uuid;
 
@@ -124,10 +124,10 @@ fn TESTING_CdsiLookupErrorConvert(
         },
         TestingCdsiLookupError::Parse => LookupError::ParseError,
         TestingCdsiLookupError::ConnectDnsFailed => LookupError::ConnectTransport(
-            libsignal_net::infra::errors::TransportConnectError::DnsError,
+            libmochi_net::infra::errors::TransportConnectError::DnsError,
         ),
         TestingCdsiLookupError::WebSocketIdleTooLong => LookupError::WebSocket(
-            libsignal_net::infra::ws::WebSocketServiceError::ChannelIdleTooLong,
+            libmochi_net::infra::ws::WebSocketServiceError::ChannelIdleTooLong,
         ),
         TestingCdsiLookupError::ConnectionTimedOut => LookupError::ConnectionTimedOut,
         TestingCdsiLookupError::ServerCrashed => LookupError::Server { reason: "crashed" },
@@ -159,7 +159,7 @@ fn TESTING_ChatServiceErrorConvert(
 ) -> Result<(), ChatServiceError> {
     Err(match error_description.into_inner() {
         TestingChatServiceError::WebSocket => ChatServiceError::WebSocket(
-            libsignal_net::infra::ws::WebSocketServiceError::Other("testing"),
+            libmochi_net::infra::ws::WebSocketServiceError::Other("testing"),
         ),
         TestingChatServiceError::AppExpired => ChatServiceError::AppExpired,
         TestingChatServiceError::DeviceDeregistered => ChatServiceError::DeviceDeregistered,

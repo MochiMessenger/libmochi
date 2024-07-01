@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -313,7 +313,7 @@ pub mod testutils {
         }
     }
 
-    pub const CONTEXT: &str = "signal-svr3-ppss-test";
+    pub const CONTEXT: &str = "mochi-svr3-ppss-test";
 
     fn oprf_eval(secret: &Scalar, blinded_elt: &RistrettoPoint) -> RistrettoPoint {
         secret * blinded_elt

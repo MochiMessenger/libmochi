@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2022 Signal Messenger, LLC.
+// Copyright 2020-2022 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@ use std::fmt::Display;
 use std::num::{NonZeroU64, ParseIntError};
 use std::ops::Deref;
 
-use libsignal_protocol::*;
+use libmochi_protocol::*;
 use paste::paste;
 use uuid::Uuid;
 
@@ -23,13 +23,13 @@ use super::*;
 /// `ArgTypeInfo` has two required methods: `borrow` and `load_from`. The use site looks like this:
 ///
 /// ```
-/// # use libsignal_bridge_types::ffi::*;
+/// # use libmochi_bridge_types::ffi::*;
 /// # struct Foo;
 /// # impl SimpleArgTypeInfo for Foo {
 /// #     type ArgType = isize;
-/// #     fn convert_from(foreign: isize) -> SignalFfiResult<Self> { Ok(Foo) }
+/// #     fn convert_from(foreign: isize) -> MochiFfiResult<Self> { Ok(Foo) }
 /// # }
-/// # fn main() -> SignalFfiResult<()> {
+/// # fn main() -> MochiFfiResult<()> {
 /// #     let ffi_arg = 2;
 /// let mut ffi_arg_borrowed = Foo::borrow(ffi_arg)?;
 /// let rust_arg = Foo::load_from(&mut ffi_arg_borrowed);
@@ -49,7 +49,7 @@ pub trait ArgTypeInfo<'storage>: Sized {
     /// Local storage for the argument (ideally borrowed rather than copied).
     type StoredType: 'storage;
     /// "Borrows" the data in `foreign`, usually to establish a local lifetime or owning type.
-    fn borrow(foreign: Self::ArgType) -> SignalFfiResult<Self::StoredType>;
+    fn borrow(foreign: Self::ArgType) -> MochiFfiResult<Self::StoredType>;
     /// Loads the Rust value from the data that's been `stored` by [`borrow()`](Self::borrow()).
     fn load_from(stored: &'storage mut Self::StoredType) -> Self;
 }
@@ -59,17 +59,17 @@ pub trait ArgTypeInfo<'storage>: Sized {
 /// This trait is easier to use when writing FFI functions manually:
 ///
 /// ```
-/// # use libsignal_bridge_types::ffi::*;
+/// # use libmochi_bridge_types::ffi::*;
 /// # struct Foo;
 /// impl SimpleArgTypeInfo for Foo {
 ///     type ArgType = isize;
-///     fn convert_from(foreign: isize) -> SignalFfiResult<Self> {
+///     fn convert_from(foreign: isize) -> MochiFfiResult<Self> {
 ///         // ...
 ///         # Ok(Foo)
 ///     }
 /// }
 ///
-/// # fn main() -> SignalFfiResult<()> {
+/// # fn main() -> MochiFfiResult<()> {
 /// #     let ffi_arg = 2;
 /// let rust_arg = Foo::convert_from(ffi_arg)?;
 /// #     Ok(())
@@ -81,7 +81,7 @@ pub trait SimpleArgTypeInfo: Sized {
     /// The FFI form of the argument (e.g. `std::ffi::c_uchar`).
     type ArgType;
     /// Converts the data in `foreign` to the Rust type.
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self>;
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self>;
 }
 
 impl<'a, T> ArgTypeInfo<'a> for T
@@ -90,7 +90,7 @@ where
 {
     type ArgType = <Self as SimpleArgTypeInfo>::ArgType;
     type StoredType = Option<Self>;
-    fn borrow(foreign: Self::ArgType) -> SignalFfiResult<Self::StoredType> {
+    fn borrow(foreign: Self::ArgType) -> MochiFfiResult<Self::StoredType> {
         Ok(Some(Self::convert_from(foreign)?))
     }
     fn load_from(stored: &'a mut Self::StoredType) -> Self {
@@ -103,13 +103,13 @@ where
 /// `ResultTypeInfo` is used to implement the `bridge_fn` macro, but can also be used outside it.
 ///
 /// ```
-/// # use libsignal_bridge_types::ffi::*;
+/// # use libmochi_bridge_types::ffi::*;
 /// # struct Foo;
 /// # impl ResultTypeInfo for Foo {
 /// #     type ResultType = isize;
-/// #     fn convert_into(self) -> SignalFfiResult<isize> { Ok(1) }
+/// #     fn convert_into(self) -> MochiFfiResult<isize> { Ok(1) }
 /// # }
-/// # fn main() -> SignalFfiResult<()> {
+/// # fn main() -> MochiFfiResult<()> {
 /// #     let rust_result = Foo;
 /// let ffi_result = rust_result.convert_into()?;
 /// #     Ok(())
@@ -121,13 +121,13 @@ pub trait ResultTypeInfo: Sized {
     /// The FFI form of the result (e.g. `std::ffi::c_uchar`).
     type ResultType;
     /// Converts the data in `self` to the FFI type, similar to `try_into()`.
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType>;
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType>;
 }
 
 impl<'a> ArgTypeInfo<'a> for &'a [u8] {
     type ArgType = BorrowedSliceOf<c_uchar>;
     type StoredType = Self::ArgType;
-    fn borrow(foreign: Self::ArgType) -> SignalFfiResult<Self::StoredType> {
+    fn borrow(foreign: Self::ArgType) -> MochiFfiResult<Self::StoredType> {
         // Check preconditions up front.
         unsafe { foreign.as_slice()? };
         Ok(foreign)
@@ -140,7 +140,7 @@ impl<'a> ArgTypeInfo<'a> for &'a [u8] {
 impl<'a> ArgTypeInfo<'a> for &'a mut [u8] {
     type ArgType = BorrowedMutableSliceOf<c_uchar>;
     type StoredType = Self::ArgType;
-    fn borrow(mut foreign: Self::ArgType) -> SignalFfiResult<Self::StoredType> {
+    fn borrow(mut foreign: Self::ArgType) -> MochiFfiResult<Self::StoredType> {
         // Check preconditions up front.
         unsafe { foreign.as_slice_mut()? };
         Ok(foreign)
@@ -154,7 +154,7 @@ impl<'a> ArgTypeInfo<'a> for crate::support::ServiceIdSequence<'a> {
     type ArgType = <&'a [u8] as ArgTypeInfo<'a>>::ArgType;
     type StoredType = Self::ArgType;
 
-    fn borrow(foreign: Self::ArgType) -> SignalFfiResult<Self::StoredType> {
+    fn borrow(foreign: Self::ArgType) -> MochiFfiResult<Self::StoredType> {
         <&'a [u8]>::borrow(foreign)
     }
 
@@ -168,7 +168,7 @@ impl<'a> ArgTypeInfo<'a> for Vec<&'a [u8]> {
     type ArgType = BorrowedSliceOf<BorrowedSliceOf<u8>>;
     type StoredType = Vec<&'a [u8]>;
 
-    fn borrow(foreign: Self::ArgType) -> SignalFfiResult<Self> {
+    fn borrow(foreign: Self::ArgType) -> MochiFfiResult<Self> {
         let slices = unsafe { foreign.as_slice()? };
         slices
             .iter()
@@ -196,7 +196,7 @@ impl<'a> ArgTypeInfo<'a> for Vec<&'a [u8]> {
 impl<const LEN: usize> SimpleArgTypeInfo for &mut [u8; LEN] {
     type ArgType = *mut [u8; LEN];
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
-    fn convert_from(input: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(input: Self::ArgType) -> MochiFfiResult<Self> {
         unsafe { input.as_mut() }.ok_or_else(|| NullPointerError.into())
     }
 }
@@ -204,7 +204,7 @@ impl<const LEN: usize> SimpleArgTypeInfo for &mut [u8; LEN] {
 /// `u32::MAX` (`UINT_MAX`, `~0u`) is used to represent `None` here.
 impl SimpleArgTypeInfo for Option<u32> {
     type ArgType = u32;
-    fn convert_from(foreign: u32) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: u32) -> MochiFfiResult<Self> {
         if foreign == u32::MAX {
             Ok(None)
         } else {
@@ -217,7 +217,7 @@ impl SimpleArgTypeInfo for Option<u32> {
 impl SimpleArgTypeInfo for String {
     type ArgType = *const c_char;
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
-    fn convert_from(foreign: *const c_char) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: *const c_char) -> MochiFfiResult<Self> {
         if foreign.is_null() {
             return Err(NullPointerError.into());
         }
@@ -232,7 +232,7 @@ impl SimpleArgTypeInfo for String {
 /// Converts a possibly-`NULL` C string to a Rust String (or `None`).
 impl SimpleArgTypeInfo for Option<String> {
     type ArgType = *const c_char;
-    fn convert_from(foreign: *const c_char) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: *const c_char) -> MochiFfiResult<Self> {
         if foreign.is_null() {
             Ok(None)
         } else {
@@ -244,7 +244,7 @@ impl SimpleArgTypeInfo for Option<String> {
 impl SimpleArgTypeInfo for uuid::Uuid {
     type ArgType = *const [u8; 16];
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
         match unsafe { foreign.as_ref() } {
             Some(array) => Ok(uuid::Uuid::from_bytes(*array)),
             None => Err(NullPointerError.into()),
@@ -254,20 +254,20 @@ impl SimpleArgTypeInfo for uuid::Uuid {
 
 impl ResultTypeInfo for uuid::Uuid {
     type ResultType = uuid::Bytes;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(*self.as_bytes())
     }
 }
 
-impl SimpleArgTypeInfo for libsignal_protocol::ServiceId {
-    type ArgType = *const libsignal_protocol::ServiceIdFixedWidthBinaryBytes;
+impl SimpleArgTypeInfo for libmochi_protocol::ServiceId {
+    type ArgType = *const libmochi_protocol::ServiceIdFixedWidthBinaryBytes;
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
         match unsafe { foreign.as_ref() } {
             Some(array) => {
-                libsignal_protocol::ServiceId::parse_from_service_id_fixed_width_binary(array)
+                libmochi_protocol::ServiceId::parse_from_service_id_fixed_width_binary(array)
                     .ok_or_else(|| {
-                        SignalProtocolError::InvalidArgument(
+                        MochiProtocolError::InvalidArgument(
                             "invalid Service-Id-FixedWidthBinary".to_string(),
                         )
                         .into()
@@ -278,44 +278,44 @@ impl SimpleArgTypeInfo for libsignal_protocol::ServiceId {
     }
 }
 
-impl ResultTypeInfo for libsignal_protocol::ServiceId {
-    type ResultType = libsignal_protocol::ServiceIdFixedWidthBinaryBytes;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+impl ResultTypeInfo for libmochi_protocol::ServiceId {
+    type ResultType = libmochi_protocol::ServiceIdFixedWidthBinaryBytes;
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(self.service_id_fixed_width_binary())
     }
 }
 
-impl SimpleArgTypeInfo for libsignal_protocol::Aci {
-    type ArgType = <libsignal_protocol::ServiceId as SimpleArgTypeInfo>::ArgType;
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
-        libsignal_protocol::ServiceId::convert_from(foreign)?
+impl SimpleArgTypeInfo for libmochi_protocol::Aci {
+    type ArgType = <libmochi_protocol::ServiceId as SimpleArgTypeInfo>::ArgType;
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
+        libmochi_protocol::ServiceId::convert_from(foreign)?
             .try_into()
-            .map_err(|_| SignalProtocolError::InvalidArgument("not an ACI".to_string()).into())
+            .map_err(|_| MochiProtocolError::InvalidArgument("not an ACI".to_string()).into())
     }
 }
 
-impl ResultTypeInfo for libsignal_protocol::Aci {
-    type ResultType = libsignal_protocol::ServiceIdFixedWidthBinaryBytes;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
-        libsignal_protocol::ServiceId::from(self).convert_into()
+impl ResultTypeInfo for libmochi_protocol::Aci {
+    type ResultType = libmochi_protocol::ServiceIdFixedWidthBinaryBytes;
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
+        libmochi_protocol::ServiceId::from(self).convert_into()
     }
 }
 
-impl SimpleArgTypeInfo for libsignal_protocol::Pni {
-    type ArgType = <libsignal_protocol::ServiceId as SimpleArgTypeInfo>::ArgType;
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
-        libsignal_protocol::ServiceId::convert_from(foreign)?
+impl SimpleArgTypeInfo for libmochi_protocol::Pni {
+    type ArgType = <libmochi_protocol::ServiceId as SimpleArgTypeInfo>::ArgType;
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
+        libmochi_protocol::ServiceId::convert_from(foreign)?
             .try_into()
-            .map_err(|_| SignalProtocolError::InvalidArgument("not a PNI".to_string()).into())
+            .map_err(|_| MochiProtocolError::InvalidArgument("not a PNI".to_string()).into())
     }
 }
 
-impl SimpleArgTypeInfo for libsignal_net::cdsi::E164 {
+impl SimpleArgTypeInfo for libmochi_net::cdsi::E164 {
     type ArgType = <String as SimpleArgTypeInfo>::ArgType;
-    fn convert_from(e164: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(e164: Self::ArgType) -> MochiFfiResult<Self> {
         let e164 = String::convert_from(e164)?;
         let parsed = e164.parse().map_err(|_: ParseIntError| {
-            SignalProtocolError::InvalidArgument(format!("{e164} is not an e164"))
+            MochiProtocolError::InvalidArgument(format!("{e164} is not an e164"))
         })?;
         Ok(parsed)
     }
@@ -324,7 +324,7 @@ impl SimpleArgTypeInfo for libsignal_net::cdsi::E164 {
 impl SimpleArgTypeInfo for Box<[u8]> {
     type ArgType = BorrowedSliceOf<c_uchar>;
 
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
         let slice = unsafe { foreign.as_slice()? };
         Ok(slice.into())
     }
@@ -333,14 +333,14 @@ impl SimpleArgTypeInfo for Box<[u8]> {
 impl<const LEN: usize> SimpleArgTypeInfo for &'_ [u8; LEN] {
     type ArgType = *const [u8; LEN];
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
-    fn convert_from(arg: *const [u8; LEN]) -> SignalFfiResult<Self> {
+    fn convert_from(arg: *const [u8; LEN]) -> MochiFfiResult<Self> {
         unsafe { arg.as_ref() }.ok_or(NullPointerError.into())
     }
 }
 
 impl<const LEN: usize> ResultTypeInfo for [u8; LEN] {
     type ResultType = [u8; LEN];
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(self)
     }
 }
@@ -352,7 +352,7 @@ macro_rules! bridge_trait {
                 type ArgType = *const [<Ffi $name Struct>];
                 type StoredType = &'a [<Ffi $name Struct>];
                 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-                fn borrow(foreign: Self::ArgType) -> SignalFfiResult<Self::StoredType> {
+                fn borrow(foreign: Self::ArgType) -> MochiFfiResult<Self::StoredType> {
                     match unsafe { foreign.as_ref() } {
                         None => Err(NullPointerError.into()),
                         Some(store) => Ok(store),
@@ -367,7 +367,7 @@ macro_rules! bridge_trait {
                 type ArgType = *const [<Ffi $name Struct>];
                 type StoredType = Option<&'a [<Ffi $name Struct>]>;
                 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-                fn borrow(foreign: Self::ArgType) -> SignalFfiResult<Self::StoredType> {
+                fn borrow(foreign: Self::ArgType) -> MochiFfiResult<Self::StoredType> {
                     Ok(unsafe { foreign.as_ref() })
                 }
                 fn load_from(stored: &'a mut Self::StoredType) -> Self {
@@ -393,7 +393,7 @@ where
     E: FfiError,
 {
     type ResultType = T::ResultType;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         T::convert_into(self?)
     }
 }
@@ -401,7 +401,7 @@ where
 /// Allocates and returns a new Rust-owned C string.
 impl ResultTypeInfo for String {
     type ResultType = *const std::ffi::c_char;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         self.deref().convert_into()
     }
 }
@@ -409,7 +409,7 @@ impl ResultTypeInfo for String {
 /// Allocates and returns a new Rust-owned C string (or `NULL`).
 impl ResultTypeInfo for Option<String> {
     type ResultType = *const std::ffi::c_char;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         self.as_deref().convert_into()
     }
 }
@@ -417,7 +417,7 @@ impl ResultTypeInfo for Option<String> {
 /// Allocates and returns a new Rust-owned C string.
 impl ResultTypeInfo for &str {
     type ResultType = *const std::ffi::c_char;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         let cstr = CString::new(self).expect("No NULL characters in string being returned to C");
         Ok(cstr.into_raw())
     }
@@ -426,7 +426,7 @@ impl ResultTypeInfo for &str {
 /// Allocates and returns a new Rust-owned C string (or `NULL`).
 impl ResultTypeInfo for Option<&str> {
     type ResultType = *const std::ffi::c_char;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         match self {
             Some(s) => s.convert_into(),
             None => Ok(std::ptr::null()),
@@ -437,7 +437,7 @@ impl ResultTypeInfo for Option<&str> {
 /// Allocates and returns an array of Rust-owned C strings.
 impl ResultTypeInfo for Box<[String]> {
     type ResultType = StringArray;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(StringArray::from_iter(&*self))
     }
 }
@@ -445,21 +445,21 @@ impl ResultTypeInfo for Box<[String]> {
 /// Allocates and returns an array of Rust-owned bytestrings.
 impl ResultTypeInfo for Box<[Vec<u8>]> {
     type ResultType = BytestringArray;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(BytestringArray::from_iter(&*self))
     }
 }
 
 impl ResultTypeInfo for Vec<u8> {
     type ResultType = OwnedBufferOf<std::ffi::c_uchar>;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(OwnedBufferOf::from(self.into_boxed_slice()))
     }
 }
 
 impl ResultTypeInfo for &[u8] {
     type ResultType = OwnedBufferOf<std::ffi::c_uchar>;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         self.to_vec().convert_into()
     }
 }
@@ -467,35 +467,35 @@ impl ResultTypeInfo for &[u8] {
 /// `u32::MAX` (`UINT_MAX`, `~0u`) is used to represent `None` here.
 impl ResultTypeInfo for Option<u32> {
     type ResultType = u32;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(self.unwrap_or(u32::MAX))
     }
 }
 
 impl SimpleArgTypeInfo for crate::protocol::Timestamp {
     type ArgType = u64;
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
         Ok(Self::from_epoch_millis(foreign))
     }
 }
 
 impl ResultTypeInfo for crate::protocol::Timestamp {
     type ResultType = u64;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(self.epoch_millis())
     }
 }
 
 impl SimpleArgTypeInfo for crate::zkgroup::Timestamp {
     type ArgType = u64;
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
         Ok(Self::from_epoch_seconds(foreign))
     }
 }
 
 impl ResultTypeInfo for crate::zkgroup::Timestamp {
     type ResultType = u64;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(self.epoch_seconds())
     }
 }
@@ -509,14 +509,14 @@ pub trait BridgeHandle: 'static {}
 impl<T: BridgeHandle> SimpleArgTypeInfo for &T {
     type ArgType = *const T;
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
-    fn convert_from(foreign: *const T) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: *const T) -> MochiFfiResult<Self> {
         unsafe { native_handle_cast(foreign) }
     }
 }
 
 impl<T: BridgeHandle> SimpleArgTypeInfo for Option<&T> {
     type ArgType = *const T;
-    fn convert_from(foreign: *const T) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: *const T) -> MochiFfiResult<Self> {
         if foreign.is_null() {
             Ok(None)
         } else {
@@ -528,7 +528,7 @@ impl<T: BridgeHandle> SimpleArgTypeInfo for Option<&T> {
 impl<T: BridgeHandle> SimpleArgTypeInfo for &mut T {
     type ArgType = *mut T;
     #[allow(clippy::not_unsafe_ptr_arg_deref)]
-    fn convert_from(foreign: *mut T) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: *mut T) -> MochiFfiResult<Self> {
         unsafe { native_handle_cast_mut(foreign) }
     }
 }
@@ -536,7 +536,7 @@ impl<T: BridgeHandle> SimpleArgTypeInfo for &mut T {
 impl<'a, T: BridgeHandle> ArgTypeInfo<'a> for &'a [&'a T] {
     type ArgType = BorrowedSliceOf<*const T>;
     type StoredType = Self::ArgType;
-    fn borrow(foreign: Self::ArgType) -> SignalFfiResult<Self::StoredType> {
+    fn borrow(foreign: Self::ArgType) -> MochiFfiResult<Self::StoredType> {
         // Check preconditions up front.
         let slice_of_pointers = unsafe { foreign.as_slice() }?;
         if slice_of_pointers.contains(&std::ptr::null()) {
@@ -560,14 +560,14 @@ impl<'a, T: BridgeHandle> ArgTypeInfo<'a> for &'a [&'a T] {
 
 impl<T: BridgeHandle> ResultTypeInfo for T {
     type ResultType = *mut T;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(Box::into_raw(Box::new(self)))
     }
 }
 
 impl<T: BridgeHandle> ResultTypeInfo for Option<T> {
     type ResultType = *mut T;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         match self {
             Some(obj) => obj.convert_into(),
             None => Ok(std::ptr::null_mut()),
@@ -584,7 +584,7 @@ where
 {
     type ArgType = *const T::Array;
 
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
         let array = unsafe { foreign.as_ref() }.ok_or(NullPointerError)?;
         let result: T = zkgroup::deserialize(array.as_ref()).unwrap_or_else(|_| {
             panic!(
@@ -603,11 +603,11 @@ where
 {
     type ArgType = P::ArgType;
 
-    fn convert_from(foreign: Self::ArgType) -> SignalFfiResult<Self> {
+    fn convert_from(foreign: Self::ArgType) -> MochiFfiResult<Self> {
         let p = P::convert_from(foreign)?;
         p.try_into()
             .map_err(|e| {
-                SignalProtocolError::InvalidArgument(format!(
+                MochiProtocolError::InvalidArgument(format!(
                     "invalid {}: {e}",
                     std::any::type_name::<T>()
                 ))
@@ -623,7 +623,7 @@ where
 {
     type ResultType = T::Array;
 
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         let result = zkgroup::serialize(self.deref());
         Ok(result.as_slice().try_into().expect("wrong serialized size"))
     }
@@ -633,14 +633,14 @@ impl ResultTypeInfo for () {
     /// Ideally we wouldn't return *anything,* but C doesn't support that.
     type ResultType = bool;
 
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         Ok(false)
     }
 }
 
-impl ResultTypeInfo for libsignal_net::cdsi::LookupResponse {
+impl ResultTypeInfo for libmochi_net::cdsi::LookupResponse {
     type ResultType = FfiCdsiLookupResponse;
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         let Self {
             records,
             debug_permits_used,
@@ -664,10 +664,10 @@ impl ResultTypeInfo for libsignal_net::cdsi::LookupResponse {
     }
 }
 
-impl ResultTypeInfo for libsignal_net::chat::Response {
+impl ResultTypeInfo for libmochi_net::chat::Response {
     type ResultType = FfiChatResponse;
 
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         let Self {
             status,
             message,
@@ -686,7 +686,7 @@ impl ResultTypeInfo for libsignal_net::chat::Response {
                 )
                 .convert_into()
             })
-            .collect::<SignalFfiResult<_>>()?;
+            .collect::<MochiFfiResult<_>>()?;
 
         Ok(FfiChatResponse {
             status: status.as_u16(),
@@ -697,10 +697,10 @@ impl ResultTypeInfo for libsignal_net::chat::Response {
     }
 }
 
-impl ResultTypeInfo for libsignal_net::chat::DebugInfo {
+impl ResultTypeInfo for libmochi_net::chat::DebugInfo {
     type ResultType = FfiChatServiceDebugInfo;
 
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         let Self {
             reconnect_count,
             ip_type,
@@ -720,7 +720,7 @@ impl ResultTypeInfo for libsignal_net::chat::DebugInfo {
 impl ResultTypeInfo for crate::net::chat::ResponseAndDebugInfo {
     type ResultType = FfiResponseAndDebugInfo;
 
-    fn convert_into(self) -> SignalFfiResult<Self::ResultType> {
+    fn convert_into(self) -> MochiFfiResult<Self::ResultType> {
         let Self {
             response,
             debug_info,
@@ -742,14 +742,14 @@ macro_rules! ffi_bridge_handle_clone {
     ( $typ:ty as $ffi_name:ident ) => {
         ::paste::paste! {
             #[export_name = concat!(
-                env!("LIBSIGNAL_BRIDGE_FN_PREFIX_FFI"),
+                env!("LIBMOCHI_BRIDGE_FN_PREFIX_FFI"),
                 stringify!($ffi_name),
                 "_clone",
             )]
             pub unsafe extern "C" fn [<__bridge_handle_ffi_ $ffi_name _clone>](
                 new_obj: *mut *mut $typ,
                 obj: *const $typ,
-            ) -> *mut $crate::ffi::SignalFfiError {
+            ) -> *mut $crate::ffi::MochiFfiError {
                 $crate::ffi::run_ffi_safe(|| {
                     let obj = $crate::ffi::native_handle_cast::<$typ>(obj)?;
                     $crate::ffi::write_result_to::<$typ>(new_obj, obj.clone())
@@ -795,13 +795,13 @@ macro_rules! trivial {
     ($typ:ty) => {
         impl SimpleArgTypeInfo for $typ {
             type ArgType = Self;
-            fn convert_from(foreign: Self) -> SignalFfiResult<Self> {
+            fn convert_from(foreign: Self) -> MochiFfiResult<Self> {
                 Ok(foreign)
             }
         }
         impl ResultTypeInfo for $typ {
             type ResultType = Self;
-            fn convert_into(self) -> SignalFfiResult<Self> {
+            fn convert_into(self) -> MochiFfiResult<Self> {
                 Ok(self)
             }
         }
@@ -842,9 +842,9 @@ macro_rules! ffi_arg_type {
     (Option<&str>) => (*const std::ffi::c_char);
     (Timestamp) => (u64);
     (Uuid) => (*const [u8; 16]);
-    (ServiceId) => (*const libsignal_protocol::ServiceIdFixedWidthBinaryBytes);
-    (Aci) => (*const libsignal_protocol::ServiceIdFixedWidthBinaryBytes);
-    (Pni) => (*const libsignal_protocol::ServiceIdFixedWidthBinaryBytes);
+    (ServiceId) => (*const libmochi_protocol::ServiceIdFixedWidthBinaryBytes);
+    (Aci) => (*const libmochi_protocol::ServiceIdFixedWidthBinaryBytes);
+    (Pni) => (*const libmochi_protocol::ServiceIdFixedWidthBinaryBytes);
     (E164) => (*const std::ffi::c_char);
     (&[u8; $len:expr]) => (*const [u8; $len]);
     (&[& $typ:ty]) => (ffi::BorrowedSliceOf<*const $typ>);
@@ -895,9 +895,9 @@ macro_rules! ffi_result_type {
     (Option<$typ:ty>) => (*mut $typ);
     (Timestamp) => (u64);
     (Uuid) => ([u8; 16]);
-    (ServiceId) => (libsignal_protocol::ServiceIdFixedWidthBinaryBytes);
-    (Aci) => (libsignal_protocol::ServiceIdFixedWidthBinaryBytes);
-    (Pni) => (libsignal_protocol::ServiceIdFixedWidthBinaryBytes);
+    (ServiceId) => (libmochi_protocol::ServiceIdFixedWidthBinaryBytes);
+    (Aci) => (libmochi_protocol::ServiceIdFixedWidthBinaryBytes);
+    (Pni) => (libmochi_protocol::ServiceIdFixedWidthBinaryBytes);
     ([u8; $len:expr]) => ([u8; $len]);
     (&[u8]) => (ffi::OwnedBufferOf<std::ffi::c_uchar>);
     (Vec<u8>) => (ffi::OwnedBufferOf<std::ffi::c_uchar>);

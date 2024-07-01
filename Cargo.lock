@@ -420,7 +420,7 @@ dependencies = [
 [[package]]
 name = "boring"
 version = "4.6.0"
-source = "git+https://github.com/signalapp/boring?tag=signal-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
 dependencies = [
  "bitflags",
  "boring-sys",
@@ -432,7 +432,7 @@ dependencies = [
 [[package]]
 name = "boring-sys"
 version = "4.6.0"
-source = "git+https://github.com/signalapp/boring?tag=signal-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
 dependencies = [
  "bindgen",
  "cmake",
@@ -860,7 +860,7 @@ dependencies = [
 [[package]]
 name = "curve25519-dalek"
 version = "4.1.3"
-source = "git+https://github.com/signalapp/curve25519-dalek?tag=signal-curve25519-4.1.3#7c6d34756355a3566a704da84dce7b1c039a6572"
+source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#7c6d34756355a3566a704da84dce7b1c039a6572"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -877,7 +877,7 @@ dependencies = [
 [[package]]
 name = "curve25519-dalek-derive"
 version = "0.1.1"
-source = "git+https://github.com/signalapp/curve25519-dalek?tag=signal-curve25519-4.1.3#7c6d34756355a3566a704da84dce7b1c039a6572"
+source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#7c6d34756355a3566a704da84dce7b1c039a6572"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1940,7 +1940,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ec2a862134d2a7d32d7983ddcdd1c4923530833c9f2ea1a44fc5fa473989058"
 
 [[package]]
-name = "libsignal-bridge"
+name = "libmochi-bridge"
 version = "0.1.0"
 dependencies = [
  "aes-gcm-siv",
@@ -1959,12 +1959,12 @@ dependencies = [
  "hmac",
  "http 1.1.0",
  "jni 0.21.1",
- "libsignal-bridge-macros",
- "libsignal-bridge-types",
- "libsignal-core",
- "libsignal-message-backup",
- "libsignal-net",
- "libsignal-protocol",
+ "libmochi-bridge-macros",
+ "libmochi-bridge-types",
+ "libmochi-core",
+ "libmochi-message-backup",
+ "libmochi-net",
+ "libmochi-protocol",
  "linkme",
  "log",
  "mediasan-common",
@@ -1980,10 +1980,10 @@ dependencies = [
  "scopeguard",
  "serde",
  "sha2",
- "signal-crypto",
- "signal-media",
- "signal-neon-futures",
- "signal-pin",
+ "mochi-crypto",
+ "mochi-media",
+ "mochi-neon-futures",
+ "mochi-pin",
  "static_assertions",
  "strum",
  "subtle",
@@ -1997,7 +1997,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-bridge-macros"
+name = "libmochi-bridge-macros"
 version = "0.1.0"
 dependencies = [
  "heck 0.3.3",
@@ -2008,7 +2008,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-bridge-types"
+name = "libmochi-bridge-types"
 version = "0.1.0"
 dependencies = [
  "aes-gcm-siv",
@@ -2029,12 +2029,12 @@ dependencies = [
  "hmac",
  "http 1.1.0",
  "jni 0.21.1",
- "libsignal-bridge-macros",
- "libsignal-core",
- "libsignal-message-backup",
- "libsignal-net",
- "libsignal-protocol",
- "libsignal-svr3",
+ "libmochi-bridge-macros",
+ "libmochi-core",
+ "libmochi-message-backup",
+ "libmochi-net",
+ "libmochi-protocol",
+ "libmochi-svr3",
  "linkme",
  "log",
  "mediasan-common",
@@ -2051,10 +2051,10 @@ dependencies = [
  "serde",
  "serde_derive",
  "sha2",
- "signal-crypto",
- "signal-media",
- "signal-neon-futures",
- "signal-pin",
+ "mochi-crypto",
+ "mochi-media",
+ "mochi-neon-futures",
+ "mochi-pin",
  "static_assertions",
  "strum",
  "subtle",
@@ -2068,7 +2068,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-core"
+name = "libmochi-core"
 version = "0.1.0"
 dependencies = [
  "hex-literal",
@@ -2079,37 +2079,37 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-ffi"
+name = "libmochi-ffi"
 version = "0.52.1"
 dependencies = [
  "cpufeatures",
  "futures-util",
- "libsignal-bridge",
- "libsignal-net",
- "libsignal-protocol",
+ "libmochi-bridge",
+ "libmochi-net",
+ "libmochi-protocol",
  "log",
  "log-panics",
- "signal-media",
+ "mochi-media",
 ]
 
 [[package]]
-name = "libsignal-jni"
+name = "libmochi-jni"
 version = "0.52.1"
 dependencies = [
  "cfg-if",
  "cpufeatures",
  "jni 0.19.0",
  "jni 0.21.1",
- "libsignal-bridge",
- "libsignal-protocol",
+ "libmochi-bridge",
+ "libmochi-protocol",
  "log",
  "log-panics",
  "rustls-platform-verifier",
- "signal-crypto",
+ "mochi-crypto",
 ]
 
 [[package]]
-name = "libsignal-message-backup"
+name = "libmochi-message-backup"
 version = "0.1.0"
 dependencies = [
  "aes",
@@ -2133,9 +2133,9 @@ dependencies = [
  "hmac",
  "itertools 0.12.1",
  "json5",
- "libsignal-message-backup",
- "libsignal-message-backup-macros",
- "libsignal-protocol",
+ "libmochi-message-backup",
+ "libmochi-message-backup-macros",
+ "libmochi-protocol",
  "log",
  "macro_rules_attribute",
  "mediasan-common",
@@ -2146,7 +2146,7 @@ dependencies = [
  "protobuf-json-mapping",
  "serde_json",
  "sha2",
- "signal-crypto",
+ "mochi-crypto",
  "smallvec",
  "strum",
  "strum_macros",
@@ -2162,7 +2162,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-message-backup-macros"
+name = "libmochi-message-backup-macros"
 version = "0.1.0"
 dependencies = [
  "heck 0.3.3",
@@ -2173,7 +2173,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-net"
+name = "libmochi-net"
 version = "0.1.0"
 dependencies = [
  "assert_matches",
@@ -2202,9 +2202,9 @@ dependencies = [
  "hyper-util",
  "itertools 0.12.1",
  "lazy_static",
- "libsignal-core",
- "libsignal-protocol",
- "libsignal-svr3",
+ "libmochi-core",
+ "libmochi-protocol",
+ "libmochi-svr3",
  "log",
  "nonzero_ext",
  "num_enum",
@@ -2237,13 +2237,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-node"
+name = "libmochi-node"
 version = "0.52.1"
 dependencies = [
  "cmake",
  "futures",
- "libsignal-bridge",
- "libsignal-protocol",
+ "libmochi-bridge",
+ "libmochi-protocol",
  "log",
  "log-panics",
  "minidump",
@@ -2253,7 +2253,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-protocol"
+name = "libmochi-protocol"
 version = "0.1.0"
 dependencies = [
  "aes",
@@ -2274,7 +2274,7 @@ dependencies = [
  "hmac",
  "indexmap 2.2.6",
  "itertools 0.12.1",
- "libsignal-core",
+ "libmochi-core",
  "log",
  "num_enum",
  "pqcrypto-kyber 0.7.9",
@@ -2287,7 +2287,7 @@ dependencies = [
  "rayon",
  "serde",
  "sha2",
- "signal-crypto",
+ "mochi-crypto",
  "subtle",
  "thiserror",
  "uuid",
@@ -2295,7 +2295,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "libsignal-svr3"
+name = "libmochi-svr3"
 version = "0.1.0"
 dependencies = [
  "assert_matches",
@@ -3779,7 +3779,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
-name = "signal-crypto"
+name = "mochi-crypto"
 version = "0.1.0"
 dependencies = [
  "aes",
@@ -3801,7 +3801,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "signal-media"
+name = "mochi-media"
 version = "0.1.0"
 dependencies = [
  "futures-util",
@@ -3812,25 +3812,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "signal-neon-futures"
+name = "mochi-neon-futures"
 version = "0.1.0"
 dependencies = [
  "futures-util",
  "neon",
- "signal-neon-futures-tests",
+ "mochi-neon-futures-tests",
 ]
 
 [[package]]
-name = "signal-neon-futures-tests"
+name = "mochi-neon-futures-tests"
 version = "0.1.0"
 dependencies = [
  "futures-util",
  "neon",
- "signal-neon-futures",
+ "mochi-neon-futures",
 ]
 
 [[package]]
-name = "signal-pin"
+name = "mochi-pin"
 version = "0.1.0"
 dependencies = [
  "argon2",
@@ -4192,7 +4192,7 @@ dependencies = [
 [[package]]
 name = "tokio-boring"
 version = "4.6.0"
-source = "git+https://github.com/signalapp/boring?tag=signal-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
 dependencies = [
  "boring",
  "boring-sys",
@@ -4465,7 +4465,7 @@ dependencies = [
  "prost-build",
  "rand",
  "sha2",
- "signal-crypto",
+ "mochi-crypto",
  "subtle",
  "thiserror",
  "zkgroup",
@@ -5005,7 +5005,7 @@ dependencies = [
  "hex-literal",
  "hkdf",
  "lazy_static",
- "libsignal-core",
+ "libmochi-core",
  "num_enum",
  "partial-default",
  "poksho",
@@ -5013,7 +5013,7 @@ dependencies = [
  "rayon",
  "serde",
  "sha2",
- "signal-crypto",
+ "mochi-crypto",
  "subtle",
  "test-case",
  "thiserror",

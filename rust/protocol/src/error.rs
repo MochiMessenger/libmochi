@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Signal Messenger, LLC.
+// Copyright 2020-2021 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -12,10 +12,10 @@ use uuid::Uuid;
 
 use std::panic::UnwindSafe;
 
-pub type Result<T> = std::result::Result<T, SignalProtocolError>;
+pub type Result<T> = std::result::Result<T, MochiProtocolError>;
 
 #[derive(Debug, Display, Error)]
-pub enum SignalProtocolError {
+pub enum MochiProtocolError {
     /// invalid argument: {0}
     InvalidArgument(String),
     /// invalid state for call to {0} to succeed: {1}
@@ -103,8 +103,8 @@ pub enum SignalProtocolError {
     BadKEMCiphertextLength(kem::KeyType, usize),
 }
 
-impl SignalProtocolError {
-    /// Convenience factory for [`SignalProtocolError::ApplicationCallbackError`].
+impl MochiProtocolError {
+    /// Convenience factory for [`MochiProtocolError::ApplicationCallbackError`].
     #[inline]
     pub fn for_application_callback<E: std::error::Error + Send + Sync + UnwindSafe + 'static>(
         method: &'static str,

@@ -1,9 +1,9 @@
 //
-// Copyright 2020 Signal Messenger, LLC.
+// Copyright 2020 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
-use crate::{proto, IdentityKey, Result, SignalProtocolError};
+use crate::{proto, IdentityKey, Result, MochiProtocolError};
 use prost::Message;
 use sha2::digest::Digest;
 use sha2::Sha512;
@@ -29,7 +29,7 @@ impl fmt::Display for DisplayableFingerprint {
 
 fn get_encoded_string(fprint: &[u8]) -> Result<String> {
     if fprint.len() < 30 {
-        return Err(SignalProtocolError::InvalidArgument(
+        return Err(MochiProtocolError::InvalidArgument(
             "DisplayableFingerprint created with short encoding".to_string(),
         ));
     }
@@ -78,22 +78,22 @@ impl ScannableFingerprint {
 
     pub fn deserialize(protobuf: &[u8]) -> Result<Self> {
         let fingerprint = proto::fingerprint::CombinedFingerprints::decode(protobuf)
-            .map_err(|_| SignalProtocolError::FingerprintParsingError)?;
+            .map_err(|_| MochiProtocolError::FingerprintParsingError)?;
 
         Ok(Self {
             version: fingerprint
                 .version
-                .ok_or(SignalProtocolError::FingerprintParsingError)?,
+                .ok_or(MochiProtocolError::FingerprintParsingError)?,
             local_fingerprint: fingerprint
                 .local_fingerprint
-                .ok_or(SignalProtocolError::FingerprintParsingError)?
+                .ok_or(MochiProtocolError::FingerprintParsingError)?
                 .content
-                .ok_or(SignalProtocolError::FingerprintParsingError)?,
+                .ok_or(MochiProtocolError::FingerprintParsingError)?,
             remote_fingerprint: fingerprint
                 .remote_fingerprint
-                .ok_or(SignalProtocolError::FingerprintParsingError)?
+                .ok_or(MochiProtocolError::FingerprintParsingError)?
                 .content
-                .ok_or(SignalProtocolError::FingerprintParsingError)?,
+                .ok_or(MochiProtocolError::FingerprintParsingError)?,
         })
     }
 
@@ -113,12 +113,12 @@ impl ScannableFingerprint {
 
     pub fn compare(&self, combined: &[u8]) -> Result<bool> {
         let combined = proto::fingerprint::CombinedFingerprints::decode(combined)
-            .map_err(|_| SignalProtocolError::FingerprintParsingError)?;
+            .map_err(|_| MochiProtocolError::FingerprintParsingError)?;
 
         let their_version = combined.version.unwrap_or(0);
 
         if their_version != self.version {
-            return Err(SignalProtocolError::FingerprintVersionMismatch(
+            return Err(MochiProtocolError::FingerprintVersionMismatch(
                 their_version,
                 self.version,
             ));
@@ -127,18 +127,18 @@ impl ScannableFingerprint {
         let same1 = combined
             .local_fingerprint
             .as_ref()
-            .ok_or(SignalProtocolError::FingerprintParsingError)?
+            .ok_or(MochiProtocolError::FingerprintParsingError)?
             .content
             .as_ref()
-            .ok_or(SignalProtocolError::FingerprintParsingError)?
+            .ok_or(MochiProtocolError::FingerprintParsingError)?
             .ct_eq(&self.remote_fingerprint);
         let same2 = combined
             .remote_fingerprint
             .as_ref()
-            .ok_or(SignalProtocolError::FingerprintParsingError)?
+            .ok_or(MochiProtocolError::FingerprintParsingError)?
             .content
             .as_ref()
-            .ok_or(SignalProtocolError::FingerprintParsingError)?
+            .ok_or(MochiProtocolError::FingerprintParsingError)?
             .ct_eq(&self.local_fingerprint);
 
         Ok(same1.into() && same2.into())
@@ -158,7 +158,7 @@ impl Fingerprint {
         local_key: &IdentityKey,
     ) -> Result<Vec<u8>> {
         if iterations <= 1 || iterations > 1000000 {
-            return Err(SignalProtocolError::InvalidArgument(format!(
+            return Err(MochiProtocolError::InvalidArgument(format!(
                 "Invalid fingerprint iterations {}",
                 iterations
             )));

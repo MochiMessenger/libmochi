@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -8,7 +8,7 @@ use std::marker::PhantomData;
 
 use futures_util::FutureExt;
 use neon::types::{Deferred, JsBigInt};
-use signal_neon_futures::ChannelEx;
+use mochi_neon_futures::ChannelEx;
 
 use crate::support::{
     describe_panic, AsyncRuntime, AsyncRuntimeBase, CancellationId, ResultReporter,
@@ -32,12 +32,12 @@ pub struct PromiseSettler<T, E> {
 impl<T, E> PromiseSettler<T, E>
 where
     T: for<'a> ResultTypeInfo<'a> + std::panic::UnwindSafe + Send + 'static,
-    E: SignalNodeError + Send + 'static,
+    E: MochiNodeError + Send + 'static,
 {
     /// Stores the information necessary to complete a JavaScript Promise.
     ///
     /// The `this` object of `cx` is assumed to contain error types in case the Promise is settled
-    /// with a failure. See [`SignalNodeError`] for more information.
+    /// with a failure. See [`MochiNodeError`] for more information.
     pub fn new(
         cx: &mut FunctionContext,
         deferred: Deferred,
@@ -80,7 +80,7 @@ impl<T, E, U: Finalize + Send + 'static> FutureResultReporter<T, E, U> {
 impl<T, E, U> ResultReporter for FutureResultReporter<T, E, U>
 where
     T: for<'a> ResultTypeInfo<'a> + std::panic::UnwindSafe + Send + 'static,
-    E: SignalNodeError + Send + 'static,
+    E: MochiNodeError + Send + 'static,
     U: Finalize + Send + 'static,
 {
     type Receiver = PromiseSettler<T, E>;
@@ -157,13 +157,13 @@ where
 /// ```no_run
 /// # use futures_util::FutureExt;
 /// # use neon::prelude::*;
-/// # use libsignal_bridge_types::node::*;
-/// # use libsignal_bridge_types::support::NoOpAsyncRuntime;
+/// # use libmochi_bridge_types::node::*;
+/// # use libmochi_bridge_types::support::NoOpAsyncRuntime;
 /// # struct MyError;
 /// # impl std::fmt::Display for MyError {
 /// #   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { unimplemented!() }
 /// # }
-/// # impl SignalNodeError for MyError {}
+/// # impl MochiNodeError for MyError {}
 /// # fn test(cx: &mut FunctionContext, async_runtime: &NoOpAsyncRuntime) -> NeonResult<()> {
 /// let js_promise = run_future_on_runtime(cx, async_runtime, "example", |_cancel| async {
 ///     let future = async {
@@ -186,7 +186,7 @@ where
     F: Future + std::panic::UnwindSafe + 'static,
     F::Output: ResultReporter<Receiver = PromiseSettler<O, E>>,
     O: for<'a> ResultTypeInfo<'a> + Send + std::panic::UnwindSafe + 'static,
-    E: SignalNodeError + Send + 'static,
+    E: MochiNodeError + Send + 'static,
 {
     let (deferred, promise) = cx.promise();
     let completer = PromiseSettler::new(cx, deferred, node_function_name);
@@ -230,7 +230,7 @@ impl<T: Future> Future for AssertSendSafe<T> {
 /// created.
 ///
 /// This allows us to implement [`AsyncRuntime`] for non-Send Futures: we start them here, on the
-/// JavaScript thread, and execute them using [`signal_neon_futures::ChannelEx::start_future`], so
+/// JavaScript thread, and execute them using [`mochi_neon_futures::ChannelEx::start_future`], so
 /// they are always polled from the JavaScript thread.
 pub struct ChannelOnItsOriginalThread<'a> {
     channel: Channel,

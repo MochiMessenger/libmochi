@@ -1,5 +1,5 @@
 //
-// Copyright 2023 Signal Messenger, LLC.
+// Copyright 2023 Mochi Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 
@@ -10,7 +10,7 @@ import * as sinonChai from 'sinon-chai';
 import * as util from './util';
 import { Aci, Pni } from '../Address';
 import * as Native from '../../Native';
-import { ErrorCode, LibSignalErrorBase } from '../Errors';
+import { ErrorCode, LibMochiErrorBase } from '../Errors';
 import {
   ChatServerMessageAck,
   ChatService,
@@ -53,7 +53,7 @@ describe('chat service api', () => {
     cases.forEach((testCase) => {
       const [name, expectedCode] = testCase;
       expect(() => Native.TESTING_ChatServiceErrorConvert(name))
-        .throws(LibSignalErrorBase)
+        .throws(LibMochiErrorBase)
         .to.include({
           code: expectedCode,
         });
@@ -137,7 +137,7 @@ describe('chat service api', () => {
 
     expect(() => requestWith({ verb: '\x00abc' })).throws(TypeError, 'method');
     expect(() => requestWith({ path: '/bad\x00path' }))
-      .throws(LibSignalErrorBase)
+      .throws(LibMochiErrorBase)
       .with.property('code', ErrorCode.InvalidUri);
     expect(() => requestWith({ headers: [['bad\x00name', 'value']] })).throws(
       TypeError,
@@ -152,16 +152,16 @@ describe('chat service api', () => {
   it('invalid proxies are rejected', () => {
     // The default TLS proxy config doesn't support staging, so we connect to production.
     const net = new Net(Environment.Production, userAgent);
-    expect(() => net.setProxy('signalfoundation.org', 0)).throws(Error);
-    expect(() => net.setProxy('signalfoundation.org', 100_000)).throws(Error);
-    expect(() => net.setProxy('signalfoundation.org', -1)).throws(Error);
-    expect(() => net.setProxy('signalfoundation.org', 0.1)).throws(Error);
+    expect(() => net.setProxy('mochifoundation.org', 0)).throws(Error);
+    expect(() => net.setProxy('mochifoundation.org', 100_000)).throws(Error);
+    expect(() => net.setProxy('mochifoundation.org', -1)).throws(Error);
+    expect(() => net.setProxy('mochifoundation.org', 0.1)).throws(Error);
   });
 
   // Integration tests make real network calls and as such will not be run unless a proxy server is provided.
   describe('Integration tests', function (this: Mocha.Suite) {
     before(() => {
-      if (!process.env.LIBSIGNAL_TESTING_PROXY_SERVER) {
+      if (!process.env.LIBMOCHI_TESTING_PROXY_SERVER) {
         this.ctx.skip();
       }
     });
@@ -174,7 +174,7 @@ describe('chat service api', () => {
     }).timeout(10000);
 
     it('can connect through a proxy server', async () => {
-      const PROXY_SERVER = process.env.LIBSIGNAL_TESTING_PROXY_SERVER;
+      const PROXY_SERVER = process.env.LIBMOCHI_TESTING_PROXY_SERVER;
       assert(PROXY_SERVER, 'checked above');
 
       // The default TLS proxy config doesn't support staging, so we connect to production.
@@ -190,12 +190,12 @@ describe('chat service api', () => {
 
   // The following payloads were generated via protoscope.
   // % protoscope -s | base64
-  // The fields are described by chat_websocket.proto in the libsignal-net crate.
+  // The fields are described by chat_websocket.proto in the libmochi-net crate.
 
   // 1: {"PUT"}
   // 2: {"/api/v1/message"}
   // 3: {"payload"}
-  // 5: {"x-signal-timestamp: 1000"}
+  // 5: {"x-mochi-timestamp: 1000"}
   // 4: 1
   const INCOMING_MESSAGE_1 = Buffer.from(
     'CgNQVVQSDy9hcGkvdjEvbWVzc2FnZRoHcGF5bG9hZCoYeC1zaWduYWwtdGltZXN0YW1wOiAxMDAwIAE=',
@@ -205,7 +205,7 @@ describe('chat service api', () => {
   // 1: {"PUT"}
   // 2: {"/api/v1/message"}
   // 3: {"payload"}
-  // 5: {"x-signal-timestamp: 2000"}
+  // 5: {"x-mochi-timestamp: 2000"}
   // 4: 2
   const INCOMING_MESSAGE_2 = Buffer.from(
     'CgNQVVQSDy9hcGkvdjEvbWVzc2FnZRoHcGF5bG9hZCoYeC1zaWduYWwtdGltZXN0YW1wOiAyMDAwIAI=',
@@ -500,7 +500,7 @@ describe('cdsi lookup', () => {
       cases.forEach((testCase) => {
         const [name, expectedCode, expectedMessage] = testCase;
         expect(() => Native.TESTING_CdsiLookupErrorConvert(name))
-          .throws(LibSignalErrorBase)
+          .throws(LibMochiErrorBase)
           .to.include({
             code: expectedCode,
             message: expectedMessage,
@@ -523,7 +523,7 @@ describe('SVR3', () => {
     const otp = Native.CreateOTPFromBase64(
       USERNAME,
       // Empty string is a valid base64 encoding
-      process.env.LIBSIGNAL_TESTING_ENCLAVE_SECRET || ''
+      process.env.LIBMOCHI_TESTING_ENCLAVE_SECRET || ''
     );
     return { username: USERNAME, password: otp };
   }
@@ -555,14 +555,14 @@ describe('SVR3', () => {
       const shareSet = Buffer.alloc(0);
       return expect(
         state!.net.svr3.restore('password', shareSet, state!.auth)
-      ).to.eventually.be.rejectedWith(LibSignalErrorBase);
+      ).to.eventually.be.rejectedWith(LibMochiErrorBase);
     });
 
     it('Share set bad format', () => {
       const shareSet = Buffer.from([42]);
       return expect(
         state!.net.svr3.restore('password', shareSet, state!.auth)
-      ).to.eventually.be.rejectedWith(LibSignalErrorBase);
+      ).to.eventually.be.rejectedWith(LibMochiErrorBase);
     });
   });
 
@@ -571,7 +571,7 @@ describe('SVR3', () => {
   // not be run).
   describe('Integration tests', function (this: Mocha.Suite) {
     before(() => {
-      if (!process.env.LIBSIGNAL_TESTING_ENCLAVE_SECRET) {
+      if (!process.env.LIBMOCHI_TESTING_ENCLAVE_SECRET) {
         this.ctx.skip();
       }
     });
@@ -610,7 +610,7 @@ describe('SVR3', () => {
       );
       await state!.net.svr3.remove(state!.auth);
       return expect(state!.net.svr3.restore('password', shareSet, state!.auth))
-        .to.eventually.be.rejectedWith(LibSignalErrorBase)
+        .to.eventually.be.rejectedWith(LibMochiErrorBase)
         .and.have.property('code', ErrorCode.SvrDataMissing);
     }).timeout(10000);
 
@@ -631,7 +631,7 @@ describe('SVR3', () => {
       return expect(
         state!.net.svr3.restore('wrong password', shareSet, state!.auth)
       )
-        .to.eventually.be.rejectedWith(LibSignalErrorBase)
+        .to.eventually.be.rejectedWith(LibMochiErrorBase)
         .and.include({
           code: ErrorCode.SvrRestoreFailed,
           triesRemaining: tries - 1,
@@ -652,7 +652,7 @@ describe('SVR3', () => {
       shareSet[1] ^= 0xff;
       return expect(
         state!.net.svr3.restore('password', shareSet, state!.auth)
-      ).to.eventually.be.rejectedWith(LibSignalErrorBase);
+      ).to.eventually.be.rejectedWith(LibMochiErrorBase);
     }).timeout(10000);
 
     it('Exceed maxTries', async () => {
@@ -665,7 +665,7 @@ describe('SVR3', () => {
       );
       await state!.net.svr3.restore('password', shareSet, state!.auth);
       return expect(state!.net.svr3.restore('password', shareSet, state!.auth))
-        .to.eventually.be.rejectedWith(LibSignalErrorBase)
+        .to.eventually.be.rejectedWith(LibMochiErrorBase)
         .and.have.property('code', ErrorCode.SvrDataMissing);
     }).timeout(10000);
   });
