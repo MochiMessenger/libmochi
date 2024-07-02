@@ -860,7 +860,7 @@ dependencies = [
 [[package]]
 name = "curve25519-dalek"
 version = "4.1.3"
-source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#25421f0826b65253446d77da79ad6b179c52b3b9"
+source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#a51eb600ab82359382cc936595d0776a7c8cf9b0"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -877,7 +877,7 @@ dependencies = [
 [[package]]
 name = "curve25519-dalek-derive"
 version = "0.1.1"
-source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#25421f0826b65253446d77da79ad6b179c52b3b9"
+source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#a51eb600ab82359382cc936595d0776a7c8cf9b0"
 dependencies = [
  "proc-macro2",
  "quote",
