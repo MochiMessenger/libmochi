@@ -420,7 +420,7 @@ dependencies = [
 [[package]]
 name = "boring"
 version = "4.6.0"
-source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#6182db70c8ef748407351ad6bfd99f1a8d473818"
 dependencies = [
  "bitflags",
  "boring-sys",
@@ -432,7 +432,7 @@ dependencies = [
 [[package]]
 name = "boring-sys"
 version = "4.6.0"
-source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#6182db70c8ef748407351ad6bfd99f1a8d473818"
 dependencies = [
  "bindgen",
  "cmake",
@@ -860,7 +860,7 @@ dependencies = [
 [[package]]
 name = "curve25519-dalek"
 version = "4.1.3"
-source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#7c6d34756355a3566a704da84dce7b1c039a6572"
+source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#25421f0826b65253446d77da79ad6b179c52b3b9"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -877,7 +877,7 @@ dependencies = [
 [[package]]
 name = "curve25519-dalek-derive"
 version = "0.1.1"
-source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#7c6d34756355a3566a704da84dce7b1c039a6572"
+source = "git+https://github.com/mochimessenger/curve25519-dalek?tag=mochi-curve25519-4.1.3#25421f0826b65253446d77da79ad6b179c52b3b9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4192,7 +4192,7 @@ dependencies = [
 [[package]]
 name = "tokio-boring"
 version = "4.6.0"
-source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#b9a75167dc08a3b16dd203e0af78c8962c5439bd"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#6182db70c8ef748407351ad6bfd99f1a8d473818"
 dependencies = [
  "boring",
  "boring-sys",
