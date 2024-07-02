@@ -420,7 +420,7 @@ dependencies = [
 [[package]]
 name = "boring"
 version = "4.6.0"
-source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#6182db70c8ef748407351ad6bfd99f1a8d473818"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#627512106bdc9948d4a9396bcb4a191fecd62a6b"
 dependencies = [
  "bitflags",
  "boring-sys",
@@ -432,7 +432,7 @@ dependencies = [
 [[package]]
 name = "boring-sys"
 version = "4.6.0"
-source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#6182db70c8ef748407351ad6bfd99f1a8d473818"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#627512106bdc9948d4a9396bcb4a191fecd62a6b"
 dependencies = [
  "bindgen",
  "cmake",
@@ -4192,7 +4192,7 @@ dependencies = [
 [[package]]
 name = "tokio-boring"
 version = "4.6.0"
-source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#6182db70c8ef748407351ad6bfd99f1a8d473818"
+source = "git+https://github.com/mochimessenger/boring?tag=mochi-v4.6.0#627512106bdc9948d4a9396bcb4a191fecd62a6b"
 dependencies = [
  "boring",
  "boring-sys",
