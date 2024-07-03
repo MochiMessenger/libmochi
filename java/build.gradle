@@ -6,8 +6,8 @@ plugins {
 }
 
 allprojects {
-    version = "0.52.1"
-    group   = "org.mochi"
+    version = "0.0.1"
+    group = "org.mochi"
 }
 
 subprojects {
@@ -32,13 +32,13 @@ subprojects {
     }
 
     apply plugin: "com.diffplug.spotless"
+
     spotless {
         java {
             target('**/*.java')
             targetExclude('**/Native.java')
             importOrder()
             removeUnusedImports()
-
             googleJavaFormat()
             formatAnnotations()
             licenseHeaderFile rootProject.file('license_header.txt')
@@ -46,37 +46,37 @@ subprojects {
     }
 }
 
-task makeJniLibrariesDesktop(type:Exec) {
-  group 'Rust'
-  description 'Build the JNI libraries'
+task makeJniLibrariesDesktop(type: Exec) {
+    group 'Rust'
+    description 'Build the JNI libraries'
 
-  def debugLevelLogsFlag = hasProperty('debugLevelLogs') ? ['--debug-level-logs'] : []
-  // Explicitly specify 'bash' for Windows compatibility.
-  commandLine 'bash', './build_jni.sh', *debugLevelLogsFlag, 'desktop'
+    def debugLevelLogsFlag = hasProperty('debugLevelLogs') ? ['--debug-level-logs'] : []
+    // Explicitly specify 'bash' for Windows compatibility.
+    commandLine 'bash', './build_jni.sh', *debugLevelLogsFlag, 'desktop'
 }
 
-task cargoClean(type:Exec) {
-  group 'Rust'
-  commandLine 'cargo', 'clean'
+task cargoClean(type: Exec) {
+    group 'Rust'
+    commandLine 'cargo', 'clean'
 }
 
 task cleanJni(type: Delete) {
-  description 'Clean JNI libs'
-  delete fileTree('./android/src/main/jniLibs') {
-    include '**/*.so'
-  }
-  delete fileTree('./shared/resources') {
-    include '**/*.so'
-    include '**/*.dylib'
-    include '**/*.dll'
-  }
+    description 'Clean JNI libs'
+    delete fileTree('./android/src/main/jniLibs') {
+        include '**/*.so'
+    }
+    delete fileTree('./shared/resources') {
+        include '**/*.so'
+        include '**/*.dylib'
+        include '**/*.dll'
+    }
 }
 
 clean.dependsOn([cargoClean, cleanJni])
 
 // PUBLISHING
 
-ext.setUpSigningKey = { signingExt -> 
+ext.setUpSigningKey = { signingExt ->
     def signingKeyId = findProperty("signingKeyId")
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")

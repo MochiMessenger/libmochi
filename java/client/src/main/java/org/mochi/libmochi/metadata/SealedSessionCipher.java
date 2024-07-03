@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.mochi.libmochi.internal.Native;
 import org.mochi.libmochi.internal.NativeHandleGuard;
 import org.mochi.libmochi.metadata.certificate.CertificateValidator;
@@ -24,19 +25,20 @@ import org.mochi.libmochi.protocol.InvalidMessageException;
 import org.mochi.libmochi.protocol.InvalidRegistrationIdException;
 import org.mochi.libmochi.protocol.InvalidVersionException;
 import org.mochi.libmochi.protocol.LegacyMessageException;
+import org.mochi.libmochi.protocol.MochiProtocolAddress;
 import org.mochi.libmochi.protocol.NoSessionException;
 import org.mochi.libmochi.protocol.ServiceId;
 import org.mochi.libmochi.protocol.SessionCipher;
-import org.mochi.libmochi.protocol.MochiProtocolAddress;
 import org.mochi.libmochi.protocol.UntrustedIdentityException;
 import org.mochi.libmochi.protocol.groups.GroupCipher;
 import org.mochi.libmochi.protocol.message.CiphertextMessage;
 import org.mochi.libmochi.protocol.message.PreKeyMochiMessage;
 import org.mochi.libmochi.protocol.message.MochiMessage;
-import org.mochi.libmochi.protocol.state.SessionRecord;
 import org.mochi.libmochi.protocol.state.MochiProtocolStore;
+import org.mochi.libmochi.protocol.state.SessionRecord;
 
 public class SealedSessionCipher {
+
 
   private static final String TAG = SealedSessionCipher.class.getSimpleName();
 
