@@ -152,7 +152,7 @@ fn group_sealed_sender() -> Result<(), MochiProtocolError> {
 
         let alice_e164 = "+14151111111".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
         let carol_uuid = "38381c3b-2606-4ca7-9310-7cb927f2ab4a".to_string();
 
@@ -356,7 +356,7 @@ fn group_sealed_sender_multiple_devices() -> Result<(), MochiProtocolError> {
 
         let alice_e164 = "+14151111111".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
         let carol_uuid = "38381c3b-2606-4ca7-9310-7cb927f2ab4a".to_string();
 
@@ -589,7 +589,7 @@ fn group_sealed_sender_multiple_devices_and_excluded_recipients() -> Result<(), 
 
         let alice_e164 = "+14151111111".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
         let carol_uuid = "38381c3b-2606-4ca7-9310-7cb927f2ab4a".to_string();
         let dave_uuid = "d4c8dd1f-89d8-484f-8e38-5aa6a1c2180b".to_string();

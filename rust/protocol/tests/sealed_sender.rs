@@ -93,7 +93,7 @@ fn test_sender_cert() -> Result<(), MochiProtocolError> {
     let expires = Timestamp::from_epoch_millis(1605722925);
 
     let sender_cert = SenderCertificate::new(
-        "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string(),
+        "7610819e-ad94-433f-adcf-001842a147a7".to_string(),
         Some("+14152222222".to_string()),
         key.public_key,
         device_id,
@@ -144,7 +144,7 @@ fn test_sealed_sender() -> Result<(), MochiProtocolError> {
         let alice_e164 = "+14151111111".to_owned();
         let bob_e164 = "+14151114444".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
 
         let bob_uuid_address = ProtocolAddress::new(bob_uuid.clone(), bob_device_id);
@@ -311,7 +311,7 @@ fn test_sender_key_in_sealed_sender() -> Result<(), MochiProtocolError> {
 
         let alice_e164 = "+14151111111".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
 
         let distribution_id = Uuid::from_u128(0xd1d1d1d1_7000_11eb_b32a_33b8a8a487a6);
@@ -428,7 +428,7 @@ fn test_sealed_sender_multi_recipient() -> Result<(), MochiProtocolError> {
         let alice_e164 = "+14151111111".to_owned();
         let bob_e164 = "+14151114444".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
 
         let bob_uuid_address = ProtocolAddress::new(bob_uuid.clone(), bob_device_id);
@@ -672,7 +672,7 @@ fn test_sealed_sender_multi_recipient_legacy_derivation() -> Result<(), MochiPro
         let alice_e164 = "+14151111111".to_owned();
         let bob_e164 = "+14151114444".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
 
         let bob_uuid_address = ProtocolAddress::new(bob_uuid.clone(), bob_device_id);
@@ -785,7 +785,7 @@ fn test_sealed_sender_multi_recipient_encrypt_with_archived_session(
 
         let alice_e164 = "+14151111111".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
 
         let bob_uuid_address = ProtocolAddress::new(bob_uuid.clone(), bob_device_id);
@@ -890,7 +890,7 @@ fn test_sealed_sender_multi_recipient_encrypt_with_bad_registration_id(
 
         let alice_e164 = "+14151111111".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
 
         let bob_uuid_address = ProtocolAddress::new(bob_uuid.clone(), bob_device_id.into());
@@ -986,7 +986,7 @@ fn test_decryption_error_in_sealed_sender() -> Result<(), MochiProtocolError> {
 
         let alice_e164 = "+14151111111".to_owned();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
 
         let alice_uuid_address = ProtocolAddress::new(alice_uuid.clone(), 1.into());
@@ -1130,7 +1130,7 @@ fn test_sealed_sender_multi_recipient_redundant_empty_devices() -> Result<(), Mo
         let alice_device_id: DeviceId = 23.into();
         let bob_device_id: DeviceId = 42.into();
 
-        let alice_uuid = "9d0652a3-dcc3-4d11-975f-74d61598733f".to_string();
+        let alice_uuid = "7610819e-ad94-433f-adcf-001842a147a7".to_string();
         let bob_uuid = "796abedb-ca4e-4f18-8803-1fde5b921f9f".to_string();
 
         let bob_uuid_address = ProtocolAddress::new(bob_uuid.clone(), bob_device_id);

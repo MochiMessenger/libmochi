@@ -83,7 +83,7 @@ publishing {
 
                 developers {
                     developer {
-                        name = 'Mochi Messenger LLC'
+                        name = 'Mochi Messenger'
                     }
                 }
             }

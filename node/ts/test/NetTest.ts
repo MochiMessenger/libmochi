@@ -424,7 +424,7 @@ describe('cdsi lookup', () => {
   const e164Both = '+18005551011';
   const e164Pni = '+18005551012';
 
-  const aciUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+  const aciUuid = '7610819e-ad94-433f-adcf-001842a147a7';
   const pniUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
   const debugPermitsUsed = 123;

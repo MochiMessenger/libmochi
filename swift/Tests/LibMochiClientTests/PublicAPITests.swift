@@ -408,8 +408,8 @@ class PublicAPITests: TestCaseBase {
 
         XCTAssertEqual(senderCert.publicKey.serialize().count, 33)
 
-        XCTAssertEqual(senderCert.senderUuid, "9d0652a3-dcc3-4d11-975f-74d61598733f")
-        XCTAssertEqual(senderCert.senderAci.serviceIdString, "9d0652a3-dcc3-4d11-975f-74d61598733f")
+        XCTAssertEqual(senderCert.senderUuid, "7610819e-ad94-433f-adcf-001842a147a7")
+        XCTAssertEqual(senderCert.senderAci.serviceIdString, "7610819e-ad94-433f-adcf-001842a147a7")
         XCTAssertEqual(senderCert.senderE164, Optional("+14152222222"))
 
         let serverCert = senderCert.serverCertificate

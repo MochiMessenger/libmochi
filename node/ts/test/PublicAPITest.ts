@@ -1256,7 +1256,7 @@ describe('MochiClient', () => {
       const aDeviceId = 1;
       const bDeviceId = 3;
 
-      const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+      const aUuid = '7610819e-ad94-433f-adcf-001842a147a7';
       const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
       const trustRoot = MochiClient.PrivateKey.generate();
@@ -1404,7 +1404,7 @@ describe('MochiClient', () => {
 
       const sharedDeviceId = 1;
 
-      const sharedUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+      const sharedUuid = '7610819e-ad94-433f-adcf-001842a147a7';
 
       const trustRoot = MochiClient.PrivateKey.generate();
       const serverKey = MochiClient.PrivateKey.generate();
@@ -1528,7 +1528,7 @@ describe('MochiClient', () => {
       const aDeviceId = 1;
       const bDeviceId = 3;
 
-      const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+      const aUuid = '7610819e-ad94-433f-adcf-001842a147a7';
       const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
       const trustRoot = MochiClient.PrivateKey.generate();
@@ -1698,7 +1698,7 @@ describe('MochiClient', () => {
       const aDeviceId = 1;
       const bDeviceId = 3;
 
-      const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+      const aUuid = '7610819e-ad94-433f-adcf-001842a147a7';
       const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
       const trustRoot = MochiClient.PrivateKey.generate();
@@ -1812,7 +1812,7 @@ describe('MochiClient', () => {
       const aDeviceId = 1;
       const bDeviceId = 3;
 
-      const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+      const aUuid = '7610819e-ad94-433f-adcf-001842a147a7';
       const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
       const eUuid = '3f0f4734-e331-4434-bd4f-6d8f6ea6dcc7';
       const mUuid = '5d088142-6fd7-4dbd-af00-fdda1b3ce988';
@@ -1946,7 +1946,7 @@ describe('MochiClient', () => {
     const aDeviceId = 1;
     const bDeviceId = 3;
 
-    const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+    const aUuid = '7610819e-ad94-433f-adcf-001842a147a7';
     const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
 
     const trustRoot = MochiClient.PrivateKey.generate();

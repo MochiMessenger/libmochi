@@ -26,7 +26,7 @@ use crate::*;
 async fn TESTING_CdsiLookupResponseConvert() -> LookupResponse {
     const E164_BOTH: E164 = E164::new(nonzero!(18005551011u64));
     const E164_PNI: E164 = E164::new(nonzero!(18005551012u64));
-    const ACI_UUID: &str = "9d0652a3-dcc3-4d11-975f-74d61598733f";
+    const ACI_UUID: &str = "7610819e-ad94-433f-adcf-001842a147a7";
     const PNI_UUID: &str = "796abedb-ca4e-4f18-8803-1fde5b921f9f";
     const DEBUG_PERMITS_USED: i32 = 123;
 

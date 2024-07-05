@@ -19,7 +19,7 @@ pub fn v1(c: &mut Criterion) {
     let mut rng = OsRng;
 
     let alice_address =
-        ProtocolAddress::new("9d0652a3-dcc3-4d11-975f-74d61598733f".to_owned(), 1.into());
+        ProtocolAddress::new("7610819e-ad94-433f-adcf-001842a147a7".to_owned(), 1.into());
     let bob_address =
         ProtocolAddress::new("796abedb-ca4e-4f18-8803-1fde5b921f9f".to_owned(), 1.into());
 
@@ -103,7 +103,7 @@ pub fn v2(c: &mut Criterion) {
     let mut rng = OsRng;
 
     let alice_address =
-        ProtocolAddress::new("9d0652a3-dcc3-4d11-975f-74d61598733f".to_owned(), 1.into());
+        ProtocolAddress::new("7610819e-ad94-433f-adcf-001842a147a7".to_owned(), 1.into());
     let bob_address =
         ProtocolAddress::new("796abedb-ca4e-4f18-8803-1fde5b921f9f".to_owned(), 1.into());
 

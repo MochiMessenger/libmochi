@@ -485,7 +485,7 @@ class ZKGroupTests: TestCaseBase {
         let serverSecretParams = try! ServerSecretParams.generate(randomness: self.TEST_ARRAY_32)
         let serverPublicParams = try! serverSecretParams.getPublicParams()
 
-        let aliceAci = try! Aci.parseFrom(serviceIdString: "9d0652a3-dcc3-4d11-975f-74d61598733f")
+        let aliceAci = try! Aci.parseFrom(serviceIdString: "7610819e-ad94-433f-adcf-001842a147a7")
         let bobAci = try! Aci.parseFrom(serviceIdString: "6838237d-02f6-4098-b110-698253d15961")
         let eveAci = try! Aci.parseFrom(serviceIdString: "3f0f4734-e331-4434-bd4f-6d8f6ea6dcc7")
         let malloryAci = try! Aci.parseFrom(serviceIdString: "5d088142-6fd7-4dbd-af00-fdda1b3ce988")

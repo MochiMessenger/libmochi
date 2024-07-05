@@ -23,7 +23,7 @@ const VERSION_RECIPIENT_MESSAGE = '22';
 const ACI_MARKER = '00';
 const PNI_MARKER = '01';
 
-const ALICE_UUID = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+const ALICE_UUID = '7610819e-ad94-433f-adcf-001842a147a7';
 const ALICE_UUID_BYTES = '9d0652a3dcc34d11975f74d61598733f';
 const ALICE_KEY_MATERIAL =
   'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';

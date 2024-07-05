@@ -6,7 +6,7 @@
 [package]
 name = "zkcredential"
 version = "0.1.0"
-authors = ["Mochi Messenger LLC"]
+authors = ["Mochi Messenger"]
 edition = "2021"
 license = "AGPL-3.0-only"
 

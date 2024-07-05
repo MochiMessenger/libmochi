@@ -201,7 +201,7 @@ class SessionTests: TestCaseBase {
     }
 
     func testSealedSenderSession() throws {
-        let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
+        let alice_address = try! ProtocolAddress(name: "7610819e-ad94-433f-adcf-001842a147a7", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
         let alice_store = InMemoryMochiProtocolStore()
@@ -304,7 +304,7 @@ class SessionTests: TestCaseBase {
     }
 
     func testSealedSenderGroupCipher() throws {
-        let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
+        let alice_address = try! ProtocolAddress(name: "7610819e-ad94-433f-adcf-001842a147a7", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
         let alice_store = InMemoryMochiProtocolStore()
@@ -407,7 +407,7 @@ class SessionTests: TestCaseBase {
     }
 
     func testSealedSenderGroupCipherWithBadRegistrationId() throws {
-        let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
+        let alice_address = try! ProtocolAddress(name: "7610819e-ad94-433f-adcf-001842a147a7", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
         let alice_store = InMemoryMochiProtocolStore()
@@ -470,7 +470,7 @@ class SessionTests: TestCaseBase {
     }
 
     func testSealedSenderGroupCipherWithExcludedRecipients() throws {
-        let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
+        let alice_address = try! ProtocolAddress(name: "7610819e-ad94-433f-adcf-001842a147a7", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
         let eve_service_id = try! ServiceId.parseFrom(serviceIdString: "3f0f4734-e331-4434-bd4f-6d8f6ea6dcc7")
@@ -540,7 +540,7 @@ class SessionTests: TestCaseBase {
     }
 
     func testDecryptionErrorMessage() throws {
-        let alice_address = try! ProtocolAddress(name: "9d0652a3-dcc3-4d11-975f-74d61598733f", deviceId: 1)
+        let alice_address = try! ProtocolAddress(name: "7610819e-ad94-433f-adcf-001842a147a7", deviceId: 1)
         let bob_address = try! ProtocolAddress(name: "6838237D-02F6-4098-B110-698253D15961", deviceId: 1)
 
         let alice_store = InMemoryMochiProtocolStore()

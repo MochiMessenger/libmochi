@@ -6,7 +6,7 @@
 [package]
 name = "zkgroup"
 version = "0.9.0"
-authors = ["Mochi Messenger LLC"]
+authors = ["Mochi Messenger"]
 edition = "2021"
 description = "A zero-knowledge group library"
 license = "AGPL-3.0-only"

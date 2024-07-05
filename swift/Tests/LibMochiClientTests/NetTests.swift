@@ -15,7 +15,7 @@ let userAgent: String = "test"
 
 final class NetTests: XCTestCase {
     func testCdsiLookupResultConversion() async throws {
-        let ACI_UUID = "9d0652a3-dcc3-4d11-975f-74d61598733f"
+        let ACI_UUID = "7610819e-ad94-433f-adcf-001842a147a7"
         let PNI_UUID = "796abedb-ca4e-4f18-8803-1fde5b921f9f"
 
         let aci = Aci(fromUUID: UUID(uuidString: ACI_UUID)!)

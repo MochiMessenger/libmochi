@@ -819,7 +819,7 @@ describe('ZKGroup', () => {
       const serverPublicParams = serverSecretParams.getPublicParams();
 
       const aliceAci = Aci.parseFromServiceIdString(
-        '9d0652a3-dcc3-4d11-975f-74d61598733f'
+        '7610819e-ad94-433f-adcf-001842a147a7'
       );
       const bobAci = Aci.parseFromServiceIdString(
         '6838237d-02f6-4098-b110-698253d15961'
@@ -1022,7 +1022,7 @@ describe('ZKGroup', () => {
       const serverPublicParams = serverSecretParams.getPublicParams();
 
       const aliceAci = Aci.parseFromServiceIdString(
-        '9d0652a3-dcc3-4d11-975f-74d61598733f'
+        '7610819e-ad94-433f-adcf-001842a147a7'
       );
 
       const masterKey = new GroupMasterKey(TEST_ARRAY_32_1);
